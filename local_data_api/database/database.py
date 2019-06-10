@@ -10,6 +10,7 @@ from typing import Optional, Dict, Any, Type, Union
 from sqlalchemy.engine import Engine, create_engine, ResultProxy
 from sqlalchemy.orm import Session, sessionmaker
 
+from exceptions import BadRequestException
 from settings import DATABASE_SETTINGS
 
 _Session = sessionmaker()
@@ -89,10 +90,16 @@ class DataBase(ABC):
 
     def execute(self, sql: str, database_name: Optional[str] = None,
                 transaction_id: Optional[str] = None) -> ResultProxy:
-        if database_name:
-            self.use_database(database_name)
-        session: Session = self.get_session(transaction_id)
-        return session.execute(sql.rstrip('; '))
+        try:
+            if database_name:
+                self.use_database(database_name)
+            session: Session = self.get_session(transaction_id)
+            return session.execute(sql.rstrip('; '))
+        except Exception as e:
+            message: str = 'Unknown'
+            if hasattr(e, 'orig') and hasattr(e.orig, 'args'):
+                message = e.orig.args[1]
+            raise BadRequestException(message)
 
     def get_session(self, transaction_id: Optional[str] = None) -> Session:
         if transaction_id:
