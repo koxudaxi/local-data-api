@@ -1,4 +1,5 @@
 # local-data-api - Local Data API for AWS Aurora Serverless
+[![Build Status](https://travis-ci.org/koxudaxi/local-data-api.svg?branch=master)](https://travis-ci.org/koxudaxi/local-data-api)
 
 local-data-api support test for Data API (AWS Aura Serverless)
 
