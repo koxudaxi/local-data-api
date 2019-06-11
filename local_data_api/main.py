@@ -17,10 +17,6 @@ app = FastAPI()
 
 setup()
 
-@app.post("/ExecuteSql")
-def execute_sql(request: ExecuteSqlRequest):
-    raise NotImplementedError
-
 
 def convert_value(value: Any) -> Dict[str, Any]:
     if isinstance(value, str):
@@ -33,6 +29,11 @@ def convert_value(value: Any) -> Dict[str, Any]:
         return {'isNull': True}
     else:
         raise Exception(f'unsupported type {type(value)}: {value} ')
+
+
+@app.post("/ExecuteSql")
+def execute_sql(request: ExecuteSqlRequest):
+    raise NotImplementedError
 
 
 @app.post("/BeginTransaction")
