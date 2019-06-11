@@ -9,5 +9,5 @@ RUN apk add --update --no-cache mariadb-connector-c-dev && \
     apk del .build-deps
 
 COPY local_data_api /app
-COPY requriements.txt /
-RUN pip install -r /requriements.txt
+COPY requirements.txt /
+RUN pip install -r /requirements.txt
