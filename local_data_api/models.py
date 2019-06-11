@@ -11,7 +11,7 @@ class ExecuteSqlRequest(BaseModel):
     dbClusterOrInstanceArn: str
     sqlStatements: str
     database: Optional[str]
-    schema_: Optional[str] = Schema(None, alias='schema')
+    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
 
 
 class Filed(BaseModel):
@@ -31,7 +31,7 @@ class ExecuteStatementRequests(BaseModel):
     continueAfterTimeout: Optional[bool]
     includeResultMetadata: Optional[bool]
     parameters: Optional[List[Dict[str, Any]]]
-    schema_: Optional[str] = Schema(None, alias='schema')
+    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
 
 
@@ -46,7 +46,7 @@ class ColumnMetadata(BaseModel):
     nullable: Optional[int]
     precision: Optional[int]
     scale: Optional[int]
-    schema_: Optional[str] = Schema(None, alias='schema')
+    schema_: Optional[str] = Schema(None, alias='schema')   # type: ignore
     tableName: Optional[str]
     type: Optional[int]
     typeName: Optional[str]
@@ -62,7 +62,7 @@ class ExecuteStatementResponse(BaseModel):
 class BeginTransactionRequest(BaseModel):
     resourceArn: str
     secretArn: str
-    schema_: Optional[str] = Schema(None, alias='schema')
+    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     database: Optional[str]
 
 

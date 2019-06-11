@@ -20,7 +20,7 @@ create_database(MySQL, secret_arn=DUMMY_ARN, resource_arn=DUMMY_ARN)
 
 @app.post("/ExecuteSql")
 def execute_sql(request: ExecuteSqlRequest):
-    raise NotImplemented
+    raise NotImplementedError
 
 
 def convert_value(value: Any) -> Dict[str, Any]:

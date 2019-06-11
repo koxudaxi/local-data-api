@@ -32,7 +32,7 @@ class DataBaseMeta:
 
 def create_database(database_type: Type[DataBase], resource_arn: str, secret_arn: str) -> None:
     setting: Dict[str, Union[str, int]] = DATABASE_SETTINGS[database_type.__name__]
-    database: DataBase = database_type(**setting)
+    database: DataBase = database_type(**setting)  # type: ignore
     DATABASE_POOL[resource_arn] = DataBaseMeta(resource_arn=resource_arn, secret_arn=secret_arn, database=database)
 
 
@@ -97,8 +97,8 @@ class DataBase(ABC):
             return session.execute(sql.rstrip('; '))
         except Exception as e:
             message: str = 'Unknown'
-            if hasattr(e, 'orig') and hasattr(e.orig, 'args'):
-                message = e.orig.args[1]
+            if hasattr(e, 'orig') and hasattr(e.orig, 'args'):  # type: ignore
+                message = e.orig.args[1]  # type: ignore
             raise BadRequestException(message)
 
     def get_session(self, transaction_id: Optional[str] = None) -> Session:
