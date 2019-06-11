@@ -12,4 +12,3 @@ DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
         'password': os.environ.get('MYSQL_PASSWORD', 'example')
          }
 }
-

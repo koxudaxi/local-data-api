@@ -82,4 +82,3 @@ class TransactionStatus(Enum):
 
 class CommitTransactionResponse(BaseModel):
     transactionStatus: TransactionStatus
-
