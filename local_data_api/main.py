@@ -6,17 +6,16 @@ from sqlalchemy.engine import ResultProxy
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from exceptions import DataAPIException
-from models import ExecuteSqlRequest, ExecuteStatementRequests, ExecuteStatementResponse, BeginTransactionRequest, \
-    BeginTransactionResponse, TransactionStatus, CommitTransactionResponse, CommitTransactionRequest
-from database.database import get_database, DataBase, create_database, DUMMY_ARN
-from database.mysql import MySQL
+from local_data_api.exceptions import DataAPIException
+from local_data_api.models import ExecuteSqlRequest, ExecuteStatementRequests, ExecuteStatementResponse,\
+    BeginTransactionRequest, BeginTransactionResponse, TransactionStatus, CommitTransactionResponse,\
+    CommitTransactionRequest
+from local_data_api.resources.resource import get_resource, Resource
+from local_data_api.settings import setup
 
 app = FastAPI()
 
-# TODO: implement to create custom resource
-create_database(MySQL, secret_arn=DUMMY_ARN, resource_arn=DUMMY_ARN)
-
+setup()
 
 @app.post("/ExecuteSql")
 def execute_sql(request: ExecuteSqlRequest):
@@ -38,7 +37,7 @@ def convert_value(value: Any) -> Dict[str, Any]:
 
 @app.post("/BeginTransaction")
 def begin_statement(request: BeginTransactionRequest) -> BeginTransactionResponse:
-    database: DataBase = get_database(request.resourceArn, request.secretArn)
+    database: Resource = get_resource(request.resourceArn, request.secretArn)
     transaction_id: str = database.begin()
 
     return BeginTransactionResponse(transactionId=transaction_id)
@@ -46,7 +45,7 @@ def begin_statement(request: BeginTransactionRequest) -> BeginTransactionRespons
 
 @app.post("/CommitTransaction")
 def commit_transaction(request: CommitTransactionRequest) -> CommitTransactionResponse:
-    database: DataBase = get_database(request.resourceArn, request.secretArn)
+    database: Resource = get_resource(request.resourceArn, request.secretArn)
     database.commit(request.transactionId)
 
     return CommitTransactionResponse(transactionStatus=TransactionStatus.transaction_committed)
@@ -54,7 +53,7 @@ def commit_transaction(request: CommitTransactionRequest) -> CommitTransactionRe
 
 @app.post("/Execute")
 def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResponse:
-    database: DataBase = get_database(request.resourceArn, request.secretArn)
+    database: Resource = get_resource(request.resourceArn, request.secretArn)
 
     result: ResultProxy = database.execute(request.sql, request.database, request.transactionId)
 

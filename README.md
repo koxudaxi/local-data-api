@@ -7,7 +7,7 @@ local-data-api support test for Data API (AWS Aura Serverless)
 https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
 
 
-## How does local-data-api work?:
+## How does local-data-api work?
 local-data-api is "proxy server" to real databases.
 
 The API converts RESTful request to SQL statements.
