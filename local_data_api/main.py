@@ -67,8 +67,11 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
                                                                       records=records)
 
     else:
+        generated_fields: List[Dict[str, Any]] = []
+        if result.lastrowid > 0:
+            generated_fields.append(convert_value(result.lastrowid))
         response = ExecuteStatementResponse(numberOfRecordsUpdated=result.rowcount,
-                                            generatedFields=[])
+                                            generatedFields=generated_fields)
 
     if request.includeResultMetadata:
         response.columnMetadata = []
