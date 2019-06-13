@@ -3,6 +3,7 @@
 
 local-data-api support test for Data API (AWS Aura Serverless)
 
+dockerhub: [local-data-api](https://hub.docker.com/r/koxudaxi/local-data-api)
 
 ## What's Data API?
 https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
@@ -21,12 +22,11 @@ docker run --name my-data-api -p 18080:80  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT
 ### Example: docker-compose with Python's aws-sdk client(boto3) 
 docker-compose.yml
 ```yaml
-
 version: '3.1'
 
 services:
-  local_data_api:
-    build: .
+  local-data-api:
+    image: koxudaxi/local-data-api
     restart: always
     environment:
       MYSQL_HOST: db
@@ -34,7 +34,7 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: example
     ports:
-      - "18080:80"
+      - "8080:80"
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
