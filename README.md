@@ -21,8 +21,7 @@ you set your MYSQL Server configs as environments.
 ```bash
 docker run --name my-data-api -p 8080:80  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example -e RESOURCE_ARN=dummy -e SECRET_ARN=dummy  koxudaxi/local-data-api
 ```
-In this caese, you give local-data-api url to aws client (like aws-cli).
-
+In this case, you give local-data-api URL to aws client (like aws-cli).
 ```bash
 $ aws --endpoint-url http://127.0.0.1:8080 rds-data execute-statement --resource-arn "dummy" --sql "show databases"  --secret-arn "dummy" --database 'test'
 ```
