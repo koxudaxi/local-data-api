@@ -82,3 +82,13 @@ class TransactionStatus(Enum):
 
 class CommitTransactionResponse(BaseModel):
     transactionStatus: TransactionStatus
+
+
+class RollbackTransactionRequest(BaseModel):
+    resourceArn: str
+    secretArn: str
+    transactionId: str
+
+
+class RollbackTransactionResponse(BaseModel):
+    transactionStatus: TransactionStatus

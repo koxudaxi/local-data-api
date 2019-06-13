@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse
 from local_data_api.exceptions import DataAPIException
 from local_data_api.models import ExecuteSqlRequest, ExecuteStatementRequests, ExecuteStatementResponse,\
     BeginTransactionRequest, BeginTransactionResponse, TransactionStatus, CommitTransactionResponse,\
-    CommitTransactionRequest
+    CommitTransactionRequest, RollbackTransactionRequest, RollbackTransactionResponse
 from local_data_api.resources.resource import get_resource, Resource
 from local_data_api.settings import setup
 
@@ -50,6 +50,14 @@ def commit_transaction(request: CommitTransactionRequest) -> CommitTransactionRe
     database.commit(request.transactionId)
 
     return CommitTransactionResponse(transactionStatus=TransactionStatus.transaction_committed)
+
+
+@app.post("/RollbackTransaction")
+def rollback_transaction(request: RollbackTransactionRequest) -> RollbackTransactionResponse:
+    database: Resource = get_resource(request.resourceArn, request.secretArn)
+    database.rollback(request.transactionId)
+
+    return RollbackTransactionResponse(transactionStatus=TransactionStatus.transaction_committed)
 
 
 @app.post("/Execute")
