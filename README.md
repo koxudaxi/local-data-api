@@ -8,6 +8,7 @@ dockerhub: [local-data-api](https://hub.docker.com/r/koxudaxi/local-data-api)
 ## What's Data API?
 https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
 
+## This project is an experimental phase.
 
 ## How does local-data-api work?
 local-data-api is "proxy server" to real databases.
@@ -16,7 +17,7 @@ The API converts RESTful request to SQL statements.
 
 ## How to use this image
 ```bash
-docker run --name my-data-api -p 18080:80  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example  koxudaxi/local-data-api
+docker run --name my-data-api -p 8080:80  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example  koxudaxi/local-data-api
 ```
  
 ### Example: docker-compose with Python's aws-sdk client(boto3) 
@@ -56,7 +57,7 @@ $ docker-compose up -d
 $ ipython
 ```
 ```python
-In [1]: client = boto3.client('rds-data', endpoint_url='http://127.0.0.1:18080', aws_access_key_id='aaa',  aws_secret_access_key='bbb') 
+In [1]: client = boto3.client('rds-data', endpoint_url='http://127.0.0.1:8080', aws_access_key_id='aaa',  aws_secret_access_key='bbb') 
 ```
 
 3. execute a sql statement
@@ -90,5 +91,9 @@ Out[3]: {'ResponseMetadata': {'HTTPStatusCode': 200,
 - `BatchExecuteStatement`
 - `ExecuteSql`
 
+## Related projects
+### py-data-api
 
-## This project is an experimental phase.
+DataAPI client for Python
+
+https://github.com/koxudaxi/py-data-api
