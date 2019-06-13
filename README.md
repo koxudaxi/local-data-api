@@ -1,11 +1,11 @@
-# local-data-api - Local Data API for AWS Aurora Serverless
+# local-data-api - Local Data API for AWS Aurora Serverless Data API
 [![Build Status](https://travis-ci.org/koxudaxi/local-data-api.svg?branch=master)](https://travis-ci.org/koxudaxi/local-data-api)
 
-local-data-api support test for Data API (AWS Aura Serverless)
+local-data-api can run in your local machine with MySQL Server.
 
 dockerhub: [local-data-api](https://hub.docker.com/r/koxudaxi/local-data-api)
 
-## What's Data API?
+## What's AWS Aurora Sreverlss's Data API?
 https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
 
 ## This project is an experimental phase.
@@ -16,10 +16,17 @@ local-data-api is "proxy server" to real databases.
 The API converts RESTful request to SQL statements.
 
 ## How to use this image
+you set your MYSQL Server configs as environments.
+
 ```bash
-docker run --name my-data-api -p 8080:80  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example  koxudaxi/local-data-api
+docker run --name my-data-api -p 8080:80  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example -e RESOURCE_ARN=dummy -e SECRET_ARN=dummy  koxudaxi/local-data-api
 ```
- 
+In this caese, you give local-data-api url to aws client (like aws-cli).
+
+```bash
+$ aws --endpoint-url http://127.0.0.1:8080 rds-data execute-statement --resource-arn "dummy" --sql "show databases"  --secret-arn "dummy" --database 'test'
+```
+
 ### Example: docker-compose with Python's aws-sdk client(boto3) 
 docker-compose.yml
 ```yaml
@@ -34,6 +41,8 @@ services:
       MYSQL_PORT: 3306
       MYSQL_USER: root
       MYSQL_PASSWORD: example
+      RESOURCE_ARN: dummy
+      SECRET_ARN: dummy
     ports:
       - "8080:80"
   db:
