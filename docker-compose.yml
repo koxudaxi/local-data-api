@@ -9,6 +9,8 @@ services:
       MYSQL_PORT: 3306
       MYSQL_USER: root
       MYSQL_PASSWORD: example
+      RESOURCE_ARN: dummy
+      SECRET_ARN: dummy
     ports:
       - "8080:80"
   db:
