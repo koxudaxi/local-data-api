@@ -19,7 +19,7 @@ The API converts RESTful request to SQL statements.
 you set your MYSQL Server configs as environments.
 
 ```bash
-docker run --name my-data-api -p 8080:80  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example -e RESOURCE_ARN=dummy -e SECRET_ARN=dummy  koxudaxi/local-data-api
+docker run --rm -it --name my-data-api -p 8080:80  -e MYSQL_HOST=YOUR_MYSQL_HOST -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example -e RESOURCE_ARN=dummy -e SECRET_ARN=dummy  koxudaxi/local-data-api
 ```
 In this case, you give local-data-api URL to aws client (like aws-cli).
 ```bash
