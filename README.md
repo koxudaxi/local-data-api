@@ -5,7 +5,7 @@ local-data-api can run in your local machine with MySQL Server.
 
 dockerhub: [local-data-api](https://hub.docker.com/r/koxudaxi/local-data-api)
 
-## What's AWS Aurora Sreverlss's Data API?
+## What's AWS Aurora Serverless's Data API?
 https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
 
 ## This project is an experimental phase.
@@ -93,11 +93,11 @@ Out[3]: {'ResponseMetadata': {'HTTPStatusCode': 200,
 - `CommitTransaction` - core 
 - `ExecuteStatement` - core 
 - `RollbackTransaction` - core
-
+- `BatchExecuteStatement` - core
 
 ### Not Implemented
-- `BatchExecuteStatement`
-- `ExecuteSql`
+
+- `ExecuteSql(Deprecated API)`
 
 ## Related projects
 ### py-data-api

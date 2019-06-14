@@ -1,16 +1,16 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI
-
 from sqlalchemy.engine import ResultProxy
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from local_data_api.exceptions import DataAPIException
-from local_data_api.models import ExecuteSqlRequest, ExecuteStatementRequests, ExecuteStatementResponse,\
-    BeginTransactionRequest, BeginTransactionResponse, TransactionStatus, CommitTransactionResponse,\
-    CommitTransactionRequest, RollbackTransactionRequest, RollbackTransactionResponse
-from local_data_api.resources.resource import get_resource, Resource
+from local_data_api.models import BatchExecuteStatementRequests, BatchExecuteStatementResponse, \
+    BeginTransactionRequest, BeginTransactionResponse, CommitTransactionRequest, CommitTransactionResponse, \
+    ExecuteSqlRequest, ExecuteStatementRequests, ExecuteStatementResponse, RollbackTransactionRequest, \
+    RollbackTransactionResponse, TransactionStatus, UpdateResult
+from local_data_api.resources.resource import Resource, get_resource
 from local_data_api.settings import setup
 
 app = FastAPI()
@@ -64,7 +64,14 @@ def rollback_transaction(request: RollbackTransactionRequest) -> RollbackTransac
 def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResponse:
     database: Resource = get_resource(request.resourceArn, request.secretArn)
 
-    result: ResultProxy = database.execute(request.sql, request.database, request.transactionId)
+    if request.parameters:
+        parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.value.valid_value
+                                                       for parameter in request.parameters
+                                                       }]
+    else:
+        parameters = None
+
+    result: ResultProxy = database.execute(request.sql, parameters, request.database, request.transactionId)
 
     if result.keys():
         records: List[List[Dict[str, Any]]] = [
@@ -85,6 +92,28 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
         response.columnMetadata = []
 
     return response
+
+
+@app.post("/BatchExecute")
+def batch_execute_statement(request: BatchExecuteStatementRequests) -> BatchExecuteStatementResponse:
+    database: Resource = get_resource(request.resourceArn, request.secretArn)
+
+    update_results: List[UpdateResult] = []
+
+    if not request.parameterSets:
+        return BatchExecuteStatementResponse(updateResults=update_results)
+
+    for parameter_set in request.parameterSets:
+        parameters: List[Dict[str, Any]] = [
+            {parameter.name: parameter.value.valid_value for parameter in parameter_set}]
+        result: ResultProxy = database.execute(request.sql, parameters, request.database, request.transactionId)
+
+        generated_fields: List[Dict[str, Any]] = []
+        if result.lastrowid > 0:
+            generated_fields.append(convert_value(result.lastrowid))
+        update_results.append(UpdateResult(generatedFields=generated_fields))
+
+    return BatchExecuteStatementResponse(updateResults=update_results)
 
 
 @app.exception_handler(DataAPIException)

@@ -1,9 +1,30 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, List, Any, Dict
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Schema
+
+
+class Field(BaseModel):
+    blobValue: Optional[str]  # Type: Base64-encoded binary data object
+    booleanValue: Optional[bool]
+    doubleValue: Optional[float]
+    isNull: Optional[bool]
+    longValue: Optional[int]
+    stringValue: Optional[str]
+
+    @property
+    def valid_value(self: Field) -> Optional[str]:
+        for value in self.dict().values():
+            if value is not None:
+                return value
+        return None
+
+
+class SqlParameter(BaseModel):
+    name: str
+    value: Field
 
 
 class ExecuteSqlRequest(BaseModel):
@@ -14,15 +35,6 @@ class ExecuteSqlRequest(BaseModel):
     schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
 
 
-class Filed(BaseModel):
-    blobValue: Optional[str]  # Type: Base64-encoded binary data object
-    booleanValue: Optional[bool]
-    doubleValue: Optional[float]
-    isNull: Optional[bool]
-    longValue: Optional[int]
-    stringValue: Optional[str]
-
-
 class ExecuteStatementRequests(BaseModel):
     resourceArn: str
     secretArn: str
@@ -30,7 +42,7 @@ class ExecuteStatementRequests(BaseModel):
     database: Optional[str]
     continueAfterTimeout: Optional[bool]
     includeResultMetadata: Optional[bool]
-    parameters: Optional[List[Dict[str, Any]]]
+    parameters: Optional[List[SqlParameter]]
     schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
 
@@ -46,7 +58,7 @@ class ColumnMetadata(BaseModel):
     nullable: Optional[int]
     precision: Optional[int]
     scale: Optional[int]
-    schema_: Optional[str] = Schema(None, alias='schema')   # type: ignore
+    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     tableName: Optional[str]
     type: Optional[int]
     typeName: Optional[str]
@@ -54,7 +66,7 @@ class ColumnMetadata(BaseModel):
 
 class ExecuteStatementResponse(BaseModel):
     numberOfRecordsUpdated: int
-    generatedFields: Optional[List[Filed]]
+    generatedFields: Optional[List[Field]]
     records: Optional[List[List[Dict[str, Any]]]]
     columnMetadata: Optional[List[ColumnMetadata]]
 
@@ -92,3 +104,23 @@ class RollbackTransactionRequest(BaseModel):
 
 class RollbackTransactionResponse(BaseModel):
     transactionStatus: TransactionStatus
+
+
+class BatchExecuteStatementRequests(BaseModel):
+    resourceArn: str
+    secretArn: str
+    sql: str
+    database: Optional[str]
+    continueAfterTimeout: Optional[bool]
+    includeResultMetadata: Optional[bool]
+    parameterSets: Optional[List[List[SqlParameter]]]
+    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
+    transactionId: Optional[str]
+
+
+class UpdateResult(BaseModel):
+    generatedFields: List[Field]
+
+
+class BatchExecuteStatementResponse(BaseModel):
+    updateResults: List[UpdateResult]

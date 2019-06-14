@@ -9,6 +9,7 @@ from abc import ABC
 from typing import Optional, Dict, Any, Type
 from hashlib import sha1
 
+from sqlalchemy import text
 from sqlalchemy.engine import Engine, create_engine, ResultProxy
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -93,8 +94,7 @@ class Resource(ABC):
             url += self.host
         if self.port:
             url += f':{self.port}'
-
-        return create_engine(url, **self.engine_kwargs)
+        return create_engine(url, **self.engine_kwargs, echo=True)
 
     @staticmethod
     def create_transaction_id() -> str:
@@ -118,14 +118,15 @@ class Resource(ABC):
         session.rollback()
         session.close()
 
-    def execute(self, sql: str, database_name: Optional[str] = None,
+    def execute(self, sql: str, params=None, database_name: Optional[str] = None,
                 transaction_id: Optional[str] = None) -> ResultProxy:
         try:
             if database_name:
                 self.use_database(database_name)
             session: Session = self.get_session(transaction_id)
-            return session.execute(sql.rstrip('; '))
+            return session.execute(text(sql), params)
         except Exception as e:
+            print(e)
             message: str = 'Unknown'
             if hasattr(e, 'orig') and hasattr(e.orig, 'args'):  # type: ignore
                 message = e.orig.args[1]  # type: ignore
