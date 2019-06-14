@@ -19,7 +19,10 @@ setup()
 
 
 def convert_value(value: Any) -> Dict[str, Any]:
-    if isinstance(value, str):
+    # TODO: support BlobValue
+    if isinstance(value, bool):
+        return {'booleanValue': value}
+    elif isinstance(value, str):
         return {'stringValue': value}
     elif isinstance(value, int):
         return {'longValue': value}
