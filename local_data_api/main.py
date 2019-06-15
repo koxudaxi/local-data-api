@@ -41,31 +41,32 @@ def execute_sql(request: ExecuteSqlRequest):
 
 @app.post("/BeginTransaction")
 def begin_statement(request: BeginTransactionRequest) -> BeginTransactionResponse:
-    database: Resource = get_resource(request.resourceArn, request.secretArn)
-    transaction_id: str = database.begin()
+    resource: Resource = get_resource(request.resourceArn, request.secretArn)
+    transaction_id: str = resource.begin()
 
     return BeginTransactionResponse(transactionId=transaction_id)
 
 
 @app.post("/CommitTransaction")
 def commit_transaction(request: CommitTransactionRequest) -> CommitTransactionResponse:
-    database: Resource = get_resource(request.resourceArn, request.secretArn)
-    database.commit(request.transactionId)
-
+    resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
+    resource.commit()
+    resource.close()
     return CommitTransactionResponse(transactionStatus=TransactionStatus.transaction_committed)
 
 
 @app.post("/RollbackTransaction")
 def rollback_transaction(request: RollbackTransactionRequest) -> RollbackTransactionResponse:
-    database: Resource = get_resource(request.resourceArn, request.secretArn)
-    database.rollback(request.transactionId)
+    resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
+    resource.rollback()
+    resource.close()
 
     return RollbackTransactionResponse(transactionStatus=TransactionStatus.transaction_committed)
 
 
 @app.post("/Execute")
 def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResponse:
-    database: Resource = get_resource(request.resourceArn, request.secretArn)
+    resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
 
     if request.parameters:
         parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.value.valid_value
@@ -74,7 +75,7 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
     else:
         parameters = None
 
-    result: ResultProxy = database.execute(request.sql, parameters, request.database, request.transactionId)
+    result: ResultProxy = resource.execute(request.sql, parameters, request.database)
 
     if result.keys():
         records: List[List[Dict[str, Any]]] = [
@@ -94,12 +95,15 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
     if request.includeResultMetadata:
         response.columnMetadata = []
 
+    if not resource.transaction_id:
+        resource.close()
+
     return response
 
 
 @app.post("/BatchExecute")
 def batch_execute_statement(request: BatchExecuteStatementRequests) -> BatchExecuteStatementResponse:
-    database: Resource = get_resource(request.resourceArn, request.secretArn)
+    resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
 
     update_results: List[UpdateResult] = []
 
@@ -109,7 +113,7 @@ def batch_execute_statement(request: BatchExecuteStatementRequests) -> BatchExec
     for parameter_set in request.parameterSets:
         parameters: List[Dict[str, Any]] = [
             {parameter.name: parameter.value.valid_value for parameter in parameter_set}]
-        result: ResultProxy = database.execute(request.sql, parameters, request.database, request.transactionId)
+        result: ResultProxy = resource.execute(request.sql, parameters, request.database)
 
         generated_fields: List[Dict[str, Any]] = []
         if result.lastrowid > 0:

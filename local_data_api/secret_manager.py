@@ -20,7 +20,7 @@ def create_secret_arn(region_name: str = 'us-east-1', account: str = '1234567890
     return f'arn:aws:secretsmanager:{region_name}:{account}:secret:local-data-api{sha1().hexdigest()}'
 
 
-def add_secret(user_name: Optional[str], password: Optional[str], secret_arn: Optional[str]) -> str:
+def register_secret(user_name: Optional[str], password: Optional[str], secret_arn: Optional[str]) -> str:
     if not secret_arn:
         secret_arn = create_secret_arn()
 
@@ -30,9 +30,8 @@ def add_secret(user_name: Optional[str], password: Optional[str], secret_arn: Op
 
 
 def get_secret(secret_arn: str) -> Secret:
-    try:
+    if secret_arn in SECRETS:
         return SECRETS[secret_arn]
-    except KeyError:
-        raise BadRequestException(f'Error fetching secret {secret_arn} : Secrets Manager can’t find the specified '
-                                  f'secret. (Service: AWSSecretsManager; Status Code: 400; Error Code: '
-                                  f'ResourceNotFoundException; Request ID:  00000000-1111-2222-3333-44444444444)')
+    raise BadRequestException(f'Error fetching secret {secret_arn} : Secrets Manager can’t find the specified '
+                              f'secret. (Service: AWSSecretsManager; Status Code: 400; Error Code: '
+                              f'ResourceNotFoundException; Request ID:  00000000-1111-2222-3333-44444444444)')
