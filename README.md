@@ -1,5 +1,6 @@
 # local-data-api - Local Data API for AWS Aurora Serverless Data API
 [![Build Status](https://travis-ci.org/koxudaxi/local-data-api.svg?branch=master)](https://travis-ci.org/koxudaxi/local-data-api)
+[![codecov](https://codecov.io/gh/koxudaxi/local-data-api/branch/master/graph/badge.svg)](https://codecov.io/gh/koxudaxi/local-data-api)
 
 local-data-api can run in your local machine with MySQL Server.
 
