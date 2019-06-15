@@ -11,3 +11,6 @@ script:
   - flake8 --max-line-length 119 local_data_api
   - mypy --ignore-missing-imports local_data_api
   - nosetests -v --with-coverage tests
+
+after_success:
+    - codecov
