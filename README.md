@@ -4,8 +4,6 @@
 
 local-data-api can run in your local machine with MySQL Server.
 
-dockerhub: [local-data-api](https://hub.docker.com/r/koxudaxi/local-data-api)
-
 ## What's AWS Aurora Serverless's Data API?
 https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
 
@@ -106,3 +104,19 @@ Out[3]: {'ResponseMetadata': {'HTTPStatusCode': 200,
 DataAPI client for Python
 
 https://github.com/koxudaxi/py-data-api
+
+## Docker Image 
+
+[https://hub.docker.com/r/koxudaxi/local-data-api](https://hub.docker.com/r/koxudaxi/local-data-api)
+
+## Source Code
+
+[https://github.com/koxudaxi/local-data-api](https://github.com/koxudaxi/local-data-api)
+
+## Documentation
+
+[https://koxudaxi.github.io/local-data-api](https://koxudaxi.github.io/local-data-api)
+
+## License
+
+local-data-api is released under the MIT License. http://www.opensource.org/licenses/mit-license
