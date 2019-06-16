@@ -1,0 +1,21 @@
+site_name: loca-data-api
+site_description: Data API for local, you can write unittest for AWS Aurora Serverless's Data API
+
+theme:
+    name: 'material'
+    palette:
+      primary: 'light blue'
+      accent: 'light blue'
+
+markdown_extensions:
+  - codehilite
+
+repo_name: koxudaxi/loca-data-api
+repo_url: https://github.com/koxudaxi/local-data-api
+
+google_analytics:
+    - 'UA-142130505-1'
+    - 'auto'
+
+nav:
+    - local-data-api: 'index.md'
