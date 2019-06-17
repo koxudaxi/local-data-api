@@ -24,13 +24,13 @@ deploy:
   - provider: script
     script: bash scripts/push-image.sh
     on:
-      branch: master
+      tags: true
   - provider: pages
     skip_cleanup: true
     github_token: $GITHUB_TOKEN
     local_dir: site
     on:
-      tags: true
+      branch: master
   - provider: releases
     api_key: $GITHUB_TOKEN
     skip_cleanup: true
