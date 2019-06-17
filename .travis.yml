@@ -30,7 +30,12 @@ deploy:
     github_token: $GITHUB_TOKEN
     local_dir: site
     on:
-      branch: master
+      tags: true
+  - provider: releases
+    api_key: $GITHUB_TOKEN
+    skip_cleanup: true
+    on:
+      tags: true
 
 after_success:
 - codecov
