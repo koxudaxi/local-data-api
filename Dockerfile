@@ -1,6 +1,6 @@
 FROM tiangolo/uvicorn-gunicorn:python3.7-alpine3.8
 
-MAINTAINER Koudai Aono (koxudaxi@gmail.com)
+LABEL maintainer="Koudai Aono <koxudaxi@gmail.com>"
 
 ENV MODULE_NAME local_data_api.main
 
