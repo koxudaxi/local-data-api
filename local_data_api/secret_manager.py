@@ -20,7 +20,8 @@ def create_secret_arn(region_name: str = 'us-east-1', account: str = '1234567890
     return f'arn:aws:secretsmanager:{region_name}:{account}:secret:local-data-api{sha1().hexdigest()}'
 
 
-def register_secret(user_name: Optional[str], password: Optional[str], secret_arn: Optional[str]) -> str:
+def register_secret(user_name: Optional[str] = None, password: Optional[str] = None,
+                    secret_arn: Optional[str] = None) -> str:
     if not secret_arn:
         secret_arn = create_secret_arn()
 

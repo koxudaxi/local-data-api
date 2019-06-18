@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from local_data_api.exceptions import BadRequestException
 from local_data_api.resources import MySQL
 from local_data_api.resources.sqlite import SQLite
-from local_data_api.resources.resource import Resource, get_resource, register_resource, RESOURCE_METAS, ResourceMeta
+from local_data_api.resources.resource import get_resource, register_resource, RESOURCE_METAS, ResourceMeta
 
 DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
     'SQLite': {
