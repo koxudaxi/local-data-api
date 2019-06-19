@@ -1,9 +1,10 @@
+from abc import ABC
 from typing import Optional, Dict
 
 from fastapi import HTTPException
 
 
-class DataAPIException(HTTPException):
+class DataAPIException(HTTPException, ABC):
     STATUS_CODE: int
 
     def __init__(self, message: str, headers: Optional[Dict] = None):
@@ -24,6 +25,9 @@ class ForbiddenException(DataAPIException):
 
 
 class InternalServerErrorException(DataAPIException):
+    def __init__(self, message: Optional[str] = None):
+        super().__init__(message)
+
     STATUS_CODE = 500
 
 

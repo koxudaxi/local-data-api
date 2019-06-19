@@ -32,7 +32,7 @@ def set_session(transaction_id: str, session: Session):
     SESSION_POOL[transaction_id] = session
 
 
-def delete_session(transaction_id: Optional[str]) -> None:
+def delete_session(transaction_id: Optional[str] = None) -> None:
     if transaction_id:
         del SESSION_POOL[transaction_id]
 
