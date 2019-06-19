@@ -5,7 +5,7 @@ from local_data_api.exceptions import BadRequestException
 from local_data_api.secret_manager import register_secret, get_secret, create_secret_arn, SECRETS, Secret
 
 
-class TestSecretFunction(TestCase):
+class TestSecretManagerFunction(TestCase):
     def setUp(self) -> None:
         SECRETS.clear()
 
