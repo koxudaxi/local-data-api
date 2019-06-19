@@ -20,7 +20,7 @@ DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
 }
 
 
-class DataBaseFunction(TestCase):
+class TestDataBaseFunction(TestCase):
     def setUp(self) -> None:
         RESOURCE_METAS.clear()
 
