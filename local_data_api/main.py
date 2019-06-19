@@ -71,7 +71,7 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
     resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
 
     if request.parameters:
-        parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.value.valid_value
+        parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.value.dict(skip_defaults=True)
                                                        for parameter in request.parameters
                                                        }]
     else:
