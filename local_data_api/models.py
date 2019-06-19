@@ -14,13 +14,6 @@ class Field(BaseModel):
     longValue: Optional[int]
     stringValue: Optional[str]
 
-    @property
-    def valid_value(self: Field) -> Optional[str]:
-        for value in self.dict().values():
-            if value is not None:
-                return value
-        return None
-
 
 class SqlParameter(BaseModel):
     name: str
