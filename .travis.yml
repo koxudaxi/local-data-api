@@ -18,6 +18,7 @@ script:
 - flake8 --max-line-length 119 local_data_api
 - mypy --ignore-missing-imports local_data_api
 - nosetests -v --with-coverage tests
+- codecov
 - cp README.md docs/index.md && mkdocs build --verbose --clean --strict
 
 deploy:
@@ -31,6 +32,3 @@ deploy:
     local_dir: site
     on:
       branch: master
-
-after_success:
-- codecov
