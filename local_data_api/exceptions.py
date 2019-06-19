@@ -26,7 +26,7 @@ class ForbiddenException(DataAPIException):
 
 class InternalServerErrorException(DataAPIException):
     def __init__(self, message: Optional[str] = None):
-        super().__init__(message)
+        super().__init__(message or 'InternalServerError')
 
     STATUS_CODE = 500
 
