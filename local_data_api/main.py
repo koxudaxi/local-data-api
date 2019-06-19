@@ -1,3 +1,4 @@
+from base64 import b64encode
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI
@@ -19,7 +20,6 @@ setup()
 
 
 def convert_value(value: Any) -> Dict[str, Any]:
-    # TODO: support BlobValue
     if isinstance(value, bool):
         return {'booleanValue': value}
     elif isinstance(value, str):
@@ -28,6 +28,8 @@ def convert_value(value: Any) -> Dict[str, Any]:
         return {'longValue': value}
     elif isinstance(value, float):
         return {'doubleValue': value}
+    elif isinstance(value, bytes):
+        return {'blobValue': b64encode(value)}
     elif value is None:
         return {'isNull': True}
     else:
@@ -69,7 +71,7 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
     resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
 
     if request.parameters:
-        parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.value.valid_value
+        parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.value.dict(skip_defaults=True)
                                                        for parameter in request.parameters
                                                        }]
     else:
@@ -112,7 +114,7 @@ def batch_execute_statement(request: BatchExecuteStatementRequests) -> BatchExec
 
     for parameter_set in request.parameterSets:
         parameters: List[Dict[str, Any]] = [
-            {parameter.name: parameter.value.valid_value for parameter in parameter_set}]
+            {parameter.name: parameter.value.dict(skip_defaults=True) for parameter in parameter_set}]
         result: ResultProxy = resource.execute(request.sql, parameters, request.database)
 
         generated_fields: List[Dict[str, Any]] = []
