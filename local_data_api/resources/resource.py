@@ -189,4 +189,3 @@ class Resource(ABC):
             elif len(getattr(e, 'args', [])):
                 message = e.args[0]
             raise BadRequestException(message)
-
