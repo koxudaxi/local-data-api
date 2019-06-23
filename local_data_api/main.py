@@ -98,6 +98,7 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
         response.columnMetadata = []
 
     if not resource.transaction_id:
+        resource.commit()
         resource.close()
 
     return response
