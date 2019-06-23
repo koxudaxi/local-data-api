@@ -10,7 +10,7 @@ from local_data_api.exceptions import DataAPIException
 from local_data_api.models import BatchExecuteStatementRequests, BatchExecuteStatementResponse, \
     BeginTransactionRequest, BeginTransactionResponse, CommitTransactionRequest, CommitTransactionResponse, \
     ExecuteSqlRequest, ExecuteStatementRequests, ExecuteStatementResponse, RollbackTransactionRequest, \
-    RollbackTransactionResponse, TransactionStatus, UpdateResult
+    RollbackTransactionResponse, TransactionStatus, UpdateResult, ColumnMetadata
 from local_data_api.resources.resource import Resource, get_resource
 from local_data_api.settings import setup
 
@@ -34,6 +34,25 @@ def convert_value(value: Any) -> Dict[str, Any]:
         return {'isNull': True}
     else:
         raise Exception(f'unsupported type {type(value)}: {value} ')
+
+
+def create_column_metadata(name: str, type_code: int, display_size: Optional[int], internal_size: int, precision: int,
+                           scale: int, null_ok: bool) -> ColumnMetadata:
+    return ColumnMetadata(arrayBaseColumnType=0,
+                          isAutoIncrement=False,
+                          isCaseSensitive=False,
+                          isCurrency=False,
+                          isSigned=False,
+                          label=name,
+                          name=name,
+                          nullabl=1 if null_ok else 0,
+                          precision=precision,
+                          scale=scale,
+                          schema_=None,  # type: ignore
+                          tableName=None,
+                          type=None,
+                          typeName=None
+                          )
 
 
 @app.post("/ExecuteSql")
@@ -95,7 +114,8 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
                                             generatedFields=generated_fields)
 
     if request.includeResultMetadata:
-        response.columnMetadata = []
+        response.columnMetadata = [create_column_metadata(*description)
+                                   for description in result.cursor.description]
 
     if not resource.transaction_id:
         resource.commit()
