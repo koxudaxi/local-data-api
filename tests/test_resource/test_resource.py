@@ -147,8 +147,6 @@ class TestSessionPool(TestCase):
     def test_delete_session(self) -> None:
         session: Session = Session()
         SESSION_POOL['abc'] = session
-        delete_session()
-        self.assertEqual(SESSION_POOL['abc'], session)
 
         delete_session('abc')
         self.assertTrue('abc' not in SESSION_POOL)

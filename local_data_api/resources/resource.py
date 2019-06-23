@@ -19,8 +19,6 @@ from local_data_api.secret_manager import get_secret, Secret
 TRANSACTION_ID_CHARACTERS: str = string.ascii_letters + '/=+'
 TRANSACTION_ID_LENGTH: int = 184
 
-SessionMaker: sessionmaker = sessionmaker()
-
 RESOURCE_CLASS: Dict[str, Type[Resource]] = {}
 
 RESOURCE_METAS: Dict[str, ResourceMeta] = {}
@@ -32,15 +30,14 @@ def set_session(transaction_id: str, session: Session):
     SESSION_POOL[transaction_id] = session
 
 
-def delete_session(transaction_id: Optional[str] = None) -> None:
-    if transaction_id:
-        del SESSION_POOL[transaction_id]
+def delete_session(transaction_id: str) -> None:
+    del SESSION_POOL[transaction_id]
 
 
 @dataclass
 class ResourceMeta:
     resource_type: Type[Resource]
-    session_maker: SessionMaker
+    session_maker: sessionmaker
     host: Optional[str] = None
     port: Optional[int] = None
     user_name: Optional[str] = None
@@ -75,7 +72,7 @@ def register_resource(resource_arn: str, engine_name: str, host: Optional[str], 
 
 def create_session_maker(engine_name: str, host: Optional[str], port: Optional[int],  user_name: Optional[str] = None,
                          password: Optional[str] = None,
-                         engine_kwargs: Optional[Dict[str, Any]] = None) -> SessionMaker:
+                         engine_kwargs: Optional[Dict[str, Any]] = None) -> sessionmaker:
 
     resource_class: Type[Resource] = get_resource_class(engine_name)
 
@@ -114,7 +111,7 @@ def get_resource(resource_arn: str, secret_arn: str, transaction_id: Optional[st
         raise BadRequestException('Invalid secret_arn')
 
     if transaction_id is None:
-        session: Session = create_session(resource_arn, autocommit=True)
+        session: Session = create_session(resource_arn, autocommit=False)
     else:
         session = get_session(transaction_id)
 
@@ -161,13 +158,13 @@ class Resource(ABC):
 
     def close(self) -> None:
         self.session.close()
-        delete_session(self.transaction_id)
+        if self.session and self.transaction_id in SESSION_POOL:
+            delete_session(self.transaction_id)
 
     def use_database(self, database_name: str) -> None:
         self.execute(f'use {database_name}')
 
     def begin(self) -> str:
-        self.session.begin()
         transaction_id = self.create_transaction_id()
         self._transaction_id = transaction_id
         set_session(transaction_id, self.session)
@@ -175,11 +172,9 @@ class Resource(ABC):
 
     def commit(self) -> None:
         self.session.commit()
-        delete_session(self.transaction_id)
 
     def rollback(self) -> None:
         self.session.rollback()
-        delete_session(self.transaction_id)
 
     def execute(self, sql: str, params=None, database_name: Optional[str] = None) -> ResultProxy:
         try:
