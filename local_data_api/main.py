@@ -68,62 +68,73 @@ def rollback_transaction(request: RollbackTransactionRequest) -> RollbackTransac
 
 @app.post("/Execute")
 def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResponse:
-    resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
+    resource: Optional[Resource] = None
+    try:
+        resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
+        if request.parameters:
+            parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.valid_value
+                                                           for parameter in request.parameters
+                                                           }]
+        else:
+            parameters = None
 
-    if request.parameters:
-        parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.value.dict(skip_defaults=True)
-                                                       for parameter in request.parameters
-                                                       }]
-    else:
-        parameters = None
+        result: ResultProxy = resource.execute(request.sql, parameters, request.database)
 
-    result: ResultProxy = resource.execute(request.sql, parameters, request.database)
+        if result.keys():
+            records: List[List[Dict[str, Any]]] = [
+                [convert_value(column) for column in row]
+                for row in result.cursor.fetchall()
+            ]
+            response: ExecuteStatementResponse = ExecuteStatementResponse(numberOfRecordsUpdated=0,
+                                                                          records=records)
 
-    if result.keys():
-        records: List[List[Dict[str, Any]]] = [
-            [convert_value(column) for column in row]
-            for row in result.cursor.fetchall()
-        ]
-        response: ExecuteStatementResponse = ExecuteStatementResponse(numberOfRecordsUpdated=0,
-                                                                      records=records)
+        else:
+            generated_fields: List[Dict[str, Any]] = []
+            if result.lastrowid > 0:
+                generated_fields.append(convert_value(result.lastrowid))
+            response = ExecuteStatementResponse(numberOfRecordsUpdated=result.rowcount,
+                                                generatedFields=generated_fields)
 
-    else:
-        generated_fields: List[Dict[str, Any]] = []
-        if result.lastrowid > 0:
-            generated_fields.append(convert_value(result.lastrowid))
-        response = ExecuteStatementResponse(numberOfRecordsUpdated=result.rowcount,
-                                            generatedFields=generated_fields)
+        if request.includeResultMetadata:
+            response.columnMetadata = []
 
-    if request.includeResultMetadata:
-        response.columnMetadata = []
-
-    if not resource.transaction_id:
-        resource.commit()
-        resource.close()
-
-    return response
+        if not resource.transaction_id:
+            resource.commit()
+        return response
+    finally:
+        if resource and not resource.transaction_id:
+            resource.close()
 
 
 @app.post("/BatchExecute")
 def batch_execute_statement(request: BatchExecuteStatementRequests) -> BatchExecuteStatementResponse:
-    resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
+    resource: Optional[Resource] = None
+    try:
+        resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
 
-    update_results: List[UpdateResult] = []
+        update_results: List[UpdateResult] = []
 
-    if not request.parameterSets:
-        return BatchExecuteStatementResponse(updateResults=update_results)
+        if not request.parameterSets:
+            response: BatchExecuteStatementResponse = BatchExecuteStatementResponse(updateResults=update_results)
+        else:
+            for parameter_set in request.parameterSets:
+                parameters: List[Dict[str, Any]] = [
+                    {parameter.name: parameter.valid_value for parameter in parameter_set}]
+                result: ResultProxy = resource.execute(request.sql, parameters, request.database)
 
-    for parameter_set in request.parameterSets:
-        parameters: List[Dict[str, Any]] = [
-            {parameter.name: parameter.value.dict(skip_defaults=True) for parameter in parameter_set}]
-        result: ResultProxy = resource.execute(request.sql, parameters, request.database)
+                generated_fields: List[Dict[str, Any]] = []
+                if result.lastrowid > 0:
+                    generated_fields.append(convert_value(result.lastrowid))
+                update_results.append(UpdateResult(generatedFields=generated_fields))
 
-        generated_fields: List[Dict[str, Any]] = []
-        if result.lastrowid > 0:
-            generated_fields.append(convert_value(result.lastrowid))
-        update_results.append(UpdateResult(generatedFields=generated_fields))
+            response = BatchExecuteStatementResponse(updateResults=update_results)
 
-    return BatchExecuteStatementResponse(updateResults=update_results)
+        if not resource.transaction_id:
+            resource.commit()
+        return response
+    finally:
+        if resource and not resource.transaction_id:
+            resource.close()
 
 
 @app.exception_handler(DataAPIException)

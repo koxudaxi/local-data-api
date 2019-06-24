@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Schema
 
@@ -18,6 +18,14 @@ class Field(BaseModel):
 class SqlParameter(BaseModel):
     name: str
     value: Field
+
+    @property
+    def valid_value(self: SqlParameter) -> Union[str, bool, float, None, int]:
+        for key, value in self.value.dict(skip_defaults=True).items():
+            if key == 'isNull' and value:
+                return None
+            return value
+        return None
 
 
 class ExecuteSqlRequest(BaseModel):
