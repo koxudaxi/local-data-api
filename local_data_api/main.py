@@ -70,7 +70,7 @@ def rollback_transaction(request: RollbackTransactionRequest) -> RollbackTransac
 def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResponse:
     resource: Optional[Resource] = None
     try:
-        resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
+        resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
         if request.parameters:
             parameters: Optional[List[Dict[str, Any]]] = [{parameter.name: parameter.valid_value
                                                            for parameter in request.parameters
