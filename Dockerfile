@@ -3,9 +3,17 @@ FROM tiangolo/uvicorn-gunicorn:python3.7-alpine3.8
 LABEL maintainer="Koudai Aono <koxudaxi@gmail.com>"
 
 ENV MODULE_NAME local_data_api.main
+ENV MARIADB_CLIENT_VERSION 2.4.2
+ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk/jre/
+ENV LD_LIBRARY_PATH /usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/server/
+
+RUN apk add --no-cache --virtual .build-deps libstdc++ g++ libc-dev openjdk8-jre curl \
+     &&  pip install JPype1==0.6.3 \
+     && curl -o /usr/lib/jvm/mariadb-java-client.jar \
+        https://downloads.mariadb.com/Connectors/java/connector-java-${MARIADB_CLIENT_VERSION}/mariadb-java-client-${MARIADB_CLIENT_VERSION}.jar \
+     &&  apk del .build-deps libstdc++ g++ libc-dev curl
 
 COPY requirements.txt /
 RUN pip install -r /requirements.txt
 
 COPY local_data_api /app/local_data_api
-

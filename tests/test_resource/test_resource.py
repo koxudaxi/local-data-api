@@ -1,15 +1,13 @@
+from __future__ import annotations
 
 from typing import Dict, Union
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
-from sqlalchemy.orm import sessionmaker, Session
-
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
-from local_data_api.resources import MySQL
-from local_data_api.resources.sqlite import SQLite
+from local_data_api.resources import SQLite
 from local_data_api.resources.resource import get_resource, register_resource, RESOURCE_METAS, ResourceMeta, \
-    SESSION_POOL, set_session, get_session, delete_session, get_resource_class, create_resource_arn
+    CONNECTION_POOL, set_connection, get_connection, delete_connection, get_resource_class, create_resource_arn
 
 DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
     'SQLite': {
@@ -21,10 +19,21 @@ DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
 }
 
 
+class ConnectionMock(Mock):
+    def close(self):
+        pass
+
+    def commit(self):
+        pass
+
+    def rollback(self):
+        pass
+
+
 class TestResourceFunction(TestCase):
     def setUp(self) -> None:
         RESOURCE_METAS.clear()
-        SESSION_POOL.clear()
+        CONNECTION_POOL.clear()
 
     def test_register_resource(self) -> None:
         resource_arn: str = 'dummy_resource_arn'
@@ -40,11 +49,9 @@ class TestResourceFunction(TestCase):
 
         resource_arn: str = 'dummy_resource_arn'
 
-        engine = MySQL.create_engine('localhost', 3306, 'test', 'pw', {})
+        connection_maker = SQLite.create_connection_maker('localhost', 3306, 'test', 'pw', {})
 
-        session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-        RESOURCE_METAS[resource_arn] = ResourceMeta(SQLite, session, 'localhost', 3306, 'test', 'pw')
+        RESOURCE_METAS[resource_arn] = ResourceMeta(SQLite, connection_maker, 'localhost', 3306, 'test', 'pw')
 
         secret = Mock()
         secret.user_name = 'test'
@@ -54,29 +61,27 @@ class TestResourceFunction(TestCase):
             mock_get_secret.return_value = secret
             resource = get_resource(resource_arn, 'dummy')
             self.assertIsInstance(resource, SQLite)
-            with mock.patch('local_data_api.resources.resource.get_session') as mock_get_session:
-                new_session = Session()
-                mock_get_session.return_value = new_session
+            with mock.patch('local_data_api.resources.resource.get_connection') as mock_get_connection:
+                new_connection = Mock()
+                mock_get_connection.return_value = new_connection
                 resource = get_resource(resource_arn, 'dummy', 'transaction')
-            self.assertEqual(resource.session, new_session)
+            self.assertEqual(resource.connection, new_connection)
 
     def test_get_resource_exception(self) -> None:
 
         resource_arn: str = 'dummy_resource_arn'
 
-        engine = MySQL.create_engine('localhost', 3306, 'test', 'pw', {})
+        connection_maker = SQLite.create_connection_maker()
 
-        session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-        RESOURCE_METAS[resource_arn] = ResourceMeta(SQLite, session, 'localhost', 3306, 'test', 'pw')
+        RESOURCE_METAS[resource_arn] = ResourceMeta(SQLite, connection_maker, 'localhost', 3306, 'test', 'pw')
 
         with self.assertRaises(BadRequestException):
             get_resource('invalid', 'dummy')
 
         with self.assertRaises(InternalServerErrorException):
-            SESSION_POOL['dummy'] = Session()
+            CONNECTION_POOL['dummy'] = connection_maker()
             get_resource('invalid', 'dummy', 'dummy')
-            del SESSION_POOL['dummy']
+            del CONNECTION_POOL['dummy']
 
         with mock.patch('local_data_api.resources.resource.get_secret') as mock_get_secret:
             with self.assertRaises(BadRequestException):
@@ -85,7 +90,7 @@ class TestResourceFunction(TestCase):
 
             with self.assertRaises(InternalServerErrorException):
                 mock_get_secret.side_effect = BadRequestException('error')
-                SESSION_POOL['dummy'] = Session()
+                CONNECTION_POOL['dummy'] = connection_maker()
                 get_resource(resource_arn, 'dummy', 'dummy')
 
             mock_get_secret.side_effect = None
@@ -116,38 +121,35 @@ class TestResourceFunction(TestCase):
     def test_get_database_invalid_resource_arn(self) -> None:
         resource_arn: str = 'dummy_resource_arn'
 
-        engine = MySQL.create_engine('localhost', 3306, 'test', 'pw', {})
+        connection_maker = SQLite.create_connection_maker('localhost', 3306, 'test', 'pw', {})
 
-        session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-        RESOURCE_METAS[resource_arn] = ResourceMeta(SQLite, session, 'localhost', 3306, 'test', 'pw')
+        RESOURCE_METAS[resource_arn] = ResourceMeta(SQLite, connection_maker, 'localhost', 3306, 'test', 'pw')
 
         with self.assertRaises(BadRequestException):
             get_resource('invalid_arn', 'secret_arn')
 
 
-class TestSessionPool(TestCase):
+class TestconnectionPool(TestCase):
     def setUp(self) -> None:
-        SESSION_POOL.clear()
+        CONNECTION_POOL.clear()
 
-    def test_set_session(self) -> None:
-        session: Session = Session()
-        set_session('abc', session)
-        self.assertEqual(SESSION_POOL['abc'], session)
+    def test_set_connection(self) -> None:
+        connection: ConnectionMock = ConnectionMock()
+        set_connection('abc', connection)
+        self.assertEqual(CONNECTION_POOL['abc'], connection)
 
-    def test_get_session(self) -> None:
-        session: Session = Session()
-        SESSION_POOL['abc'] = session
-        self.assertEqual(get_session('abc'), session)
+    def test_get_connection(self) -> None:
+        connection: ConnectionMock = ConnectionMock()
+        CONNECTION_POOL['abc'] = connection
+        self.assertEqual(get_connection('abc'), connection)
 
-    def test_get_session_notfound(self) -> None:
+    def test_get_connection_notfound(self) -> None:
         with self.assertRaises(BadRequestException):
-            get_session('abc')
+            get_connection('abc')
 
-    def test_delete_session(self) -> None:
-        session: Session = Session()
-        SESSION_POOL['abc'] = session
+    def test_delete_connection(self) -> None:
+        connection: ConnectionMock = ConnectionMock()
+        CONNECTION_POOL['abc'] = connection
 
-        delete_session('abc')
-        self.assertTrue('abc' not in SESSION_POOL)
-
+        delete_connection('abc')
+        self.assertTrue('abc' not in CONNECTION_POOL)

@@ -3,17 +3,19 @@ from __future__ import annotations
 import random
 import string
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from typing import Optional, Dict, Any, Type
+from typing import Optional, Dict, Any, Type, List, TYPE_CHECKING, Tuple
 from hashlib import sha1
 
 from sqlalchemy import text
-from sqlalchemy.engine import Engine, create_engine, ResultProxy
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.engine import Dialect
+from sqlalchemy.sql.elements import TextClause
 
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
+from local_data_api import convert_value
+from local_data_api.models import ExecuteStatementResponse, ColumnMetadata
 from local_data_api.secret_manager import get_secret, Secret
 
 TRANSACTION_ID_CHARACTERS: str = string.ascii_letters + '/=+'
@@ -23,21 +25,62 @@ RESOURCE_CLASS: Dict[str, Type[Resource]] = {}
 
 RESOURCE_METAS: Dict[str, ResourceMeta] = {}
 
-SESSION_POOL: Dict[str, Session] = {}
+CONNECTION_POOL: Dict[str, Connection] = {}
+
+# DBAPI's Types
+if TYPE_CHECKING:
+    from typing import Callable
+
+    connect = Callable
+
+    class Connection:
+        def close(self):
+            pass
+
+        def commit(self):
+            pass
+
+        def rollback(self):
+            pass
+
+        def cursor(self) -> Cursor:
+            return Cursor()
+
+    class Cursor:
+        def execute(self, *args, **kwargs):
+            pass
+
+        def fetchone(self) -> Tuple:
+            pass
+
+        def fetchmany(self, _) -> Tuple[Tuple]:
+            pass
+
+        def fetchall(self) -> Tuple[Tuple]:
+            pass
+
+        def close(self):
+            pass
+
+        @property
+        def description(self) -> Tuple[Tuple]:
+            return ((),)
+
+    ConnectionMaker = Callable[..., Connection]
 
 
-def set_session(transaction_id: str, session: Session):
-    SESSION_POOL[transaction_id] = session
+def set_connection(transaction_id: str, connection: Connection):
+    CONNECTION_POOL[transaction_id] = connection
 
 
-def delete_session(transaction_id: str) -> None:
-    del SESSION_POOL[transaction_id]
+def delete_connection(transaction_id: str) -> None:
+    del CONNECTION_POOL[transaction_id]
 
 
 @dataclass
 class ResourceMeta:
     resource_type: Type[Resource]
-    session_maker: sessionmaker
+    connection_maker: ConnectionMaker
     host: Optional[str] = None
     port: Optional[int] = None
     user_name: Optional[str] = None
@@ -65,42 +108,39 @@ def register_resource(resource_arn: str, engine_name: str, host: Optional[str], 
                       engine_kwargs: Optional[Dict[str, Any]] = None) -> None:
     resource_meta = ResourceMeta(
         resource_type=get_resource_class(engine_name),
-        session_maker=create_session_maker(engine_name, host, port, user_name, password, engine_kwargs),
+        connection_maker=create_connection_maker(engine_name, host, port, user_name, password, engine_kwargs),
         host=host, port=port, user_name=user_name, password=password)
     RESOURCE_METAS[resource_arn] = resource_meta
 
 
-def create_session_maker(engine_name: str, host: Optional[str], port: Optional[int],  user_name: Optional[str] = None,
-                         password: Optional[str] = None,
-                         engine_kwargs: Optional[Dict[str, Any]] = None) -> sessionmaker:
-
+def create_connection_maker(engine_name: str, host: Optional[str], port: Optional[int],
+                            user_name: Optional[str] = None, password: Optional[str] = None,
+                            engine_kwargs: Optional[Dict[str, Any]] = None) -> ConnectionMaker:
     resource_class: Type[Resource] = get_resource_class(engine_name)
 
-    engine: Engine = resource_class.create_engine(host, port, user_name, password, engine_kwargs)
-
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return resource_class.create_connection_maker(host, port, user_name, password, engine_kwargs)
 
 
-def create_session(resource_arn: str, **session_kwargs: Any) -> Session:
-    return RESOURCE_METAS[resource_arn].session_maker(**session_kwargs)
+def create_connection(resource_arn: str, **connection_kwargs: Any) -> Connection:
+    return RESOURCE_METAS[resource_arn].connection_maker(**connection_kwargs)
 
 
-def get_session(transaction_id: str) -> Session:
-    if transaction_id in SESSION_POOL:
-        return SESSION_POOL[transaction_id]
+def get_connection(transaction_id: str) -> Connection:
+    if transaction_id in CONNECTION_POOL:
+        return CONNECTION_POOL[transaction_id]
     raise BadRequestException('Invalid transaction ID')
 
 
 def get_resource(resource_arn: str, secret_arn: str, transaction_id: Optional[str] = None) -> Resource:
     if resource_arn not in RESOURCE_METAS:
-        if transaction_id in SESSION_POOL:
+        if transaction_id in CONNECTION_POOL:
             raise InternalServerErrorException
         raise BadRequestException(f'HttpEndPoint is not enabled for {resource_arn}')
 
     try:
         secret: Secret = get_secret(secret_arn)
     except BadRequestException:
-        if transaction_id in SESSION_POOL:
+        if transaction_id in CONNECTION_POOL:
             raise InternalServerErrorException
         raise
 
@@ -111,42 +151,55 @@ def get_resource(resource_arn: str, secret_arn: str, transaction_id: Optional[st
         raise BadRequestException('Invalid secret_arn')
 
     if transaction_id is None:
-        session: Session = create_session(resource_arn, autocommit=False)
+        connection: Connection = create_connection(resource_arn)
     else:
-        session = get_session(transaction_id)
+        connection = get_connection(transaction_id)
 
-    return meta.resource_type(session, transaction_id)
+    return meta.resource_type(connection, transaction_id)
+
+
+def create_column_metadata(name: str, type_code: int, display_size: Optional[int], internal_size: int, precision: int,
+                           scale: int, null_ok: bool) -> ColumnMetadata:
+    return ColumnMetadata(arrayBaseColumnType=0,
+                          isAutoIncrement=False,
+                          isCaseSensitive=False,
+                          isCurrency=False,
+                          isSigned=False,
+                          label=name,
+                          name=name,
+                          nullabl=1 if null_ok else 0,
+                          precision=precision,
+                          scale=scale,
+                          schema_=None,
+                          tableName=None,
+                          type=None,
+                          typeName=None
+                          )
 
 
 class Resource(ABC):
-    DIALECT: str
-    DRIVER: Optional[str]
+    DIALECT: Dialect
 
-    def __init__(self, session: Session, transaction_id: Optional[str] = None):
-        self._session: Session = session
+    def __init__(self, connection: Connection, transaction_id: Optional[str] = None):
+        self._connection: Connection = connection
         self._transaction_id: Optional[str] = transaction_id
 
     @classmethod
-    def create_engine(cls, host: Optional[str] = None, port: Optional[int] = None, user_name: Optional[str] = None,
-                      password: Optional[str] = None, engine_kwargs: Dict[str, Any] = None) -> Engine:
-        url: str = cls.DIALECT
-        if cls.DRIVER:
-            url += f'+{cls.DRIVER}'
-        url += '://'
-        if user_name and password:
-            url += f'{user_name}:{password}@'
-        if host:
-            url += host
-        if port:
-            url += f':{port}'
-        if not engine_kwargs:
-            engine_kwargs = {}
+    def create_query(cls, sql: str, params: Dict[str, Any]) -> str:
+        text_sql: TextClause = text(sql)
+        kwargs = {'dialect': cls.DIALECT, 'compile_kwargs': {"literal_binds": True}}
+        return str(text_sql.bindparams(**params).compile(kwargs))
 
-        return create_engine(url, **engine_kwargs, echo=True)
+    @classmethod
+    @abstractmethod
+    def create_connection_maker(cls, host: Optional[str] = None, port: Optional[int] = None,
+                                user_name: Optional[str] = None, password: Optional[str] = None,
+                                engine_kwargs: Dict[str, Any] = None) -> ConnectionMaker:
+        pass
 
     @property
-    def session(self) -> Session:
-        return self._session
+    def connection(self) -> Connection:
+        return self._connection
 
     @property
     def transaction_id(self) -> Optional[str]:
@@ -157,9 +210,9 @@ class Resource(ABC):
         return ''.join(random.choice(TRANSACTION_ID_CHARACTERS) for _ in range(TRANSACTION_ID_LENGTH))
 
     def close(self) -> None:
-        self.session.close()
-        if self.session and self.transaction_id in SESSION_POOL:
-            delete_session(self.transaction_id)
+        self.connection.close()
+        if self.connection and self.transaction_id in CONNECTION_POOL:
+            delete_connection(self.transaction_id)
 
     def use_database(self, database_name: str) -> None:
         self.execute(f'use {database_name}')
@@ -167,22 +220,54 @@ class Resource(ABC):
     def begin(self) -> str:
         transaction_id = self.create_transaction_id()
         self._transaction_id = transaction_id
-        set_session(transaction_id, self.session)
+        set_connection(transaction_id, self.connection)
         return transaction_id
 
     def commit(self) -> None:
-        self.session.commit()
+        self.connection.commit()
 
     def rollback(self) -> None:
-        self.session.rollback()
+        self.connection.rollback()
 
-    def execute(self, sql: str, params=None, database_name: Optional[str] = None) -> ResultProxy:
+    def execute(self, sql: str, params: Optional[Dict[str, Any]] = None,
+                database_name: Optional[str] = None,
+                include_result_metadata: bool = False) -> ExecuteStatementResponse:
+
         try:
             if database_name:
                 self.use_database(database_name)
-            return self.session.execute(text(sql), params)
+
+            cursor: Optional[Cursor] = None
+            try:
+                cursor = self.connection.cursor()
+                if params:
+                    cursor.execute(self.create_query(sql, params))
+                else:
+                    cursor.execute(str(text(sql)))
+
+                if cursor.description:
+                    response: ExecuteStatementResponse = ExecuteStatementResponse(numberOfRecordsUpdated=0,
+                                                                                  records=[
+                                                                                      [convert_value(column) for column
+                                                                                       in row]
+                                                                                      for row in cursor.fetchall()
+                                                                                  ])
+                    if include_result_metadata:
+                        response.columnMetadata = [create_column_metadata(*d) for d in cursor.description]
+                    return response
+                else:
+                    rowcount: int = cursor.rowcount
+                    last_generated_id: int = cursor.lastrowid
+                    generated_fields: List[Dict[str, Any]] = []
+                    if last_generated_id > 0:
+                        generated_fields.append(convert_value(last_generated_id))
+                    return ExecuteStatementResponse(numberOfRecordsUpdated=rowcount,
+                                                    generatedFields=generated_fields)
+            finally:
+                if cursor:
+                    cursor.close()
+
         except Exception as e:
-            print(e)
             message: str = 'Unknown'
             if hasattr(e, 'orig') and hasattr(e.orig, 'args'):  # type: ignore
                 message = e.orig.args[1]  # type: ignore
