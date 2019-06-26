@@ -28,7 +28,7 @@ RESOURCE_METAS: Dict[str, ResourceMeta] = {}
 CONNECTION_POOL: Dict[str, Connection] = {}
 
 # DBAPI's Types
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from typing import Callable
 
     connect = Callable

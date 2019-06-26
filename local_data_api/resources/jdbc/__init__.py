@@ -11,7 +11,7 @@ from sqlalchemy.engine import Dialect
 from local_data_api.models import ColumnMetadata
 from local_data_api.resources.resource import Resource
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker, Connection
 
 

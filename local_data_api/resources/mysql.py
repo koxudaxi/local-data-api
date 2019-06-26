@@ -8,7 +8,7 @@ from local_data_api.resources.resource import Resource, register_resource_type
 
 import pymysql
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker
 
 

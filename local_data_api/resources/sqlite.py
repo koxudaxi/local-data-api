@@ -5,7 +5,7 @@ from typing import Dict, Any, Optional, TYPE_CHECKING
 from sqlalchemy.dialects import sqlite
 from local_data_api.resources.resource import Resource, register_resource_type
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker
 
 
