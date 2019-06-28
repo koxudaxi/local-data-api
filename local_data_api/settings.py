@@ -5,7 +5,6 @@ import os
 from local_data_api.resources.resource import register_resource
 from local_data_api.secret_manager import register_secret
 
-
 RESOURCE_ARN: str = os.environ.get('RESOURCE_ARN', 'dummy')
 SECRET_ARN: str = os.environ.get('SECRET_ARN', 'dummy')
 

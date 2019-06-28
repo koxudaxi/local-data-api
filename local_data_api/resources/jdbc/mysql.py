@@ -1,11 +1,10 @@
-from typing import Optional, Any, List, Dict
+from typing import Any, Dict, List, Optional
 
 import jaydebeapi
-
 from sqlalchemy import text
 
-from local_data_api.exceptions import BadRequestException
 from local_data_api import convert_value
+from local_data_api.exceptions import BadRequestException
 from local_data_api.models import ExecuteStatementResponse
 from local_data_api.resources.jdbc import JDBC, create_column_metadata_set
 from local_data_api.resources.resource import register_resource_type
@@ -18,7 +17,7 @@ class MySQLJDBC(JDBC):
 
     @staticmethod
     def reset_generated_id(cursor: jaydebeapi.Cursor):
-        cursor.execute('select LAST_INSERT_ID(NULL)')
+        cursor.execute('SELECT LAST_INSERT_ID(NULL)')
 
     @staticmethod
     def last_generated_id(cursor: jaydebeapi.Cursor) -> int:
@@ -63,7 +62,6 @@ class MySQLJDBC(JDBC):
                     cursor.close()
 
         except jaydebeapi.DatabaseError as e:
-            print(e)
             message: str = 'Unknown'
             if len(getattr(e, 'args', [])):
                 message = e.args[0]

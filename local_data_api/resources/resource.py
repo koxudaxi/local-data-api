@@ -2,21 +2,19 @@ from __future__ import annotations
 
 import random
 import string
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
-from typing import Optional, Dict, Any, Type, List, TYPE_CHECKING, Tuple
 from hashlib import sha1
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Type
 
 from sqlalchemy import text
 from sqlalchemy.engine import Dialect
 from sqlalchemy.sql.elements import TextClause
 
-from local_data_api.exceptions import BadRequestException, InternalServerErrorException
 from local_data_api import convert_value
-from local_data_api.models import ExecuteStatementResponse, ColumnMetadata
-from local_data_api.secret_manager import get_secret, Secret
+from local_data_api.exceptions import BadRequestException, InternalServerErrorException
+from local_data_api.models import ColumnMetadata, ExecuteStatementResponse
+from local_data_api.secret_manager import Secret, get_secret
 
 TRANSACTION_ID_CHARACTERS: str = string.ascii_letters + '/=+'
 TRANSACTION_ID_LENGTH: int = 184
@@ -33,6 +31,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     connect = Callable
 
+
     class Connection:
         def close(self):
             pass
@@ -45,6 +44,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
         def cursor(self) -> Cursor:
             return Cursor()
+
 
     class Cursor:
         def execute(self, *args, **kwargs):
@@ -65,6 +65,7 @@ if TYPE_CHECKING:  # pragma: no cover
         @property
         def description(self) -> Tuple[Tuple]:
             return ((),)
+
 
     ConnectionMaker = Callable[..., Connection]
 

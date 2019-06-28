@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Dict
 from hashlib import sha1
+from typing import Dict, Optional
 
 from local_data_api.exceptions import BadRequestException
 

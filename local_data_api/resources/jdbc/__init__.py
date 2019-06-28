@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Optional, Any, Union, List, Dict, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
 import jaydebeapi
-
 from sqlalchemy.dialects import mysql
 from sqlalchemy.engine import Dialect
 
@@ -28,10 +27,10 @@ def attach_thread_to_jvm():  # pragma: no cover
 def connection_maker(jclassname: str, url: str, driver_args: Union[Dict, List] = None,
                      jars: Union[List[str], str] = None,
                      libs: Union[List[str], str] = None) -> ConnectionMaker:
-
     def connect(**kwargs):
         attach_thread_to_jvm()
         return jaydebeapi.connect(jclassname, url, driver_args, jars, libs)
+
     return connect
 
 

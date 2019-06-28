@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional, Dict, Any, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
+import pymysql
 from sqlalchemy.dialects import mysql
 
 from local_data_api.resources.resource import Resource, register_resource_type
-
-import pymysql
 
 if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker

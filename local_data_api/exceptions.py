@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from fastapi import HTTPException
 
