@@ -31,7 +31,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
     connect = Callable
 
-
     class Connection:
         def close(self):
             pass
@@ -44,7 +43,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
         def cursor(self) -> Cursor:
             return Cursor()
-
 
     class Cursor:
         def execute(self, *args, **kwargs):
@@ -65,7 +63,6 @@ if TYPE_CHECKING:  # pragma: no cover
         @property
         def description(self) -> Tuple[Tuple]:
             return ((),)
-
 
     ConnectionMaker = Callable[..., Connection]
 
