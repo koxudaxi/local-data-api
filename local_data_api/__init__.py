@@ -1,7 +1,7 @@
 from base64 import b64encode
 from typing import Any, Dict
 
-__version__ = '0.1.4'
+__version__ = '0.2.0'
 
 
 def convert_value(value: Any) -> Dict[str, Any]:
