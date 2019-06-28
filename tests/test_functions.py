@@ -1,7 +1,7 @@
 from base64 import b64encode
 from unittest import TestCase
 
-from local_data_api.main import convert_value
+from local_data_api import convert_value
 
 
 class TestLocalDataAPIFunction(TestCase):
@@ -19,5 +19,6 @@ class TestLocalDataAPIFunction(TestCase):
 
         class Dummy:
             pass
+
         with self.assertRaises(Exception):
             convert_value(Dummy())

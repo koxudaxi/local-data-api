@@ -1,8 +1,7 @@
-
 from unittest import TestCase
 
 from local_data_api.exceptions import BadRequestException
-from local_data_api.secret_manager import register_secret, get_secret, create_secret_arn, SECRETS, Secret
+from local_data_api.secret_manager import SECRETS, Secret, create_secret_arn, get_secret, register_secret
 
 
 class TestSecretManagerFunction(TestCase):
@@ -10,7 +9,8 @@ class TestSecretManagerFunction(TestCase):
         SECRETS.clear()
 
     def test_create_secret_arn(self) -> None:
-        self.assertEqual(create_secret_arn()[:67], 'arn:aws:secretsmanager:us-east-1:123456789012:secret:local-data-api')
+        self.assertEqual(create_secret_arn()[:67],
+                         'arn:aws:secretsmanager:us-east-1:123456789012:secret:local-data-api')
         self.assertEqual(create_secret_arn(region_name='ap-northeast-1', account='000000000000')[:72],
                          'arn:aws:secretsmanager:ap-northeast-1:000000000000:secret:local-data-api')
 
@@ -42,9 +42,10 @@ class TestSecretManagerFunction(TestCase):
     def test_get_secret_notfound_secret(self) -> None:
         secret_arn = 'arn:aws:secretsmanager:ap-northeast-1:000000000000:secret:local-data-api'
 
-        exception = BadRequestException(f'Error fetching secret {secret_arn} : Secrets Manager can’t find the specified '
-                            f'secret. (Service: AWSSecretsManager; Status Code: 400; Error Code: '
-                            f'ResourceNotFoundException; Request ID:  00000000-1111-2222-3333-44444444444)')
+        exception = BadRequestException(
+            f'Error fetching secret {secret_arn} : Secrets Manager can’t find the specified '
+            f'secret. (Service: AWSSecretsManager; Status Code: 400; Error Code: '
+            f'ResourceNotFoundException; Request ID:  00000000-1111-2222-3333-44444444444)')
 
         with self.assertRaises(BadRequestException, ):
             try:

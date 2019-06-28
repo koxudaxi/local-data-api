@@ -1,7 +1,6 @@
-
 from unittest import TestCase
 
-from local_data_api.models import SqlParameter, Field
+from local_data_api.models import Field, SqlParameter
 
 
 class TestSqlParameter(TestCase):

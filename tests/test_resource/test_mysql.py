@@ -12,8 +12,7 @@ from local_data_api.exceptions import BadRequestException, InternalServerErrorEx
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources import SQLite
 from local_data_api.resources.resource import CONNECTION_POOL, RESOURCE_METAS, Resource, ResourceMeta, \
-    create_column_metadata, create_resource_arn, delete_connection, get_connection, get_resource, get_resource_class, \
-    register_resource, set_connection
+    create_column_metadata, create_resource_arn, get_resource, get_resource_class, register_resource
 
 DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
     'SQLite': {
@@ -140,32 +139,6 @@ class TestResourceFunction(TestCase):
                                         isCurrency=False, isSigned=False, label='name', name='name', nullable=None,
                                         precision=4, scale=5, tableName=None, type=None, typeName=None, schema_=None)
                          )
-
-
-class TestConnectionPool(TestCase):
-    def setUp(self) -> None:
-        CONNECTION_POOL.clear()
-
-    def test_set_connection(self) -> None:
-        connection = Mock()
-        set_connection('abc', connection)
-        self.assertEqual(CONNECTION_POOL['abc'], connection)
-
-    def test_get_connection(self) -> None:
-        connection = Mock()
-        CONNECTION_POOL['abc'] = connection
-        self.assertEqual(get_connection('abc'), connection)
-
-    def test_get_connection_notfound(self) -> None:
-        with self.assertRaises(BadRequestException):
-            get_connection('abc')
-
-    def test_delete_connection(self) -> None:
-        connection = Mock()
-        CONNECTION_POOL['abc'] = connection
-
-        delete_connection('abc')
-        self.assertTrue('abc' not in CONNECTION_POOL)
 
 
 class TestResource(TestCase):
