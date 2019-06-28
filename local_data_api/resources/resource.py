@@ -188,14 +188,14 @@ class Resource(ABC):
     def create_query(cls, sql: str, params: Dict[str, Any]) -> str:
         text_sql: TextClause = text(sql)
         kwargs = {'dialect': cls.DIALECT, 'compile_kwargs': {"literal_binds": True}}
-        return str(text_sql.bindparams(**params).compile(kwargs))
+        return str(text_sql.bindparams(**params).compile(**kwargs))
 
     @classmethod
     @abstractmethod
     def create_connection_maker(cls, host: Optional[str] = None, port: Optional[int] = None,
                                 user_name: Optional[str] = None, password: Optional[str] = None,
                                 engine_kwargs: Dict[str, Any] = None) -> ConnectionMaker:
-        pass
+        raise NotImplementedError
 
     @property
     def connection(self) -> Connection:

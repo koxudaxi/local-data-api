@@ -16,10 +16,11 @@ MYSQL_PORT: int = int(os.environ.get('MYSQL_PORT', '3306'))
 MYSQL_USER: str = os.environ.get('MYSQL_USER', 'root')
 MYSQL_PASSWORD: str = os.environ.get('MYSQL_PASSWORD', 'example')
 
-JAR_PATH: str = os.environ.get('JAR_PATH', '/usr/lib/jvm/mariadb-java-client.jar')
+MYSQL_JDBC_JAR_PATH: str = os.environ.get('MYSQL_JDBC_JAR_PATH', '/usr/lib/jvm/mariadb-java-client.jar')
 
 
 def setup():
     # TODO: implement to create custom resource
     register_secret(MYSQL_USER, MYSQL_PASSWORD, SECRET_ARN)
-    register_resource(RESOURCE_ARN, ENGINE, MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, {'JAR_PATH': JAR_PATH})
+    register_resource(RESOURCE_ARN, ENGINE, MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD,
+                      {'JAR_PATH': MYSQL_JDBC_JAR_PATH})

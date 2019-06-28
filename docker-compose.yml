@@ -9,6 +9,7 @@ services:
       MYSQL_PORT: 3306
       MYSQL_USER: root
       MYSQL_PASSWORD: example
+      MYSQL_JDBC_JAR_PATH: /usr/lib/jvm/mariadb-java-client.jar
       RESOURCE_ARN: dummy
       SECRET_ARN: dummy
     ports:

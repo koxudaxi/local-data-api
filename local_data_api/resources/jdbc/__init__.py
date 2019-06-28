@@ -15,7 +15,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker, Connection
 
 
-def attach_thread_to_jvm():
+def attach_thread_to_jvm():  # pragma: no cover
     "https://github.com/baztian/jaydebeapi/issues/14#issuecomment-261489331"
 
     import jpype
