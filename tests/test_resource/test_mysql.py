@@ -3,14 +3,14 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 from unittest import TestCase, mock
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from sqlalchemy.dialects import mysql
 
 from local_data_api import convert_value
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
-from local_data_api.resources import SQLite
+from local_data_api.resources import SQLite, MySQL
 from local_data_api.resources.resource import CONNECTION_POOL, RESOURCE_METAS, Resource, ResourceMeta, \
     create_column_metadata, create_resource_arn, get_resource, get_resource_class, register_resource
 
@@ -142,6 +142,14 @@ class TestResourceFunction(TestCase):
 
 
 class TestResource(TestCase):
+    def test_create_query(self):
+        with patch('local_data_api.resources.mysql.pymysql.connect') as mock_connect:
+            connection_maker = MySQL.create_connection_maker(host='127.0.0.1', port=3306, user_name='root',
+                                                             password='pass', engine_kwargs={'auto_commit': True})
+            connection_maker()
+        mock_connect.assert_called_once_with(auto_commit=True, host='127.0.0.1', password='pass',
+                                             port=3306, user='root')
+
     def test_create_query(self):
         query = DummyResource.create_query('insert into users values (:id, :name)', {'id': 1, 'name': 'abc'})
         self.assertEqual(query, "insert into users values (1, 'abc')")
