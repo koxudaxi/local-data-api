@@ -86,7 +86,7 @@ class TestResourceFunction(TestCase):
         with self.assertRaises(InternalServerErrorException):
             CONNECTION_POOL['dummy'] = connection_maker()
             get_resource('invalid', 'dummy', 'dummy')
-            del CONNECTION_POOL['dummy']
+        del CONNECTION_POOL['dummy']
 
         with mock.patch('local_data_api.resources.resource.get_secret') as mock_get_secret:
             with self.assertRaises(BadRequestException):
@@ -142,7 +142,7 @@ class TestResourceFunction(TestCase):
 
 
 class TestResource(TestCase):
-    def test_create_query(self):
+    def test_create_connection_maker(self):
         with patch('local_data_api.resources.mysql.pymysql.connect') as mock_connect:
             connection_maker = MySQL.create_connection_maker(host='127.0.0.1', port=3306, user_name='root',
                                                              password='pass', engine_kwargs={'auto_commit': True})
