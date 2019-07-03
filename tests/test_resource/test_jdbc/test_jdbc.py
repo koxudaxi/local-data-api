@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from unittest import TestCase
 
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 
 from local_data_api.models import ColumnMetadata
 from local_data_api.resources.jdbc import connection_maker, attach_thread_to_jvm, JDBC, create_column_metadata_set
