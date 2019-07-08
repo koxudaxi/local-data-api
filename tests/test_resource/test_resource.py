@@ -231,11 +231,24 @@ class TestResource(TestCase):
         connection_mock.cursor.side_effect = [cursor_mock]
         cursor_mock.description = ''
         cursor_mock.rowcount = 1
-        cursor_mock.lastrowid = 1
+        cursor_mock.lastrowid = 0
         dummy = DummyResource(connection_mock)
         self.assertEqual(dummy.execute("insert into users values (1, 'abc')"),
-                         ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]))
+                         ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[]))
         cursor_mock.execute.assert_called_once_with("insert into users values (1, 'abc')")
+        cursor_mock.close.assert_called_once_with()
+
+    def test_execute_insert_with_generated(self):
+        connection_mock = Mock()
+        cursor_mock = Mock()
+        connection_mock.cursor.side_effect = [cursor_mock]
+        cursor_mock.description = ''
+        cursor_mock.rowcount = 1
+        cursor_mock.lastrowid = 1
+        dummy = DummyResource(connection_mock)
+        self.assertEqual(dummy.execute("insert into users ('name') values ('abc')"),
+                         ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]))
+        cursor_mock.execute.assert_called_once_with("insert into users ('name') values ('abc')")
         cursor_mock.close.assert_called_once_with()
 
     def test_execute_insert_with_params(self):
@@ -307,7 +320,7 @@ class TestResource(TestCase):
     def test_execute_exception_1(self):
         connection_mock = Mock()
         cursor_mock = Mock()
-        error = Exception('errro')
+        error = Exception('error')
         error.orig = ['error_message']
         cursor_mock.execute.side_effect = error
         connection_mock.cursor.side_effect = [cursor_mock]
@@ -320,7 +333,7 @@ class TestResource(TestCase):
     def test_execute_exception_2(self):
         connection_mock = Mock()
         cursor_mock = Mock()
-        error = Exception('errro')
+        error = Exception('error')
         error_orig = Mock()
         error_orig.args = ['', 'error_message']
         error.orig = error_orig
@@ -328,6 +341,44 @@ class TestResource(TestCase):
         connection_mock.cursor.side_effect = [cursor_mock]
         dummy = DummyResource(connection_mock, transaction_id='123')
         with self.assertRaises(BadRequestException):
-            dummy.execute("select * from users")
+            try:
+                dummy.execute("select * from users")
+            except Exception as e:
+                self.assertEqual(e.message, 'error_message')
+                raise
+        cursor_mock.execute.assert_called_once_with('select * from users')
+        cursor_mock.close.assert_called_once_with()
+
+    def test_execute_exception_3(self):
+        connection_mock = Mock()
+        cursor_mock = Mock()
+        error = Exception('error')
+        inner_error = Exception('inner_error')
+        error.args = [inner_error]
+        cursor_mock.execute.side_effect = error
+        connection_mock.cursor.side_effect = [cursor_mock]
+        dummy = DummyResource(connection_mock, transaction_id='123')
+        with self.assertRaises(BadRequestException):
+            try:
+                dummy.execute("select * from users")
+            except Exception as e:
+                self.assertEqual(e.message, 'inner_error')
+                raise
+        cursor_mock.execute.assert_called_once_with('select * from users')
+        cursor_mock.close.assert_called_once_with()
+
+    def test_execute_exception_4(self):
+        connection_mock = Mock()
+        cursor_mock = Mock()
+        error = Exception('error')
+        cursor_mock.execute.side_effect = error
+        connection_mock.cursor.side_effect = [cursor_mock]
+        dummy = DummyResource(connection_mock, transaction_id='123')
+        with self.assertRaises(BadRequestException):
+            try:
+                dummy.execute("select * from users")
+            except Exception as e:
+                self.assertEqual(e.message, 'error')
+                raise
         cursor_mock.execute.assert_called_once_with('select * from users')
         cursor_mock.close.assert_called_once_with()

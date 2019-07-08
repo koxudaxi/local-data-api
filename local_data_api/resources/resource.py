@@ -262,13 +262,13 @@ class Resource(ABC):
                     return ExecuteStatementResponse(numberOfRecordsUpdated=rowcount,
                                                     generatedFields=generated_fields)
             finally:
-                if cursor:
+                if cursor: # pragma: no cover
                     cursor.close()
 
         except Exception as e:
             message: str = 'Unknown'
             if hasattr(e, 'orig') and hasattr(e.orig, 'args'):  # type: ignore
-                message = e.orig.args[1]  # type: ignore
+                message = str(e.orig.args[1])  # type: ignore
             elif len(getattr(e, 'args', [])):
-                message = e.args[0]
+                message = str(e.args[0])
             raise BadRequestException(message)
