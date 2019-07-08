@@ -262,7 +262,7 @@ class Resource(ABC):
                     return ExecuteStatementResponse(numberOfRecordsUpdated=rowcount,
                                                     generatedFields=generated_fields)
             finally:
-                if cursor: # pragma: no cover
+                if cursor:  # pragma: no cover
                     cursor.close()
 
         except Exception as e:

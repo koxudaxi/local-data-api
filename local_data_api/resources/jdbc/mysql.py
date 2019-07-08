@@ -58,7 +58,7 @@ class MySQLJDBC(JDBC):
                     return ExecuteStatementResponse(numberOfRecordsUpdated=rowcount,
                                                     generatedFields=generated_fields)
             finally:
-                if cursor: # pragma: no cover
+                if cursor:  # pragma: no cover
                     cursor.close()
 
         except jaydebeapi.DatabaseError as e:
