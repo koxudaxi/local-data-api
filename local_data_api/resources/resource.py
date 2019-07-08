@@ -269,6 +269,6 @@ class Resource(ABC):
             message: str = 'Unknown'
             if hasattr(e, 'orig') and hasattr(e.orig, 'args'):  # type: ignore
                 message = str(e.orig.args[1])  # type: ignore
-            elif len(getattr(e, 'args', [])):
+            elif len(getattr(e, 'args', [])) and e.args[0]:
                 message = str(e.args[0])
             raise BadRequestException(message)

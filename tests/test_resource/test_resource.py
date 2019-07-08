@@ -370,7 +370,7 @@ class TestResource(TestCase):
     def test_execute_exception_4(self):
         connection_mock = Mock()
         cursor_mock = Mock()
-        error = Exception('error')
+        error = Exception('')
         cursor_mock.execute.side_effect = error
         connection_mock.cursor.side_effect = [cursor_mock]
         dummy = DummyResource(connection_mock, transaction_id='123')
@@ -378,7 +378,7 @@ class TestResource(TestCase):
             try:
                 dummy.execute("select * from users")
             except Exception as e:
-                self.assertEqual(e.message, 'error')
+                self.assertEqual(e.message, 'Unknown')
                 raise
         cursor_mock.execute.assert_called_once_with('select * from users')
         cursor_mock.close.assert_called_once_with()
