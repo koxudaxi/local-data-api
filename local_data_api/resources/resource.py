@@ -209,7 +209,7 @@ class Resource(ABC):
 
     def close(self) -> None:
         self.connection.close()
-        if self.connection and self.transaction_id in CONNECTION_POOL:
+        if self.transaction_id in CONNECTION_POOL:
             delete_connection(self.transaction_id)
 
     def use_database(self, database_name: str) -> None:
@@ -262,13 +262,13 @@ class Resource(ABC):
                     return ExecuteStatementResponse(numberOfRecordsUpdated=rowcount,
                                                     generatedFields=generated_fields)
             finally:
-                if cursor:
+                if cursor:  # pragma: no cover
                     cursor.close()
 
         except Exception as e:
             message: str = 'Unknown'
             if hasattr(e, 'orig') and hasattr(e.orig, 'args'):  # type: ignore
-                message = e.orig.args[1]  # type: ignore
-            elif len(getattr(e, 'args', [])):
-                message = e.args[0]
+                message = str(e.orig.args[1])  # type: ignore
+            elif len(getattr(e, 'args', [])) and e.args[0]:
+                message = str(e.args[0])
             raise BadRequestException(message)

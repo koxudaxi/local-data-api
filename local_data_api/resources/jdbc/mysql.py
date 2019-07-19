@@ -58,7 +58,7 @@ class MySQLJDBC(JDBC):
                     return ExecuteStatementResponse(numberOfRecordsUpdated=rowcount,
                                                     generatedFields=generated_fields)
             finally:
-                if cursor:
+                if cursor:  # pragma: no cover
                     cursor.close()
 
         except jaydebeapi.DatabaseError as e:
@@ -67,6 +67,6 @@ class MySQLJDBC(JDBC):
                 message = e.args[0]
                 if len(getattr(e.args[0], 'args', [])):
                     message = e.args[0].args[0]
-                    if getattr(e.args[0].args[0], 'cause'):
+                    if getattr(e.args[0].args[0], 'cause', None):
                         message = e.args[0].args[0].cause.message
             raise BadRequestException(str(message))
