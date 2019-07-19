@@ -44,7 +44,7 @@ def rollback_transaction(request: RollbackTransactionRequest) -> RollbackTransac
     resource.rollback()
     resource.close()
 
-    return RollbackTransactionResponse(transactionStatus=TransactionStatus.transaction_committed)
+    return RollbackTransactionResponse(transactionStatus=TransactionStatus.rollback_complete)
 
 
 @app.post("/Execute")
