@@ -209,7 +209,7 @@ class Resource(ABC):
 
     def close(self) -> None:
         self.connection.close()
-        if self.connection and self.transaction_id in CONNECTION_POOL:
+        if self.transaction_id in CONNECTION_POOL:
             delete_connection(self.transaction_id)
 
     def use_database(self, database_name: str) -> None:

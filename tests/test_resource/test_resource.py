@@ -169,6 +169,11 @@ class TestConnectionPool(TestCase):
 
 
 class TestResource(TestCase):
+    class TestResourceFunction(TestCase):
+        def setUp(self) -> None:
+            RESOURCE_METAS.clear()
+            CONNECTION_POOL.clear()
+
     def test_create_query(self):
         query = DummyResource.create_query('insert into users values (:id, :name)', {'id': 1, 'name': 'abc'})
         self.assertEqual(query, "insert into users values (1, 'abc')")
@@ -224,6 +229,22 @@ class TestResource(TestCase):
             dummy.close()
             connection_mock.close.assert_called_once_with()
             delete_connection_mock.assert_called_once_with('abc')
+
+    def test_close(self):
+        connection_mock = Mock()
+        dummy = DummyResource(connection_mock, 'abc')
+        with mock.patch('local_data_api.resources.resource.delete_connection') as delete_connection_mock, \
+                mock.patch('local_data_api.resources.resource.CONNECTION_POOL', {'abc': ''}):
+            dummy.close()
+            connection_mock.close.assert_called_once_with()
+            delete_connection_mock.assert_called_once_with('abc')
+
+    def test_close_with_empty_connection_pool(self):
+        connection_mock = Mock()
+        dummy = DummyResource(connection_mock, 'abc')
+        with mock.patch('local_data_api.resources.resource.CONNECTION_POOL', {}):
+            dummy.close()
+            connection_mock.close.assert_called_once_with()
 
     def test_execute_insert(self):
         connection_mock = Mock()
