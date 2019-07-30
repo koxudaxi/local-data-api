@@ -140,9 +140,9 @@ def create_connection_maker(
 
 
 def create_connection(resource_arn: str, **connection_kwargs: Any) -> Connection:
-    return RESOURCE_METAS[resource_arn].connection_maker(
+    return RESOURCE_METAS[resource_arn].connection_maker(  # type: ignore
         **connection_kwargs
-    )  # type: ignore
+    )
 
 
 def get_connection(transaction_id: str) -> Connection:

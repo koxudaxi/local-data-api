@@ -1,5 +1,6 @@
 isort
 black
 pytest
+pytest-cov
 mypy==0.701
 codecov==2.0.15
