@@ -15,7 +15,7 @@ install:
 cache: pip
 
 script:
-- flake8 --max-line-length 119 local_data_api
+- flake8 --max-line-length 120 local_data_api
 - mypy --ignore-missing-imports local_data_api
 - nosetests -v --with-coverage --cover-package=local_data_api --cover-erase tests
 - codecov
