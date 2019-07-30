@@ -8,9 +8,7 @@ services:
   - docker
 
 install:
-- pip install -r requirements.txt
-- pip install -r requirements-test.txt
-- pip install mkdocs mkdocs-material
+- pip install ".[all]"
 
 cache: pip
 
