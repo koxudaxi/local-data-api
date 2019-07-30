@@ -229,6 +229,20 @@ class TestResource(TestCase):
         )
         self.assertEqual(query, "insert into users values (1, 'abc')")
 
+    def test_create_query_invalid_param(self):
+        with self.assertRaises(BadRequestException) as cm:
+            DummyResource.create_query(
+                'insert into users values (:id, :name)', {'id': 1}
+            )
+        self.assertEqual(cm.exception.message, 'Cannot find parameter: name')
+
+    def test_create_query_undefined_param(self):
+        query = DummyResource.create_query(
+            'insert into users values (:id, :name)',
+            {'id': 1, 'name': 'abc', 'undefined': 'abc'},
+        )
+        self.assertEqual(query, "insert into users values (1, 'abc')")
+
     def test_transaction_id(self):
         connection_mock = Mock()
         dummy = DummyResource(connection_mock, transaction_id='123')

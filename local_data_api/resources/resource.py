@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import random
+import re
 import string
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from hashlib import sha1
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Pattern, Tuple, Type, Union
 
 from local_data_api import convert_value
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
@@ -13,7 +14,11 @@ from local_data_api.models import ColumnMetadata, ExecuteStatementResponse
 from local_data_api.secret_manager import Secret, get_secret
 from sqlalchemy import text
 from sqlalchemy.engine import Dialect
+from sqlalchemy.exc import ArgumentError, CompileError
 from sqlalchemy.sql.elements import TextClause
+
+INVALID_PARAMETER_MESSAGE: str = r"Bind parameter '([^\']+)' without a renderable value not allowed here."
+UNDEFINED_PARAMETER_MESSAGE: str = r"This text\(\) construct doesn't define a bound parameter named '([^\']+)'"
 
 TRANSACTION_ID_CHARACTERS: str = string.ascii_letters + '/=+'
 TRANSACTION_ID_LENGTH: int = 184
@@ -218,7 +223,23 @@ class Resource(ABC):
     def create_query(cls, sql: str, params: Dict[str, Any]) -> str:
         text_sql: TextClause = text(sql)
         kwargs = {'dialect': cls.DIALECT, 'compile_kwargs': {"literal_binds": True}}
-        return str(text_sql.bindparams(**params).compile(**kwargs))
+        try:
+            return str(text_sql.bindparams(**params).compile(**kwargs))
+        except CompileError as e:
+            invalid_param_match = re.match(INVALID_PARAMETER_MESSAGE, e.args[0])
+            if invalid_param_match:  # pragma: no cover
+                raise BadRequestException(
+                    message=f'Cannot find parameter: {invalid_param_match.group(1)}'
+                )
+            raise  # pragma: no cover
+        except ArgumentError as e:
+            undefined_param_match = re.match(UNDEFINED_PARAMETER_MESSAGE, e.args[0])
+            if undefined_param_match:  # pragma: no cover
+                undefined_param: str = undefined_param_match.group(1)
+                return cls.create_query(
+                    sql, {k: v for k, v in params.items() if k != undefined_param}
+                )
+            raise  # pragma: no cover
 
     @classmethod
     @abstractmethod
