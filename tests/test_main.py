@@ -3,7 +3,11 @@ from unittest.mock import Mock
 
 from local_data_api.main import app
 from local_data_api.resources import MySQL, SQLite
-from local_data_api.resources.resource import CONNECTION_POOL, RESOURCE_METAS, ResourceMeta
+from local_data_api.resources.resource import (
+    CONNECTION_POOL,
+    RESOURCE_METAS,
+    ResourceMeta,
+)
 from starlette.testclient import TestClient
 
 client = TestClient(app)
