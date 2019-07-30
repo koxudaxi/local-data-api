@@ -28,6 +28,10 @@ class SqlParameter(BaseModel):
         return None
 
 
+class SqlParameters(BaseModel):
+    __root__: List[SqlParameter]
+
+
 class ExecuteSqlRequest(BaseModel):
     awsSecretStoreArn: str
     dbClusterOrInstanceArn: str
@@ -43,7 +47,7 @@ class ExecuteStatementRequests(BaseModel):
     database: Optional[str]
     continueAfterTimeout: Optional[bool]
     includeResultMetadata: Optional[bool]
-    parameters: Optional[List[SqlParameter]]
+    parameters: Optional[SqlParameters]
     schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
 
@@ -91,6 +95,7 @@ class CommitTransactionRequest(BaseModel):
 
 class TransactionStatus(Enum):
     transaction_committed: str = 'Transaction Committed'
+    rollback_complete: str = 'Rollback Complete'
 
 
 class CommitTransactionResponse(BaseModel):
@@ -114,7 +119,7 @@ class BatchExecuteStatementRequests(BaseModel):
     database: Optional[str]
     continueAfterTimeout: Optional[bool]
     includeResultMetadata: Optional[bool]
-    parameterSets: Optional[List[List[SqlParameter]]]
+    parameterSets: Optional[List[SqlParameters]]
     schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
 

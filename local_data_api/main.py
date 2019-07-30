@@ -22,59 +22,58 @@ def execute_sql(request: ExecuteSqlRequest):
     raise NotImplementedError
 
 
-@app.post("/BeginTransaction")
-def begin_statement(request: BeginTransactionRequest) -> BeginTransactionResponse:
+@app.post("/BeginTransaction", response_model=BeginTransactionResponse)
+def begin_statement(request: BeginTransactionRequest):
     resource: Resource = get_resource(request.resourceArn, request.secretArn)
     transaction_id: str = resource.begin()
 
     return BeginTransactionResponse(transactionId=transaction_id)
 
 
-@app.post("/CommitTransaction")
-def commit_transaction(request: CommitTransactionRequest) -> CommitTransactionResponse:
+@app.post("/CommitTransaction", response_model=CommitTransactionResponse)
+def commit_transaction(request: CommitTransactionRequest):
     resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
     resource.commit()
     resource.close()
     return CommitTransactionResponse(transactionStatus=TransactionStatus.transaction_committed)
 
 
-@app.post("/RollbackTransaction")
-def rollback_transaction(request: RollbackTransactionRequest) -> RollbackTransactionResponse:
+@app.post("/RollbackTransaction", response_model=RollbackTransactionResponse)
+def rollback_transaction(request: RollbackTransactionRequest):
     resource: Resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
     resource.rollback()
     resource.close()
 
-    return RollbackTransactionResponse(transactionStatus=TransactionStatus.transaction_committed)
+    return RollbackTransactionResponse(transactionStatus=TransactionStatus.rollback_complete)
 
 
-@app.post("/Execute")
-def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResponse:
+@app.post("/Execute", response_model=ExecuteStatementResponse, response_model_skip_defaults=True)
+def execute_statement(request: ExecuteStatementRequests):
     resource: Optional[Resource] = None
     try:
         resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
 
         if request.parameters:
             parameters: Optional[Dict[str, Any]] = {parameter.name: parameter.valid_value
-                                                    for parameter in request.parameters
+                                                    for parameter in request.parameters.__root__
                                                     }
         else:
             parameters = None
 
-        response: ExecuteStatementResponse = resource.execute(request.sql, parameters, request.database)
-
-        if request.includeResultMetadata:
-            response.columnMetadata = []
+        response: ExecuteStatementResponse = resource.execute(
+            request.sql, parameters, request.database,
+            include_result_metadata=request.includeResultMetadata or False)
 
         if not resource.transaction_id:
             resource.commit()
-        return response
+        return response.dict(skip_defaults=True)
     finally:
         if resource and not resource.transaction_id:
             resource.close()
 
 
-@app.post("/BatchExecute")
-def batch_execute_statement(request: BatchExecuteStatementRequests) -> BatchExecuteStatementResponse:
+@app.post("/BatchExecute", response_model=BatchExecuteStatementResponse, response_model_skip_defaults=True)
+def batch_execute_statement(request: BatchExecuteStatementRequests):
     resource: Optional[Resource] = None
     try:
         resource = get_resource(request.resourceArn, request.secretArn, request.transactionId)
@@ -85,16 +84,18 @@ def batch_execute_statement(request: BatchExecuteStatementRequests) -> BatchExec
             response: BatchExecuteStatementResponse = BatchExecuteStatementResponse(updateResults=update_results)
         else:
             for parameter_set in request.parameterSets:
-                parameters: Dict[str, Any] = {parameter.name: parameter.valid_value for parameter in parameter_set}
+                parameters: Dict[str, Any] = {parameter.name: parameter.valid_value
+                                              for parameter in parameter_set.__root__}
                 result: ExecuteStatementResponse = resource.execute(request.sql, parameters, request.database)
 
-                update_results.append(UpdateResult(generatedFields=result.generatedFields or []))
+                if result.generatedFields:
+                    update_results.append(UpdateResult(generatedFields=result.generatedFields))
 
             response = BatchExecuteStatementResponse(updateResults=update_results)
 
         if not resource.transaction_id:
             resource.commit()
-        return response
+        return response.dict(skip_defaults=True)
     finally:
         if resource and not resource.transaction_id:
             resource.close()
