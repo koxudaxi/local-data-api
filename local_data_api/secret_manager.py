@@ -16,12 +16,17 @@ class Secret:
 SECRETS: Dict[str, Secret] = {}
 
 
-def create_secret_arn(region_name: str = 'us-east-1', account: str = '123456789012') -> str:
+def create_secret_arn(
+    region_name: str = 'us-east-1', account: str = '123456789012'
+) -> str:
     return f'arn:aws:secretsmanager:{region_name}:{account}:secret:local-data-api{sha1().hexdigest()}'
 
 
-def register_secret(user_name: Optional[str] = None, password: Optional[str] = None,
-                    secret_arn: Optional[str] = None) -> str:
+def register_secret(
+    user_name: Optional[str] = None,
+    password: Optional[str] = None,
+    secret_arn: Optional[str] = None,
+) -> str:
     if not secret_arn:
         secret_arn = create_secret_arn()
 
@@ -33,6 +38,8 @@ def register_secret(user_name: Optional[str] = None, password: Optional[str] = N
 def get_secret(secret_arn: str) -> Secret:
     if secret_arn in SECRETS:
         return SECRETS[secret_arn]
-    raise BadRequestException(f'Error fetching secret {secret_arn} : Secrets Manager can’t find the specified '
-                              f'secret. (Service: AWSSecretsManager; Status Code: 400; Error Code: '
-                              f'ResourceNotFoundException; Request ID:  00000000-1111-2222-3333-44444444444)')
+    raise BadRequestException(
+        f'Error fetching secret {secret_arn} : Secrets Manager can’t find the specified '
+        f'secret. (Service: AWSSecretsManager; Status Code: 400; Error Code: '
+        f'ResourceNotFoundException; Request ID:  00000000-1111-2222-3333-44444444444)'
+    )

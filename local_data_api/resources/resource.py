@@ -5,16 +5,15 @@ import string
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from hashlib import sha1
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Type
-
-from sqlalchemy import text
-from sqlalchemy.engine import Dialect
-from sqlalchemy.sql.elements import TextClause
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 from local_data_api import convert_value
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse
 from local_data_api.secret_manager import Secret, get_secret
+from sqlalchemy import text
+from sqlalchemy.engine import Dialect
+from sqlalchemy.sql.elements import TextClause
 
 TRANSACTION_ID_CHARACTERS: str = string.ascii_letters + '/=+'
 TRANSACTION_ID_LENGTH: int = 184
@@ -32,42 +31,42 @@ if TYPE_CHECKING:  # pragma: no cover
     connect = Callable
 
     class Connection:
-        def close(self):
+        def close(self) -> None:
             pass
 
-        def commit(self):
+        def commit(self) -> None:
             pass
 
-        def rollback(self):
+        def rollback(self) -> None:
             pass
 
         def cursor(self) -> Cursor:
             return Cursor()
 
     class Cursor:
-        def execute(self, *args, **kwargs):
+        def execute(self, *args: Any, **kwargs: Any) -> Any:
             pass
 
         def fetchone(self) -> Tuple:
             pass
 
-        def fetchmany(self, _) -> Tuple[Tuple]:
+        def fetchmany(self, _: Any) -> Tuple[Tuple]:
             pass
 
         def fetchall(self) -> Tuple[Tuple]:
             pass
 
-        def close(self):
+        def close(self) -> None:
             pass
 
         @property
         def description(self) -> Tuple[Tuple]:
             return ((),)
 
-    ConnectionMaker = Callable[..., Connection]
+    ConnectionMaker = Callable[[], Connection]
 
 
-def set_connection(transaction_id: str, connection: Connection):
+def set_connection(transaction_id: str, connection: Connection) -> None:
     CONNECTION_POOL[transaction_id] = connection
 
 
@@ -90,37 +89,60 @@ def register_resource_type(resource: Type[Resource]) -> Type[Resource]:
     return resource
 
 
-def get_resource_class(engine_name: str):
+def get_resource_class(engine_name: str) -> Type[Resource]:
     try:
         return RESOURCE_CLASS[engine_name]
     except KeyError:
         raise Exception(f'Invalid engine name: {engine_name}')
 
 
-def create_resource_arn(region_name: str = 'us-east-1', account: str = '123456789012') -> str:
+def create_resource_arn(
+    region_name: str = 'us-east-1', account: str = '123456789012'
+) -> str:
     return f'arn:aws:rds:{region_name}:{account}:cluster:local-data-api{sha1().hexdigest()}'
 
 
-def register_resource(resource_arn: str, engine_name: str, host: Optional[str], port: Optional[int],
-                      user_name: Optional[str] = None, password: Optional[str] = None,
-                      engine_kwargs: Optional[Dict[str, Any]] = None) -> None:
+def register_resource(
+    resource_arn: str,
+    engine_name: str,
+    host: Optional[str],
+    port: Optional[int],
+    user_name: Optional[str] = None,
+    password: Optional[str] = None,
+    engine_kwargs: Optional[Dict[str, Any]] = None,
+) -> None:
     resource_meta = ResourceMeta(
         resource_type=get_resource_class(engine_name),
-        connection_maker=create_connection_maker(engine_name, host, port, user_name, password, engine_kwargs),
-        host=host, port=port, user_name=user_name, password=password)
+        connection_maker=create_connection_maker(
+            engine_name, host, port, user_name, password, engine_kwargs
+        ),
+        host=host,
+        port=port,
+        user_name=user_name,
+        password=password,
+    )
     RESOURCE_METAS[resource_arn] = resource_meta
 
 
-def create_connection_maker(engine_name: str, host: Optional[str], port: Optional[int],
-                            user_name: Optional[str] = None, password: Optional[str] = None,
-                            engine_kwargs: Optional[Dict[str, Any]] = None) -> ConnectionMaker:
+def create_connection_maker(
+    engine_name: str,
+    host: Optional[str],
+    port: Optional[int],
+    user_name: Optional[str] = None,
+    password: Optional[str] = None,
+    engine_kwargs: Optional[Dict[str, Any]] = None,
+) -> ConnectionMaker:
     resource_class: Type[Resource] = get_resource_class(engine_name)
 
-    return resource_class.create_connection_maker(host, port, user_name, password, engine_kwargs)
+    return resource_class.create_connection_maker(
+        host, port, user_name, password, engine_kwargs
+    )
 
 
 def create_connection(resource_arn: str, **connection_kwargs: Any) -> Connection:
-    return RESOURCE_METAS[resource_arn].connection_maker(**connection_kwargs)
+    return RESOURCE_METAS[resource_arn].connection_maker(  # type: ignore
+        **connection_kwargs
+    )
 
 
 def get_connection(transaction_id: str) -> Connection:
@@ -129,7 +151,9 @@ def get_connection(transaction_id: str) -> Connection:
     raise BadRequestException('Invalid transaction ID')
 
 
-def get_resource(resource_arn: str, secret_arn: str, transaction_id: Optional[str] = None) -> Resource:
+def get_resource(
+    resource_arn: str, secret_arn: str, transaction_id: Optional[str] = None
+) -> Resource:
     if resource_arn not in RESOURCE_METAS:
         if transaction_id in CONNECTION_POOL:
             raise InternalServerErrorException
@@ -156,23 +180,31 @@ def get_resource(resource_arn: str, secret_arn: str, transaction_id: Optional[st
     return meta.resource_type(connection, transaction_id)
 
 
-def create_column_metadata(name: str, type_code: int, display_size: Optional[int], internal_size: int, precision: int,
-                           scale: int, null_ok: bool) -> ColumnMetadata:
-    return ColumnMetadata(arrayBaseColumnType=0,
-                          isAutoIncrement=False,
-                          isCaseSensitive=False,
-                          isCurrency=False,
-                          isSigned=False,
-                          label=name,
-                          name=name,
-                          nullabl=1 if null_ok else 0,
-                          precision=precision,
-                          scale=scale,
-                          schema_=None,
-                          tableName=None,
-                          type=None,
-                          typeName=None
-                          )
+def create_column_metadata(
+    name: str,
+    type_code: int,
+    display_size: Optional[int],
+    internal_size: int,
+    precision: int,
+    scale: int,
+    null_ok: bool,
+) -> ColumnMetadata:
+    return ColumnMetadata(
+        arrayBaseColumnType=0,
+        isAutoIncrement=False,
+        isCaseSensitive=False,
+        isCurrency=False,
+        isSigned=False,
+        label=name,
+        name=name,
+        nullabl=1 if null_ok else 0,
+        precision=precision,
+        scale=scale,
+        schema_=None,
+        tableName=None,
+        type=None,
+        typeName=None,
+    )
 
 
 class Resource(ABC):
@@ -190,9 +222,14 @@ class Resource(ABC):
 
     @classmethod
     @abstractmethod
-    def create_connection_maker(cls, host: Optional[str] = None, port: Optional[int] = None,
-                                user_name: Optional[str] = None, password: Optional[str] = None,
-                                engine_kwargs: Dict[str, Any] = None) -> ConnectionMaker:
+    def create_connection_maker(
+        cls,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        user_name: Optional[str] = None,
+        password: Optional[str] = None,
+        engine_kwargs: Dict[str, Any] = None,
+    ) -> ConnectionMaker:
         raise NotImplementedError
 
     @property
@@ -205,7 +242,10 @@ class Resource(ABC):
 
     @staticmethod
     def create_transaction_id() -> str:
-        return ''.join(random.choice(TRANSACTION_ID_CHARACTERS) for _ in range(TRANSACTION_ID_LENGTH))
+        return ''.join(
+            random.choice(TRANSACTION_ID_CHARACTERS)
+            for _ in range(TRANSACTION_ID_LENGTH)
+        )
 
     def close(self) -> None:
         self.connection.close()
@@ -227,9 +267,13 @@ class Resource(ABC):
     def rollback(self) -> None:
         self.connection.rollback()
 
-    def execute(self, sql: str, params: Optional[Dict[str, Any]] = None,
-                database_name: Optional[str] = None,
-                include_result_metadata: bool = False) -> ExecuteStatementResponse:
+    def execute(
+        self,
+        sql: str,
+        params: Optional[Dict[str, Any]] = None,
+        database_name: Optional[str] = None,
+        include_result_metadata: bool = False,
+    ) -> ExecuteStatementResponse:
 
         try:
             if database_name:
@@ -244,14 +288,17 @@ class Resource(ABC):
                     cursor.execute(str(text(sql)))
 
                 if cursor.description:
-                    response: ExecuteStatementResponse = ExecuteStatementResponse(numberOfRecordsUpdated=0,
-                                                                                  records=[
-                                                                                      [convert_value(column) for column
-                                                                                       in row]
-                                                                                      for row in cursor.fetchall()
-                                                                                  ])
+                    response: ExecuteStatementResponse = ExecuteStatementResponse(
+                        numberOfRecordsUpdated=0,
+                        records=[
+                            [convert_value(column) for column in row]
+                            for row in cursor.fetchall()
+                        ],
+                    )
                     if include_result_metadata:
-                        response.columnMetadata = [create_column_metadata(*d) for d in cursor.description]
+                        response.columnMetadata = [
+                            create_column_metadata(*d) for d in cursor.description
+                        ]
                     return response
                 else:
                     rowcount: int = cursor.rowcount
@@ -259,8 +306,10 @@ class Resource(ABC):
                     generated_fields: List[Dict[str, Any]] = []
                     if last_generated_id > 0:
                         generated_fields.append(convert_value(last_generated_id))
-                    return ExecuteStatementResponse(numberOfRecordsUpdated=rowcount,
-                                                    generatedFields=generated_fields)
+                    return ExecuteStatementResponse(
+                        numberOfRecordsUpdated=rowcount,
+                        generatedFields=generated_fields,
+                    )
             finally:
                 if cursor:  # pragma: no cover
                     cursor.close()

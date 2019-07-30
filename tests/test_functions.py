@@ -14,7 +14,9 @@ class TestLocalDataAPIFunction(TestCase):
         self.assertDictEqual(convert_value(1.23), {'doubleValue': 1.23})
         self.assertDictEqual(convert_value(True), {'booleanValue': True})
         self.assertDictEqual(convert_value(False), {'booleanValue': False})
-        self.assertDictEqual(convert_value(b'bytes'), {'blobValue': b64encode(b'bytes')})
+        self.assertDictEqual(
+            convert_value(b'bytes'), {'blobValue': b64encode(b'bytes')}
+        )
         self.assertDictEqual(convert_value(None), {'isNull': True})
 
         class Dummy:

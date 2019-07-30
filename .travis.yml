@@ -8,19 +8,18 @@ services:
   - docker
 
 install:
-- pip install -r requirements.txt
-- pip install -r requirements-test.txt
-- pip install mkdocs mkdocs-material
+- pip install ".[all]"
 
 cache: pip
 
 script:
-- flake8 --max-line-length 120 local_data_api
-- mypy --ignore-missing-imports local_data_api
-- nosetests -v --with-coverage --cover-package=local_data_api --cover-erase tests
-- codecov
+- black local_data_api tests --check --skip-string-normalization
+- mypy --ignore-missing-imports --disallow-untyped-defs local_data_api
+- isort --recursive --check-only -w 88 --combine-as --thirdparty local_data_api local_data_api tests -m 3 -tc
+- pytest --cov=local_data_api tests
 - cp README.md docs/index.md && mkdocs build --verbose --clean --strict
-
+after_success:
+- codecov
 deploy:
   - provider: script
     script: bash scripts/push-image.sh

@@ -13,7 +13,11 @@ RUN apk add --no-cache libstdc++ openjdk8-jre g++ libc-dev curl \
         https://downloads.mariadb.com/Connectors/java/connector-java-${MARIADB_CLIENT_VERSION}/mariadb-java-client-${MARIADB_CLIENT_VERSION}.jar \
      &&  apk del g++ libc-dev curl
 
-COPY requirements.txt /
-RUN pip install -r /requirements.txt
+COPY setup.py /app
+COPY setup.cfg /app
+COPY LICENSE /app
+WORKDIR /app
+
+RUN pip install .
 
 COPY local_data_api /app/local_data_api
