@@ -65,15 +65,34 @@ $ docker-compose up -d
 $ ipython
 ```
 ```python
-In [1]: client = boto3.client('rds-data', endpoint_url='http://127.0.0.1:8080', aws_access_key_id='aaa',  aws_secret_access_key='bbb') 
+In [1]: import boto3; client = boto3.client('rds-data', endpoint_url='http://127.0.0.1:8080', aws_access_key_id='aaa',  aws_secret_access_key='bbb') 
 ```
 
 3. execute a sql statement
 ```python
-In [2]: client.execute_statement(resourceArn='dummy', secretArn='dummy', sql='select * from users', database='test')
+In [2]: client.execute_statement(resourceArn='dummy', secretArn='dummy', sql='show databases', database='test')
 ```
 
 4. local-data-api return the result from a MySQL Server.
+```python
+Out[2]: {'ResponseMetadata': {'HTTPStatusCode': 200,
+ 'HTTPHeaders': {'date': 'Sun, 09 Jun 2019 18:35:22 GMT',
+ 'server': 'uvicorn',
+ 'content-length': '492',
+ 'content-type': 'application/json'},
+ 'RetryAttempts': 0},
+ 'numberOfRecordsUpdated': 0,
+ 'records': [[{'stringValue': 'information_schema'}],
+  [{'stringValue': 'mysql'}],
+  [{'stringValue': 'performance_schema'}],
+  [{'stringValue': 'sys'}],
+  [{'stringValue': 'test'}]]}
+```
+
+If a table has some records, then the local-data-api cant run `select`
+```python
+In [3]: client.execute_statement(resourceArn='dummy', secretArn='dummy', sql='select * from users', database='test')
+```
 ```python
 Out[3]: {'ResponseMetadata': {'HTTPStatusCode': 200,
  'HTTPHeaders': {'date': 'Sun, 09 Jun 2019 18:35:22 GMT',
