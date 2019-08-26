@@ -8,9 +8,8 @@ from dataclasses import dataclass
 from hashlib import sha1
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Pattern, Tuple, Type, Union
 
-from local_data_api import convert_value
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
-from local_data_api.models import ColumnMetadata, ExecuteStatementResponse
+from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.secret_manager import Secret, get_secret
 from sqlalchemy import text
 from sqlalchemy.engine import Dialect
@@ -312,7 +311,7 @@ class Resource(ABC):
                     response: ExecuteStatementResponse = ExecuteStatementResponse(
                         numberOfRecordsUpdated=0,
                         records=[
-                            [convert_value(column) for column in row]
+                            [Field.from_value(column) for column in row]
                             for row in cursor.fetchall()
                         ],
                     )
@@ -324,9 +323,9 @@ class Resource(ABC):
                 else:
                     rowcount: int = cursor.rowcount
                     last_generated_id: int = cursor.lastrowid
-                    generated_fields: List[Dict[str, Any]] = []
+                    generated_fields: List[Field] = []
                     if last_generated_id > 0:
-                        generated_fields.append(convert_value(last_generated_id))
+                        generated_fields.append(Field.from_value(last_generated_id))
                     return ExecuteStatementResponse(
                         numberOfRecordsUpdated=rowcount,
                         generatedFields=generated_fields,

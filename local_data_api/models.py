@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from base64 import b64encode
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
@@ -13,6 +14,23 @@ class Field(BaseModel):
     isNull: Optional[bool]
     longValue: Optional[int]
     stringValue: Optional[str]
+
+    @classmethod
+    def from_value(cls, value: Any) -> Field:
+        if isinstance(value, bool):
+            return cls(booleanValue=value)
+        elif isinstance(value, str):
+            return cls(stringValue=value)
+        elif isinstance(value, int):
+            return cls(longValue=value)
+        elif isinstance(value, float):
+            return cls(doubleValue=value)
+        elif isinstance(value, bytes):
+            return cls(blobValue=b64encode(value))
+        elif value is None:
+            return cls(isNull=True)
+        else:
+            raise Exception(f'unsupported type {type(value)}: {value} ')
 
 
 class SqlParameter(BaseModel):
@@ -72,7 +90,7 @@ class ColumnMetadata(BaseModel):
 class ExecuteStatementResponse(BaseModel):
     numberOfRecordsUpdated: int
     generatedFields: Optional[List[Field]]
-    records: Optional[List[List[Dict[str, Any]]]]
+    records: Optional[List[List[Field]]]
     columnMetadata: Optional[List[ColumnMetadata]]
 
 
