@@ -34,7 +34,9 @@ class TestField(TestCase):
         self.assertEqual(Field.from_value(1.23), Field(doubleValue=1.23))
         self.assertEqual(Field.from_value(True), Field(booleanValue=True))
         self.assertEqual(Field.from_value(False), Field(booleanValue=False))
-        self.assertEqual(Field.from_value(b'bytes'), Field(blobValue=b64encode(b'bytes')))
+        self.assertEqual(
+            Field.from_value(b'bytes'), Field(blobValue=b64encode(b'bytes'))
+        )
         self.assertEqual(Field.from_value(None), Field(isNull=True))
 
         class Dummy:
