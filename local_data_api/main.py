@@ -70,9 +70,9 @@ def rollback_transaction(
 @app.post(
     "/Execute",
     response_model=ExecuteStatementResponse,
-    response_model_skip_defaults=True,
+    response_model_skip_defaults=True
 )
-def execute_statement(request: ExecuteStatementRequests) -> Dict:
+def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResponse:
     resource: Optional[Resource] = None
     try:
         resource = get_resource(
@@ -96,7 +96,7 @@ def execute_statement(request: ExecuteStatementRequests) -> Dict:
 
         if not resource.transaction_id:
             resource.commit()
-        return response.dict(skip_defaults=True)
+        return response
     finally:
         if resource and not resource.transaction_id:
             resource.close()
@@ -107,7 +107,7 @@ def execute_statement(request: ExecuteStatementRequests) -> Dict:
     response_model=BatchExecuteStatementResponse,
     response_model_skip_defaults=True,
 )
-def batch_execute_statement(request: BatchExecuteStatementRequests) -> Dict:
+def batch_execute_statement(request: BatchExecuteStatementRequests) -> BatchExecuteStatementResponse:
     resource: Optional[Resource] = None
     try:
         resource = get_resource(
@@ -139,7 +139,7 @@ def batch_execute_statement(request: BatchExecuteStatementRequests) -> Dict:
 
         if not resource.transaction_id:
             resource.commit()
-        return response.dict(skip_defaults=True)
+        return response
     finally:
         if resource and not resource.transaction_id:
             resource.close()
