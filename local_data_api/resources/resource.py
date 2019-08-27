@@ -201,7 +201,7 @@ def create_column_metadata(
         isSigned=False,
         label=name,
         name=name,
-        nullabl=1 if null_ok else 0,
+        nullable=1 if null_ok else 0,
         precision=precision,
         scale=scale,
         schema_=None,
