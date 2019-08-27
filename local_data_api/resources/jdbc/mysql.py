@@ -1,9 +1,8 @@
 from typing import Any, Dict, List, Optional
 
 import jaydebeapi
-from local_data_api import convert_value
 from local_data_api.exceptions import BadRequestException
-from local_data_api.models import ExecuteStatementResponse
+from local_data_api.models import ExecuteStatementResponse, Field
 from local_data_api.resources.jdbc import JDBC, create_column_metadata_set
 from local_data_api.resources.resource import register_resource_type
 from sqlalchemy import text
@@ -46,7 +45,7 @@ class MySQLJDBC(JDBC):
                     response = ExecuteStatementResponse(
                         numberOfRecordsUpdated=0,
                         records=[
-                            [convert_value(column) for column in row]
+                            [Field.from_value(column) for column in row]
                             for row in cursor.fetchall()
                         ],
                     )
@@ -57,9 +56,9 @@ class MySQLJDBC(JDBC):
                 else:
                     rowcount: int = cursor.rowcount
                     last_generated_id: int = self.last_generated_id(cursor)
-                    generated_fields: List[Dict[str, Any]] = []
+                    generated_fields: List[Field] = []
                     if last_generated_id > 0:
-                        generated_fields.append(convert_value(last_generated_id))
+                        generated_fields.append(Field.from_value(last_generated_id))
                     return ExecuteStatementResponse(
                         numberOfRecordsUpdated=rowcount,
                         generatedFields=generated_fields,

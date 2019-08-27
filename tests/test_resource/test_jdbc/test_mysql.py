@@ -5,7 +5,6 @@ from unittest import TestCase, mock
 from unittest.mock import Mock, call
 
 import jaydebeapi
-from local_data_api import convert_value
 from local_data_api.exceptions import BadRequestException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources.jdbc.mysql import MySQLJDBC
@@ -98,7 +97,7 @@ class TestResource(TestCase):
             dummy.execute("select * from users", database_name='test'),
             ExecuteStatementResponse(
                 numberOfRecordsUpdated=0,
-                records=[[convert_value(1), convert_value('abc')]],
+                records=[[Field.from_value(1), Field.from_value('abc')]],
             ),
         )
         cursor_mock.execute.assert_has_calls(
@@ -160,7 +159,7 @@ class TestResource(TestCase):
                 ),
                 ExecuteStatementResponse(
                     numberOfRecordsUpdated=0,
-                    records=[[convert_value(1), convert_value('abc')]],
+                    records=[[Field.from_value(1), Field.from_value('abc')]],
                     columnMetadata=[
                         ColumnMetadata(
                             arrayBaseColumnType=0,
