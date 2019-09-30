@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import re
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
-from unittest import TestCase, mock
-from unittest.mock import Mock
 
+import pytest
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources import SQLite
@@ -47,474 +46,451 @@ class DummyResource(Resource):
         pass
 
 
-class TestResourceFunction(TestCase):
-    def setUp(self) -> None:
-        RESOURCE_METAS.clear()
-        CONNECTION_POOL.clear()
+@pytest.fixture
+def clear():
+    RESOURCE_METAS.clear()
+    CONNECTION_POOL.clear()
 
-    def test_register_resource(self) -> None:
-        resource_arn: str = 'dummy_resource_arn'
-        register_resource(
-            resource_arn,
-            'MySQL',
-            host='localhost',
-            port=3306,
-            user_name='test',
-            password='pw',
-        )
 
-        resource_meta: ResourceMeta = RESOURCE_METAS[resource_arn]
-        self.assertEqual(resource_meta.host, 'localhost')
-        self.assertEqual(resource_meta.port, 3306)
-        self.assertEqual(resource_meta.user_name, 'test')
-        self.assertEqual(resource_meta.password, 'pw')
+@pytest.fixture
+def secrets(mocker):
+    secret = mocker.Mock()
+    secret.user_name = 'test'
+    secret.password = 'pw'
+    mocked_secrets = mocker.patch(
+        'local_data_api.resources.resource.get_secret', return_value=secret
+    )
+    return mocked_secrets
 
-    def test_get_resource(self) -> None:
-        resource_arn: str = 'dummy_resource_arn'
 
-        connection_maker = SQLite.create_connection_maker(
-            'localhost', 3306, 'test', 'pw', {}
-        )
+def test_register_resource(clear) -> None:
+    resource_arn: str = 'dummy_resource_arn'
+    register_resource(
+        resource_arn,
+        'MySQL',
+        host='localhost',
+        port=3306,
+        user_name='test',
+        password='pw',
+    )
 
-        RESOURCE_METAS[resource_arn] = ResourceMeta(
-            SQLite, connection_maker, 'localhost', 3306, 'test', 'pw'
-        )
+    resource_meta: ResourceMeta = RESOURCE_METAS[resource_arn]
+    assert resource_meta.host == 'localhost'
+    assert resource_meta.port == 3306
+    assert resource_meta.user_name == 'test'
+    assert resource_meta.password == 'pw'
 
-        secret = Mock()
-        secret.user_name = 'test'
-        secret.password = 'pw'
 
-        with mock.patch(
-            'local_data_api.resources.resource.get_secret'
-        ) as mock_get_secret:
-            mock_get_secret.return_value = secret
-            resource = get_resource(resource_arn, 'dummy')
-            self.assertIsInstance(resource, SQLite)
-            with mock.patch(
-                'local_data_api.resources.resource.get_connection'
-            ) as mock_get_connection:
-                new_connection = Mock()
-                mock_get_connection.return_value = new_connection
-                resource = get_resource(resource_arn, 'dummy', 'transaction')
-            self.assertEqual(resource.connection, new_connection)
+def test_get_resource(secrets, mocker) -> None:
+    resource_arn: str = 'dummy_resource_arn'
 
-    def test_get_resource_exception(self) -> None:
-        resource_arn: str = 'dummy_resource_arn'
+    connection_maker = SQLite.create_connection_maker(
+        'localhost', 3306, 'test', 'pw', {}
+    )
 
-        connection_maker = SQLite.create_connection_maker()
+    RESOURCE_METAS[resource_arn] = ResourceMeta(
+        SQLite, connection_maker, 'localhost', 3306, 'test', 'pw'
+    )
 
-        RESOURCE_METAS[resource_arn] = ResourceMeta(
-            SQLite, connection_maker, 'localhost', 3306, 'test', 'pw'
-        )
+    mock_get_connection = mocker.patch(
+        'local_data_api.resources.resource.get_connection'
+    )
+    new_connection = mocker.Mock()
+    mock_get_connection.return_value = new_connection
+    resource = get_resource(resource_arn, 'dummy', 'transaction')
+    assert resource.connection, new_connection
 
-        with self.assertRaises(BadRequestException):
-            get_resource('invalid', 'dummy')
 
-        with self.assertRaises(InternalServerErrorException):
-            CONNECTION_POOL['dummy'] = connection_maker()
-            get_resource('invalid', 'dummy', 'dummy')
-            del CONNECTION_POOL['dummy']
+def test_get_resource_exception(clear, secrets, mocker) -> None:
+    resource_arn: str = 'dummy_resource_arn'
 
-        with mock.patch(
-            'local_data_api.resources.resource.get_secret'
-        ) as mock_get_secret:
-            with self.assertRaises(BadRequestException):
-                mock_get_secret.side_effect = BadRequestException('error')
-                get_resource(resource_arn, 'dummy')
+    connection_maker = SQLite.create_connection_maker()
 
-            with self.assertRaises(InternalServerErrorException):
-                mock_get_secret.side_effect = BadRequestException('error')
-                CONNECTION_POOL['dummy'] = connection_maker()
-                get_resource(resource_arn, 'dummy', 'dummy')
+    RESOURCE_METAS[resource_arn] = ResourceMeta(
+        SQLite, connection_maker, 'localhost', 3306, 'test', 'pw'
+    )
 
-            mock_get_secret.side_effect = None
-            secret = Mock()
-            secret.user_name = 'invalid'
-            secret.password = 'pw'
+    with pytest.raises(BadRequestException):
+        get_resource('invalid', 'dummy')
 
-            mock_get_secret.return_value = secret
-            with self.assertRaises(BadRequestException):
-                get_resource(resource_arn, 'dummy')
+    with pytest.raises(InternalServerErrorException):
+        CONNECTION_POOL['dummy'] = connection_maker()
+        get_resource('invalid', 'dummy', 'dummy')
+    del CONNECTION_POOL['dummy']
 
-            secret = Mock()
-            secret.user_name = 'test'
-            secret.password = 'invalid'
+    with pytest.raises(BadRequestException):
+        secrets.side_effect = BadRequestException('error')
+        get_resource(resource_arn, 'dummy')
 
-            mock_get_secret.return_value = secret
-            with self.assertRaises(BadRequestException):
-                get_resource(resource_arn, 'dummy')
+    with pytest.raises(InternalServerErrorException):
+        secrets.side_effect = BadRequestException('error')
+        CONNECTION_POOL['dummy'] = connection_maker()
+        get_resource(resource_arn, 'dummy', 'dummy')
 
-    def test_get_resource_class_exception(self) -> None:
-        with self.assertRaises(Exception):
-            get_resource_class('invalid_engine')
+    secrets.side_effect = None
+    secret = mocker.Mock()
+    secret.user_name = 'invalid'
+    secret.password = 'pw'
 
-    def test_create_resource_arn(self):
-        self.assertEqual(
-            create_resource_arn('us-east-1', '123456789012')[:57],
-            'arn:aws:rds:us-east-1:123456789012:cluster:local-data-api',
-        )
+    secrets.return_value = secret
+    with pytest.raises(BadRequestException):
+        get_resource(resource_arn, 'dummy')
 
-    def test_get_database_invalid_resource_arn(self) -> None:
-        resource_arn: str = 'dummy_resource_arn'
+    secret = mocker.Mock()
+    secret.user_name = 'test'
+    secret.password = 'invalid'
 
-        connection_maker = SQLite.create_connection_maker(
-            'localhost', 3306, 'test', 'pw', {}
-        )
+    secrets.return_value = secret
+    with pytest.raises(BadRequestException):
+        get_resource(resource_arn, 'dummy')
 
-        RESOURCE_METAS[resource_arn] = ResourceMeta(
-            SQLite, connection_maker, 'localhost', 3306, 'test', 'pw'
-        )
 
-        with self.assertRaises(BadRequestException):
-            get_resource('invalid_arn', 'secret_arn')
+def test_get_resource_class_exception(clear) -> None:
+    with pytest.raises(Exception):
+        get_resource_class('invalid_engine')
 
-    def test_create_column_metadata(self):
-        self.assertEqual(
-            create_column_metadata('name', 1, 2, 3, 4, 5, True),
+
+def test_create_resource_arn(clear):
+    assert (
+        create_resource_arn('us-east-1', '123456789012')[:57]
+        == 'arn:aws:rds:us-east-1:123456789012:cluster:local-data-api'
+    )
+
+
+def test_get_database_invalid_resource_arn(clear) -> None:
+    resource_arn: str = 'dummy_resource_arn'
+
+    connection_maker = SQLite.create_connection_maker(
+        'localhost', 3306, 'test', 'pw', {}
+    )
+
+    RESOURCE_METAS[resource_arn] = ResourceMeta(
+        SQLite, connection_maker, 'localhost', 3306, 'test', 'pw'
+    )
+
+    with pytest.raises(BadRequestException):
+        get_resource('invalid_arn', 'secret_arn')
+
+
+def test_create_column_metadata(clear):
+    assert create_column_metadata('name', 1, 2, 3, 4, 5, True) == ColumnMetadata(
+        arrayBaseColumnType=0,
+        isAutoIncrement=False,
+        isCaseSensitive=False,
+        isCurrency=False,
+        isSigned=False,
+        label='name',
+        name='name',
+        nullable=1,
+        precision=4,
+        scale=5,
+        tableName=None,
+        type=None,
+        typeName=None,
+        schema_=None,
+    )
+
+
+def test_set_connection(clear, mocker) -> None:
+    connection = mocker.Mock()
+    set_connection('abc', connection)
+    assert CONNECTION_POOL['abc'] == connection
+
+
+def test_get_connection(clear, mocker) -> None:
+    connection = mocker.Mock()
+    CONNECTION_POOL['abc'] = connection
+    assert get_connection('abc') == connection
+
+
+def test_get_connection_notfound(clear) -> None:
+    with pytest.raises(BadRequestException):
+        get_connection('abc')
+
+
+def test_delete_connection(clear, mocker) -> None:
+    connection = mocker.Mock()
+    CONNECTION_POOL['abc'] = connection
+
+    delete_connection('abc')
+    assert 'abc' not in CONNECTION_POOL
+
+
+def test_create_query(clear):
+    query = DummyResource.create_query(
+        'insert into users values (:id, :name)', {'id': 1, 'name': 'abc'}
+    )
+    assert query == "insert into users values (1, 'abc')"
+
+
+def test_create_query_invalid_param(clear):
+    with pytest.raises(BadRequestException) as cm:
+        DummyResource.create_query('insert into users values (:id, :name)', {'id': 1})
+    assert cm.value.message == 'Cannot find parameter: name'
+
+
+def test_create_query_undefined_param(clear):
+    query = DummyResource.create_query(
+        'insert into users values (:id, :name)',
+        {'id': 1, 'name': 'abc', 'undefined': 'abc'},
+    )
+    assert query == "insert into users values (1, 'abc')"
+
+
+def test_transaction_id(clear, mocker):
+    connection_mock = mocker.Mock()
+    dummy = DummyResource(connection_mock, transaction_id='123')
+    assert dummy.transaction_id == '123'
+
+
+def test_connection(clear, mocker):
+    connection_mock = mocker.Mock()
+    dummy = DummyResource(connection_mock)
+    assert dummy.connection == connection_mock
+
+
+def test_create_transaction_id(clear):
+    transaction_id: str = DummyResource.create_transaction_id()
+    assert re.match(
+        r'[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/=+]{184}$',
+        transaction_id,
+    )
+
+
+def test_commit(clear, mocker):
+    connection_mock = mocker.Mock()
+    dummy = DummyResource(connection_mock)
+    dummy.commit()
+    assert connection_mock.commit.call_count == 1
+
+
+def test_rollback(clear, mocker):
+    connection_mock = mocker.Mock()
+    dummy = DummyResource(connection_mock)
+    dummy.rollback()
+    assert connection_mock.rollback.call_count == 1
+
+
+def test_use_database(clear, mocker):
+    execute_mock = mocker.Mock()
+    dummy = DummyResource(mocker.Mock())
+    dummy.execute = execute_mock
+    dummy.use_database('abc')
+    execute_mock.assert_called_once_with('use abc')
+
+
+def test_begin(clear, mocker):
+    create_transaction_id_mock = mocker.Mock(side_effect=['abc'])
+    connection_mock = mocker.Mock()
+    dummy = DummyResource(connection_mock)
+    dummy.create_transaction_id = create_transaction_id_mock
+    set_connection_mock = mocker.patch(
+        'local_data_api.resources.resource.set_connection'
+    )
+    result = dummy.begin()
+    assert result == 'abc'
+    set_connection_mock.assert_called_once_with('abc', connection_mock)
+
+
+def test_close(clear, mocker):
+    connection_mock = mocker.Mock()
+    dummy = DummyResource(connection_mock, 'abc')
+    delete_connection_mock = mocker.patch(
+        'local_data_api.resources.resource.delete_connection'
+    )
+    mocker.patch('local_data_api.resources.resource.CONNECTION_POOL', {'abc': ''})
+    dummy.close()
+    connection_mock.close.assert_called_once_with()
+    delete_connection_mock.assert_called_once_with('abc')
+
+
+def test_close_with_empty_connection_pool(clear, mocker):
+    connection_mock = mocker.Mock()
+    dummy = DummyResource(connection_mock, 'abc')
+    mocker.patch('local_data_api.resources.resource.CONNECTION_POOL', {})
+    dummy.close()
+    connection_mock.close.assert_called_once_with()
+
+
+def test_execute_insert(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    connection_mock.cursor.side_effect = [cursor_mock]
+    cursor_mock.description = ''
+    cursor_mock.rowcount = 1
+    cursor_mock.lastrowid = 0
+    dummy = DummyResource(connection_mock)
+    assert dummy.execute(
+        "insert into users values (1, 'abc')"
+    ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
+    cursor_mock.execute.assert_called_once_with("insert into users values (1, 'abc')")
+    cursor_mock.close.assert_called_once_with()
+
+
+def test_execute_insert_with_generated(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    connection_mock.cursor.side_effect = [cursor_mock]
+    cursor_mock.description = ''
+    cursor_mock.rowcount = 1
+    cursor_mock.lastrowid = 1
+    dummy = DummyResource(connection_mock)
+    assert dummy.execute(
+        "insert into users ('name') values ('abc')"
+    ) == ExecuteStatementResponse(
+        numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]
+    )
+    cursor_mock.execute.assert_called_once_with(
+        "insert into users ('name') values ('abc')"
+    )
+    cursor_mock.close.assert_called_once_with()
+
+
+def test_execute_insert_with_params(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    connection_mock.cursor.side_effect = [cursor_mock]
+    cursor_mock.description = ''
+    cursor_mock.rowcount = 1
+    cursor_mock.lastrowid = 1
+    dummy = DummyResource(connection_mock)
+    assert dummy.execute(
+        "insert into users values (:id, :name)", {'id': 1, 'name': 'abc'}
+    ) == ExecuteStatementResponse(
+        numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]
+    )
+
+    cursor_mock.execute.assert_called_once_with("insert into users values (1, 'abc')")
+    cursor_mock.close.assert_called_once_with()
+
+
+def test_execute_select(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    connection_mock.cursor.side_effect = [cursor_mock]
+    cursor_mock.description = 1, 1, 1, 1, 1, 1, 1
+    cursor_mock.fetchall.side_effect = [((1, 'abc'),)]
+    dummy = DummyResource(connection_mock, transaction_id='123')
+    dummy.use_database = mocker.Mock()
+    assert dummy.execute(
+        "select * from users", database_name='test'
+    ) == ExecuteStatementResponse(
+        numberOfRecordsUpdated=0,
+        records=[[Field.from_value(1), Field.from_value('abc')]],
+    )
+    cursor_mock.execute.assert_called_once_with('select * from users')
+    cursor_mock.close.assert_called_once_with()
+
+
+def test_execute_select_with_include_metadata(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    connection_mock.cursor.side_effect = [cursor_mock]
+    cursor_mock.description = (1, 2, 3, 4, 5, 6, 7), (8, 9, 10, 11, 12, 13, 14)
+    cursor_mock.fetchall.side_effect = [((1, 'abc'),)]
+    dummy = DummyResource(connection_mock, transaction_id='123')
+    dummy.use_database = mocker.Mock()
+    assert dummy.execute(
+        "select * from users", database_name='test', include_result_metadata=True
+    ).dict() == ExecuteStatementResponse(
+        numberOfRecordsUpdated=0,
+        records=[[Field.from_value(1), Field.from_value('abc')]],
+        columnMetadata=[
             ColumnMetadata(
                 arrayBaseColumnType=0,
                 isAutoIncrement=False,
                 isCaseSensitive=False,
                 isCurrency=False,
                 isSigned=False,
-                label='name',
-                name='name',
+                label='1',
+                name='1',
                 nullable=1,
-                precision=4,
-                scale=5,
+                precision=5,
+                scale=6,
                 tableName=None,
                 type=None,
                 typeName=None,
-                schema_=None,
             ),
-        )
-
-
-class TestConnectionPool(TestCase):
-    def setUp(self) -> None:
-        CONNECTION_POOL.clear()
-
-    def test_set_connection(self) -> None:
-        connection = Mock()
-        set_connection('abc', connection)
-        self.assertEqual(CONNECTION_POOL['abc'], connection)
-
-    def test_get_connection(self) -> None:
-        connection = Mock()
-        CONNECTION_POOL['abc'] = connection
-        self.assertEqual(get_connection('abc'), connection)
-
-    def test_get_connection_notfound(self) -> None:
-        with self.assertRaises(BadRequestException):
-            get_connection('abc')
-
-    def test_delete_connection(self) -> None:
-        connection = Mock()
-        CONNECTION_POOL['abc'] = connection
-
-        delete_connection('abc')
-        self.assertTrue('abc' not in CONNECTION_POOL)
-
-
-class TestResource(TestCase):
-    class TestResourceFunction(TestCase):
-        def setUp(self) -> None:
-            RESOURCE_METAS.clear()
-            CONNECTION_POOL.clear()
-
-    def test_create_query(self):
-        query = DummyResource.create_query(
-            'insert into users values (:id, :name)', {'id': 1, 'name': 'abc'}
-        )
-        self.assertEqual(query, "insert into users values (1, 'abc')")
-
-    def test_create_query_invalid_param(self):
-        with self.assertRaises(BadRequestException) as cm:
-            DummyResource.create_query(
-                'insert into users values (:id, :name)', {'id': 1}
-            )
-        self.assertEqual(cm.exception.message, 'Cannot find parameter: name')
-
-    def test_create_query_undefined_param(self):
-        query = DummyResource.create_query(
-            'insert into users values (:id, :name)',
-            {'id': 1, 'name': 'abc', 'undefined': 'abc'},
-        )
-        self.assertEqual(query, "insert into users values (1, 'abc')")
-
-    def test_transaction_id(self):
-        connection_mock = Mock()
-        dummy = DummyResource(connection_mock, transaction_id='123')
-        self.assertEqual(dummy.transaction_id, '123')
-
-    def test_connection(self):
-        connection_mock = Mock()
-        dummy = DummyResource(connection_mock)
-        self.assertEqual(dummy.connection, connection_mock)
-
-    def test_create_transaction_id(self):
-        transaction_id: str = DummyResource.create_transaction_id()
-        self.assertTrue(
-            re.match(
-                r'[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/=+]{184}$',
-                transaction_id,
-            )
-        )
-
-    def test_commit(self):
-        connection_mock = Mock()
-        dummy = DummyResource(connection_mock)
-        dummy.commit()
-        self.assertEqual(connection_mock.commit.call_count, 1)
-
-    def test_rollback(self):
-        connection_mock = Mock()
-        dummy = DummyResource(connection_mock)
-        dummy.rollback()
-        self.assertEqual(connection_mock.rollback.call_count, 1)
-
-    def test_use_database(self):
-        execute_mock = Mock()
-        dummy = DummyResource(Mock())
-        dummy.execute = execute_mock
-        dummy.use_database('abc')
-        execute_mock.assert_called_once_with('use abc')
-
-    def test_begin(self):
-        create_transaction_id_mock = Mock(side_effect=['abc'])
-        connection_mock = Mock()
-        dummy = DummyResource(connection_mock)
-        dummy.create_transaction_id = create_transaction_id_mock
-        with mock.patch(
-            'local_data_api.resources.resource.set_connection'
-        ) as set_connection_mock:
-            result = dummy.begin()
-            self.assertEqual(result, 'abc')
-            set_connection_mock.assert_called_once_with('abc', connection_mock)
-
-    def test_close(self):
-        connection_mock = Mock()
-        dummy = DummyResource(connection_mock, 'abc')
-        with mock.patch(
-            'local_data_api.resources.resource.delete_connection'
-        ) as delete_connection_mock, mock.patch(
-            'local_data_api.resources.resource.CONNECTION_POOL', {'abc': ''}
-        ):
-            dummy.close()
-            connection_mock.close.assert_called_once_with()
-            delete_connection_mock.assert_called_once_with('abc')
-
-    def test_close(self):
-        connection_mock = Mock()
-        dummy = DummyResource(connection_mock, 'abc')
-        with mock.patch(
-            'local_data_api.resources.resource.delete_connection'
-        ) as delete_connection_mock, mock.patch(
-            'local_data_api.resources.resource.CONNECTION_POOL', {'abc': ''}
-        ):
-            dummy.close()
-            connection_mock.close.assert_called_once_with()
-            delete_connection_mock.assert_called_once_with('abc')
-
-    def test_close_with_empty_connection_pool(self):
-        connection_mock = Mock()
-        dummy = DummyResource(connection_mock, 'abc')
-        with mock.patch('local_data_api.resources.resource.CONNECTION_POOL', {}):
-            dummy.close()
-            connection_mock.close.assert_called_once_with()
-
-    def test_execute_insert(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        connection_mock.cursor.side_effect = [cursor_mock]
-        cursor_mock.description = ''
-        cursor_mock.rowcount = 1
-        cursor_mock.lastrowid = 0
-        dummy = DummyResource(connection_mock)
-        self.assertEqual(
-            dummy.execute("insert into users values (1, 'abc')"),
-            ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[]),
-        )
-        cursor_mock.execute.assert_called_once_with(
-            "insert into users values (1, 'abc')"
-        )
-        cursor_mock.close.assert_called_once_with()
-
-    def test_execute_insert_with_generated(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        connection_mock.cursor.side_effect = [cursor_mock]
-        cursor_mock.description = ''
-        cursor_mock.rowcount = 1
-        cursor_mock.lastrowid = 1
-        dummy = DummyResource(connection_mock)
-        self.assertEqual(
-            dummy.execute("insert into users ('name') values ('abc')"),
-            ExecuteStatementResponse(
-                numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]
+            ColumnMetadata(
+                arrayBaseColumnType=0,
+                isAutoIncrement=False,
+                isCaseSensitive=False,
+                isCurrency=False,
+                isSigned=False,
+                label='8',
+                name='8',
+                nullable=1,
+                precision=12,
+                scale=13,
+                tableName=None,
+                type=None,
+                typeName=None,
             ),
-        )
-        cursor_mock.execute.assert_called_once_with(
-            "insert into users ('name') values ('abc')"
-        )
-        cursor_mock.close.assert_called_once_with()
+        ],
+    )
 
-    def test_execute_insert_with_params(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        connection_mock.cursor.side_effect = [cursor_mock]
-        cursor_mock.description = ''
-        cursor_mock.rowcount = 1
-        cursor_mock.lastrowid = 1
-        dummy = DummyResource(connection_mock)
-        self.assertEqual(
-            dummy.execute(
-                "insert into users values (:id, :name)", {'id': 1, 'name': 'abc'}
-            ),
-            ExecuteStatementResponse(
-                numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]
-            ),
-        )
-        cursor_mock.execute.assert_called_once_with(
-            "insert into users values (1, 'abc')"
-        )
-        cursor_mock.close.assert_called_once_with()
+    cursor_mock.execute.assert_called_once_with('select * from users')
+    cursor_mock.close.assert_called_once_with()
 
-    def test_execute_select(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        connection_mock.cursor.side_effect = [cursor_mock]
-        cursor_mock.description = 1, 1, 1, 1, 1, 1, 1
-        cursor_mock.fetchall.side_effect = [((1, 'abc'),)]
-        dummy = DummyResource(connection_mock, transaction_id='123')
-        dummy.use_database = Mock()
-        self.assertEqual(
-            dummy.execute("select * from users", database_name='test'),
-            ExecuteStatementResponse(
-                numberOfRecordsUpdated=0,
-                records=[[Field.from_value(1), Field.from_value('abc')]],
-            ),
-        )
-        cursor_mock.execute.assert_called_once_with('select * from users')
-        cursor_mock.close.assert_called_once_with()
 
-    def test_execute_select_with_include_metadata(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        connection_mock.cursor.side_effect = [cursor_mock]
-        cursor_mock.description = (1, 2, 3, 4, 5, 6, 7), (8, 9, 10, 11, 12, 13, 14)
-        cursor_mock.fetchall.side_effect = [((1, 'abc'),)]
-        dummy = DummyResource(connection_mock, transaction_id='123')
-        dummy.use_database = Mock()
-        self.assertEqual(
-            dummy.execute(
-                "select * from users",
-                database_name='test',
-                include_result_metadata=True,
-            ).dict(),
-            ExecuteStatementResponse(
-                numberOfRecordsUpdated=0,
-                records=[[Field.from_value(1), Field.from_value('abc')]],
-                columnMetadata=[
-                    ColumnMetadata(
-                        arrayBaseColumnType=0,
-                        isAutoIncrement=False,
-                        isCaseSensitive=False,
-                        isCurrency=False,
-                        isSigned=False,
-                        label='1',
-                        name='1',
-                        nullable=1,
-                        precision=5,
-                        scale=6,
-                        tableName=None,
-                        type=None,
-                        typeName=None,
-                    ),
-                    ColumnMetadata(
-                        arrayBaseColumnType=0,
-                        isAutoIncrement=False,
-                        isCaseSensitive=False,
-                        isCurrency=False,
-                        isSigned=False,
-                        label='8',
-                        name='8',
-                        nullable=1,
-                        precision=12,
-                        scale=13,
-                        tableName=None,
-                        type=None,
-                        typeName=None,
-                    ),
-                ],
-            ),
-        )
+def test_execute_exception_1(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    error = Exception('error')
+    error.orig = ['error_message']
+    cursor_mock.execute.side_effect = error
+    connection_mock.cursor.side_effect = [cursor_mock]
+    dummy = DummyResource(connection_mock, transaction_id='123')
+    with pytest.raises(BadRequestException):
+        dummy.execute("select * from users")
+    cursor_mock.execute.assert_called_once_with('select * from users')
+    cursor_mock.close.assert_called_once_with()
 
-        cursor_mock.execute.assert_called_once_with('select * from users')
-        cursor_mock.close.assert_called_once_with()
 
-    def test_execute_exception_1(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        error = Exception('error')
-        error.orig = ['error_message']
-        cursor_mock.execute.side_effect = error
-        connection_mock.cursor.side_effect = [cursor_mock]
-        dummy = DummyResource(connection_mock, transaction_id='123')
-        with self.assertRaises(BadRequestException):
-            dummy.execute("select * from users")
-        cursor_mock.execute.assert_called_once_with('select * from users')
-        cursor_mock.close.assert_called_once_with()
+def test_execute_exception_2(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    error = Exception('error')
+    error_orig = mocker.Mock()
+    error_orig.args = ['', 'error_message']
+    error.orig = error_orig
+    cursor_mock.execute.side_effect = error
+    connection_mock.cursor.side_effect = [cursor_mock]
+    dummy = DummyResource(connection_mock, transaction_id='123')
+    with pytest.raises(BadRequestException) as e:
+        dummy.execute("select * from users")
+    assert e.value.message == 'error_message'
+    cursor_mock.execute.assert_called_once_with('select * from users')
+    cursor_mock.close.assert_called_once_with()
 
-    def test_execute_exception_2(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        error = Exception('error')
-        error_orig = Mock()
-        error_orig.args = ['', 'error_message']
-        error.orig = error_orig
-        cursor_mock.execute.side_effect = error
-        connection_mock.cursor.side_effect = [cursor_mock]
-        dummy = DummyResource(connection_mock, transaction_id='123')
-        with self.assertRaises(BadRequestException):
-            try:
-                dummy.execute("select * from users")
-            except Exception as e:
-                self.assertEqual(e.message, 'error_message')
-                raise
-        cursor_mock.execute.assert_called_once_with('select * from users')
-        cursor_mock.close.assert_called_once_with()
 
-    def test_execute_exception_3(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        error = Exception('error')
-        inner_error = Exception('inner_error')
-        error.args = [inner_error]
-        cursor_mock.execute.side_effect = error
-        connection_mock.cursor.side_effect = [cursor_mock]
-        dummy = DummyResource(connection_mock, transaction_id='123')
-        with self.assertRaises(BadRequestException):
-            try:
-                dummy.execute("select * from users")
-            except Exception as e:
-                self.assertEqual(e.message, 'inner_error')
-                raise
-        cursor_mock.execute.assert_called_once_with('select * from users')
-        cursor_mock.close.assert_called_once_with()
+def test_execute_exception_3(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    error = Exception('error')
+    inner_error = Exception('inner_error')
+    error.args = [inner_error]
+    cursor_mock.execute.side_effect = error
+    connection_mock.cursor.side_effect = [cursor_mock]
+    dummy = DummyResource(connection_mock, transaction_id='123')
+    with pytest.raises(BadRequestException) as e:
+        dummy.execute("select * from users")
+    assert e.value.message == 'inner_error'
 
-    def test_execute_exception_4(self):
-        connection_mock = Mock()
-        cursor_mock = Mock()
-        error = Exception('')
-        cursor_mock.execute.side_effect = error
-        connection_mock.cursor.side_effect = [cursor_mock]
-        dummy = DummyResource(connection_mock, transaction_id='123')
-        with self.assertRaises(BadRequestException):
-            try:
-                dummy.execute("select * from users")
-            except Exception as e:
-                self.assertEqual(e.message, 'Unknown')
-                raise
-        cursor_mock.execute.assert_called_once_with('select * from users')
-        cursor_mock.close.assert_called_once_with()
+    cursor_mock.execute.assert_called_once_with('select * from users')
+    cursor_mock.close.assert_called_once_with()
+
+
+def test_execute_exception_4(clear, mocker):
+    connection_mock = mocker.Mock()
+    cursor_mock = mocker.Mock()
+    error = Exception('')
+    cursor_mock.execute.side_effect = error
+    connection_mock.cursor.side_effect = [cursor_mock]
+    dummy = DummyResource(connection_mock, transaction_id='123')
+    with pytest.raises(BadRequestException) as e:
+        dummy.execute("select * from users")
+    assert e.value.message == 'Unknown'
+
+    cursor_mock.execute.assert_called_once_with('select * from users')
+    cursor_mock.close.assert_called_once_with()
