@@ -1,7 +1,6 @@
 from base64 import b64encode
 
 import pytest
-
 from local_data_api.models import Field, SqlParameter
 
 

@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import pytest
-from sqlalchemy.dialects import mysql
-
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources import SQLite
@@ -23,6 +21,7 @@ from local_data_api.resources.resource import (
     register_resource,
     set_connection,
 )
+from sqlalchemy.dialects import mysql
 
 DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
     'SQLite': {'host': '', 'port': None, 'user_name': None, 'password': None}
@@ -37,12 +36,12 @@ class DummyResource(Resource):
 
     @classmethod
     def create_connection_maker(
-            cls,
-            host: Optional[str] = None,
-            port: Optional[int] = None,
-            user_name: Optional[str] = None,
-            password: Optional[str] = None,
-            engine_kwargs: Dict[str, Any] = None,
+        cls,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        user_name: Optional[str] = None,
+        password: Optional[str] = None,
+        engine_kwargs: Dict[str, Any] = None,
     ) -> ConnectionMaker:
         pass
 
@@ -58,7 +57,9 @@ def secrets(mocker):
     secret = mocker.Mock()
     secret.user_name = 'test'
     secret.password = 'pw'
-    mocked_secrets = mocker.patch('local_data_api.resources.resource.get_secret', return_value=secret)
+    mocked_secrets = mocker.patch(
+        'local_data_api.resources.resource.get_secret', return_value=secret
+    )
     return mocked_secrets
 
 
@@ -91,7 +92,9 @@ def test_get_resource(secrets, mocker) -> None:
         SQLite, connection_maker, 'localhost', 3306, 'test', 'pw'
     )
 
-    mock_get_connection = mocker.patch('local_data_api.resources.resource.get_connection')
+    mock_get_connection = mocker.patch(
+        'local_data_api.resources.resource.get_connection'
+    )
     new_connection = mocker.Mock()
     mock_get_connection.return_value = new_connection
     resource = get_resource(resource_arn, 'dummy', 'transaction')
@@ -148,8 +151,10 @@ def test_get_resource_class_exception(clear) -> None:
 
 
 def test_create_resource_arn(clear):
-    assert create_resource_arn('us-east-1', '123456789012')[
-           :57] == 'arn:aws:rds:us-east-1:123456789012:cluster:local-data-api'
+    assert (
+        create_resource_arn('us-east-1', '123456789012')[:57]
+        == 'arn:aws:rds:us-east-1:123456789012:cluster:local-data-api'
+    )
 
 
 def test_get_database_invalid_resource_arn(clear) -> None:
@@ -220,9 +225,7 @@ def test_create_query(clear):
 
 def test_create_query_invalid_param(clear):
     with pytest.raises(BadRequestException) as cm:
-        DummyResource.create_query(
-            'insert into users values (:id, :name)', {'id': 1}
-        )
+        DummyResource.create_query('insert into users values (:id, :name)', {'id': 1})
     assert cm.value.message == 'Cannot find parameter: name'
 
 
@@ -295,9 +298,7 @@ def test_close(clear, mocker):
     delete_connection_mock = mocker.patch(
         'local_data_api.resources.resource.delete_connection'
     )
-    mocker.patch(
-        'local_data_api.resources.resource.CONNECTION_POOL', {'abc': ''}
-    )
+    mocker.patch('local_data_api.resources.resource.CONNECTION_POOL', {'abc': ''})
     dummy.close()
     connection_mock.close.assert_called_once_with()
     delete_connection_mock.assert_called_once_with('abc')
@@ -319,11 +320,10 @@ def test_execute_insert(clear, mocker):
     cursor_mock.rowcount = 1
     cursor_mock.lastrowid = 0
     dummy = DummyResource(connection_mock)
-    assert dummy.execute("insert into users values (1, 'abc')") == ExecuteStatementResponse(numberOfRecordsUpdated=1,
-                                                                                            generatedFields=[])
-    cursor_mock.execute.assert_called_once_with(
+    assert dummy.execute(
         "insert into users values (1, 'abc')"
-    )
+    ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
+    cursor_mock.execute.assert_called_once_with("insert into users values (1, 'abc')")
     cursor_mock.close.assert_called_once_with()
 
 
@@ -335,7 +335,9 @@ def test_execute_insert_with_generated(clear, mocker):
     cursor_mock.rowcount = 1
     cursor_mock.lastrowid = 1
     dummy = DummyResource(connection_mock)
-    assert dummy.execute("insert into users ('name') values ('abc')") == ExecuteStatementResponse(
+    assert dummy.execute(
+        "insert into users ('name') values ('abc')"
+    ) == ExecuteStatementResponse(
         numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]
     )
     cursor_mock.execute.assert_called_once_with(
@@ -358,9 +360,7 @@ def test_execute_insert_with_params(clear, mocker):
         numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]
     )
 
-    cursor_mock.execute.assert_called_once_with(
-        "insert into users values (1, 'abc')"
-    )
+    cursor_mock.execute.assert_called_once_with("insert into users values (1, 'abc')")
     cursor_mock.close.assert_called_once_with()
 
 
@@ -372,7 +372,9 @@ def test_execute_select(clear, mocker):
     cursor_mock.fetchall.side_effect = [((1, 'abc'),)]
     dummy = DummyResource(connection_mock, transaction_id='123')
     dummy.use_database = mocker.Mock()
-    assert dummy.execute("select * from users", database_name='test') == ExecuteStatementResponse(
+    assert dummy.execute(
+        "select * from users", database_name='test'
+    ) == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
         records=[[Field.from_value(1), Field.from_value('abc')]],
     )
@@ -389,9 +391,7 @@ def test_execute_select_with_include_metadata(clear, mocker):
     dummy = DummyResource(connection_mock, transaction_id='123')
     dummy.use_database = mocker.Mock()
     assert dummy.execute(
-        "select * from users",
-        database_name='test',
-        include_result_metadata=True,
+        "select * from users", database_name='test', include_result_metadata=True
     ).dict() == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
         records=[[Field.from_value(1), Field.from_value('abc')]],

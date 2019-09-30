@@ -1,6 +1,4 @@
 import pytest
-from starlette.testclient import TestClient
-
 from local_data_api.main import app
 from local_data_api.resources import SQLite
 from local_data_api.resources.resource import (
@@ -8,6 +6,7 @@ from local_data_api.resources.resource import (
     RESOURCE_METAS,
     ResourceMeta,
 )
+from starlette.testclient import TestClient
 
 client = TestClient(app)
 
@@ -30,7 +29,10 @@ def mocked_mysql(mocker):
 @pytest.fixture
 def mocked_connection(mocker):
     mocked_connection = mocker.Mock()
-    mocker.patch('local_data_api.resources.resource.create_connection', return_value=mocked_connection)
+    mocker.patch(
+        'local_data_api.resources.resource.create_connection',
+        return_value=mocked_connection,
+    )
     return mocked_connection
 
 
@@ -108,11 +110,7 @@ def test_execute_statement(mocked_mysql, mocked_cursor):
 
     response = client.post(
         "/Execute",
-        json={
-            'resourceArn': 'abc',
-            'secretArn': '1',
-            'sql': 'select * from users',
-        },
+        json={'resourceArn': 'abc', 'secretArn': '1', 'sql': 'select * from users'},
     )
     assert response.status_code == 200
     response_json = response.json()
@@ -143,7 +141,9 @@ def test_execute_statement_with_parameters(mocked_mysql, mocked_cursor):
     }
 
 
-def test_execute_statement_with_transaction(mocked_mysql, mocked_connection, mocked_connection_pool, mocked_cursor):
+def test_execute_statement_with_transaction(
+    mocked_mysql, mocked_connection, mocked_connection_pool, mocked_cursor
+):
     mocked_cursor.description = 1, 1, 1, 1, 1, 1, 1
     mocked_cursor.fetchall.side_effect = [((1, 'abc'),)]
     mocked_connection_pool['2'] = mocked_connection
@@ -207,7 +207,9 @@ def test_batch_execute_statement_with_parameters(mocked_mysql, mocked_cursor):
     assert response_json == {'updateResults': []}
 
 
-def test_batch_execute_statement_with_transaction(mocked_mysql, mocked_connection, mocked_connection_pool, mocked_cursor):
+def test_batch_execute_statement_with_transaction(
+    mocked_mysql, mocked_connection, mocked_connection_pool, mocked_cursor
+):
     mocked_cursor.description = ''
     mocked_cursor.rowcount = 1
     mocked_cursor.lastrowid = 1
@@ -221,9 +223,7 @@ def test_batch_execute_statement_with_transaction(mocked_mysql, mocked_connectio
             'secretArn': '1',
             'sql': "insert into users (name) values (:name)",
             'transactionId': '2',
-            'parameterSets': [
-                [{'name': 'name', 'value': {'stringValue': 'abc'}}]
-            ],
+            'parameterSets': [[{'name': 'name', 'value': {'stringValue': 'abc'}}]],
         },
     )
 

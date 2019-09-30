@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from local_data_api.models import ColumnMetadata
 from local_data_api.resources.jdbc import (
     JDBC,
