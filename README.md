@@ -19,11 +19,11 @@ The API converts RESTful request to SQL statements.
 you set your MYSQL Server configs as environments.
 
 ```bash
-docker run --rm -it --name my-data-api -p 8080:80  -e MYSQL_HOST=YOUR_MYSQL_HOST -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example -e RESOURCE_ARN=dummy -e SECRET_ARN=dummy  koxudaxi/local-data-api
+docker run --rm -it --name my-data-api -p 8080:80  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD=example -e RESOURCE_ARN=arn:aws:rds:us-east-1:123456789012:cluster:dummy -e SECRET_ARN=arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy  koxudaxi/local-data-api
 ```
 In this case, you give local-data-api URL to aws client (like aws-cli).
 ```bash
-$ aws --endpoint-url http://127.0.0.1:8080 rds-data execute-statement --resource-arn "dummy" --sql "show databases"  --secret-arn "dummy" --database 'test'
+$ aws --endpoint-url http://127.0.0.1:8080 rds-data execute-statement --resource-arn "arn:aws:rds:us-east-1:123456789012:cluster:dummy" --sql "show databases"  --secret-arn "arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy" --database 'test'
 ```
 
 ### Example: docker-compose with Python's aws-sdk client(boto3) 
@@ -40,8 +40,9 @@ services:
       MYSQL_PORT: 3306
       MYSQL_USER: root
       MYSQL_PASSWORD: example
-      RESOURCE_ARN: dummy
-      SECRET_ARN: dummy
+      MYSQL_JDBC_JAR_PATH: /usr/lib/jvm/mariadb-java-client.jar
+      RESOURCE_ARN: 'arn:aws:rds:us-east-1:123456789012:cluster:dummy'
+      SECRET_ARN: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy'
     ports:
       - "8080:80"
   db:
@@ -70,7 +71,7 @@ In [1]: import boto3; client = boto3.client('rds-data', endpoint_url='http://127
 
 3. execute a sql statement
 ```python
-In [2]: client.execute_statement(resourceArn='dummy', secretArn='dummy', sql='show databases', database='test')
+In [2]: client.execute_statement(resourceArn='arn:aws:rds:us-east-1:123456789012:cluster:dummy', secretArn='arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy', sql='show databases', database='test')
 ```
 
 4. local-data-api return the result from a MySQL Server.
@@ -91,7 +92,7 @@ Out[2]: {'ResponseMetadata': {'HTTPStatusCode': 200,
 
 If a table has some records, then the local-data-api cant run `select`
 ```python
-In [3]: client.execute_statement(resourceArn='dummy', secretArn='dummy', sql='select * from users', database='test')
+In [3]: client.execute_statement(resourceArn='arn:aws:rds:us-east-1:123456789012:cluster:dummy', secretArn='arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy', sql='select * from users', database='test')
 ```
 ```python
 Out[3]: {'ResponseMetadata': {'HTTPStatusCode': 200,
