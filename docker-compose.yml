@@ -10,8 +10,8 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: example
       MYSQL_JDBC_JAR_PATH: /usr/lib/jvm/mariadb-java-client.jar
-      RESOURCE_ARN: dummy
-      SECRET_ARN: dummy
+      RESOURCE_ARN: 'arn:aws:rds:us-east-1:123456789012:cluster:dummy'
+      SECRET_ARN: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy'
     ports:
       - "8080:80"
   db:

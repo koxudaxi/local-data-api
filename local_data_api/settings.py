@@ -5,8 +5,12 @@ import os
 from local_data_api.resources.resource import register_resource
 from local_data_api.secret_manager import register_secret
 
-RESOURCE_ARN: str = os.environ.get('RESOURCE_ARN', 'dummy')
-SECRET_ARN: str = os.environ.get('SECRET_ARN', 'dummy')
+RESOURCE_ARN: str = os.environ.get(
+    'RESOURCE_ARN', 'arn:aws:rds:us-east-1:123456789012:cluster:dummy'
+)
+SECRET_ARN: str = os.environ.get(
+    'SECRET_ARN', 'arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy'
+)
 
 MYSQL_HOST: str = os.environ.get('MYSQL_HOST', '127.0.0.1')
 ENGINE: str = os.environ.get('ENGINE', 'MySQLJDBC')

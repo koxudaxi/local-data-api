@@ -13,10 +13,8 @@ install:
 cache: pip
 
 script:
-- black local_data_api tests --check --skip-string-normalization
-- mypy --ignore-missing-imports --disallow-untyped-defs local_data_api
-- isort --recursive --check-only -w 88 --combine-as --thirdparty local_data_api local_data_api tests -m 3 -tc
-- pytest --cov=local_data_api tests
+-  ./scripts/test.sh
+-  ./scripts/lint.sh
 - cp README.md docs/index.md && mkdocs build --verbose --clean --strict
 after_success:
 - codecov
