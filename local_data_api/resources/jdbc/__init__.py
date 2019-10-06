@@ -91,5 +91,5 @@ def create_column_metadata_set(meta: Any) -> List[ColumnMetadata]:
             type=meta.getColumnType(i),
             typeName=meta.getColumnTypeName(i),
         )
-        for i in range(1, meta.getColumnCount())
+        for i in range(1, meta.getColumnCount() + 1)
     ]
