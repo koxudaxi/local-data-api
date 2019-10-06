@@ -63,7 +63,7 @@ def test_create_column_metadata_set(mocker):
     mock_meta.getTableName.side_effect = ['g', 'h']
     mock_meta.getColumnType.side_effect = [5, 6]
     mock_meta.getColumnTypeName.side_effect = ['i', 'j']
-    mock_meta.getColumnCount.return_value = 3
+    mock_meta.getColumnCount.return_value = 2
 
     assert create_column_metadata_set(mock_meta) == [
         ColumnMetadata(
