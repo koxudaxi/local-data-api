@@ -153,6 +153,8 @@ async def data_api_exception_handler(_: Request, exc: DataAPIException) -> JSONR
         status_code=exc.status_code, content={"message": exc.message, "code": exc.code}
     )
 
+
 if __name__ == '__main__':
     from uvicorn import run
+
     run(app=app, port=8080)
