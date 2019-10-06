@@ -91,7 +91,7 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
             request.sql,
             parameters,
             request.database,
-            include_result_metadata=request.includeResultMetadata or False,
+            include_result_metadata=request.includeResultMetadata,
         )
 
         if not resource.transaction_id:
