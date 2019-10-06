@@ -83,13 +83,13 @@ def create_column_metadata_set(meta: Any) -> List[ColumnMetadata]:
             isSigned=meta.isSigned(i),
             label=meta.getColumnLabel(i),
             name=meta.getColumnName(i),
-            nullabl=meta.isNullable(i),
+            nullable=meta.isNullable(i),
             precision=meta.getPrecision(i),
             scale=meta.getScale(i),
-            schema_=meta.getSchemaName(i),
+            schema=meta.getSchemaName(i),
             tableName=meta.getTableName(i),
             type=meta.getColumnType(i),
             typeName=meta.getColumnTypeName(i),
         )
-        for i in range(meta.getColumnCount())
+        for i in range(1, meta.getColumnCount())
     ]

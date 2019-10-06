@@ -63,7 +63,7 @@ def test_create_column_metadata_set(mocker):
     mock_meta.getTableName.side_effect = ['g', 'h']
     mock_meta.getColumnType.side_effect = [5, 6]
     mock_meta.getColumnTypeName.side_effect = ['i', 'j']
-    mock_meta.getColumnCount.return_value = 2
+    mock_meta.getColumnCount.return_value = 3
 
     assert create_column_metadata_set(mock_meta) == [
         ColumnMetadata(
@@ -74,10 +74,10 @@ def test_create_column_metadata_set(mocker):
             isSigned=True,
             label='a',
             name='c',
-            nullabl=0,
+            nullable=0,
             precision=1,
             scale=3,
-            schema_='e',
+            schema='e',
             tableName='g',
             type=5,
             typeName='i',
@@ -90,10 +90,10 @@ def test_create_column_metadata_set(mocker):
             isSigned=False,
             label='b',
             name='d',
-            nullabl=0,
+            nullable=1,
             precision=2,
             scale=4,
-            schema_='e',
+            schema='f',
             tableName='h',
             type=6,
             typeName='j',

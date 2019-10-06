@@ -64,7 +64,7 @@ class ExecuteStatementRequests(BaseModel):
     sql: str
     database: Optional[str]
     continueAfterTimeout: Optional[bool]
-    includeResultMetadata: Optional[bool]
+    includeResultMetadata: bool = False
     parameters: Optional[SqlParameters]
     schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
