@@ -204,7 +204,7 @@ def create_column_metadata(
         nullable=1 if null_ok else 0,
         precision=precision,
         scale=scale,
-        schema_=None,
+        schema=None,
         tableName=None,
         type=None,
         typeName=None,
