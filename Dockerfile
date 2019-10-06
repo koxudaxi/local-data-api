@@ -3,7 +3,7 @@ FROM tiangolo/uvicorn-gunicorn:python3.7-alpine3.8
 LABEL maintainer="Koudai Aono <koxudaxi@gmail.com>"
 
 ENV MODULE_NAME local_data_api.main
-ENV MARIADB_CLIENT_VERSION 2.4.2
+ENV MARIADB_CLIENT_VERSION 2.5.0
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk/jre/
 ENV LD_LIBRARY_PATH /usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/server/
 
