@@ -3,7 +3,7 @@
 [![](https://images.microbadger.com/badges/version/koxudaxi/local-data-api.svg)](https://microbadger.com/images/koxudaxi/local-data-api "Get your own version badge on microbadger.com")
 [![codecov](https://codecov.io/gh/koxudaxi/local-data-api/branch/master/graph/badge.svg)](https://codecov.io/gh/koxudaxi/local-data-api)
 
-If you want to run tests on your local machine and CI then then, local-data-api can run in your local machine with MySQL Server.
+If you want to run tests on your local machine and CI then, local-data-api can run in your local machine with MySQL Server.
 
 ## What's AWS Aurora Serverless's Data API?
 https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
