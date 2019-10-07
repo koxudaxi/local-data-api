@@ -39,6 +39,24 @@ def test_execute_insert(mocked_connection, mocked_cursor, mocker):
     ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
     mocked_cursor.execute.assert_has_calls(
         [
+            mocker.call('SET AUTOCOMMIT=0'),
+            mocker.call('SELECT LAST_INSERT_ID(NULL)'),
+            mocker.call("insert into users values (1, 'abc')"),
+            mocker.call('SELECT LAST_INSERT_ID()'),
+        ]
+    )
+    mocked_cursor.close.assert_called_once_with()
+
+    mocked_cursor = mocker.Mock()
+    mocked_connection.cursor.side_effect = [mocked_cursor]
+    mocked_cursor.description = ''
+    mocked_cursor.rowcount = 1
+    mocked_cursor.fetchone.side_effect = [[0]]
+    assert dummy.execute(
+        "insert into users values (1, 'abc')"
+    ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
+    mocked_cursor.execute.assert_has_calls(
+        [
             mocker.call('SELECT LAST_INSERT_ID(NULL)'),
             mocker.call("insert into users values (1, 'abc')"),
             mocker.call('SELECT LAST_INSERT_ID()'),
@@ -59,6 +77,7 @@ def test_execute_insert_with_generated_field(mocked_connection, mocked_cursor, m
     )
     mocked_cursor.execute.assert_has_calls(
         [
+            mocker.call('SET AUTOCOMMIT=0'),
             mocker.call('SELECT LAST_INSERT_ID(NULL)'),
             mocker.call("insert into users (name) values ('abc')"),
             mocker.call('SELECT LAST_INSERT_ID()'),
@@ -77,6 +96,7 @@ def test_execute_insert_with_params(mocked_connection, mocked_cursor, mocker):
     ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
     mocked_cursor.execute.assert_has_calls(
         [
+            mocker.call('SET AUTOCOMMIT=0'),
             mocker.call('SELECT LAST_INSERT_ID(NULL)'),
             mocker.call("insert into users values (1, 'abc')"),
             mocker.call('SELECT LAST_INSERT_ID()'),
@@ -98,7 +118,11 @@ def test_execute_select(mocked_connection, mocked_cursor, mocker):
     )
 
     mocked_cursor.execute.assert_has_calls(
-        [mocker.call('SELECT LAST_INSERT_ID(NULL)'), mocker.call('select * from users')]
+        [
+            mocker.call('SET AUTOCOMMIT=0'),
+            mocker.call('SELECT LAST_INSERT_ID(NULL)'),
+            mocker.call('select * from users'),
+        ]
     )
     mocked_cursor.close.assert_called_once_with()
 
@@ -200,7 +224,7 @@ def test_execute_exception_1(mocked_connection, mocked_cursor, mocker):
         dummy.execute("select * from users")
     assert e.value.message == 'error_message'
     mocked_cursor.execute.assert_has_calls(
-        [mocker.call('SELECT LAST_INSERT_ID(NULL)'), mocker.call('select * from users')]
+        [mocker.call('SET AUTOCOMMIT=0'), mocker.call('SELECT LAST_INSERT_ID(NULL)')]
     )
     mocked_cursor.close.assert_called_once_with()
 
@@ -219,7 +243,7 @@ def test_execute_exception_2(mocked_connection, mocked_cursor, mocker):
         dummy.execute("select * from users")
     assert e.value.message == 'cause_error_message'
     mocked_cursor.execute.assert_has_calls(
-        [mocker.call('SELECT LAST_INSERT_ID(NULL)'), mocker.call('select * from users')]
+        [mocker.call('SET AUTOCOMMIT=0'), mocker.call('SELECT LAST_INSERT_ID(NULL)')]
     )
     mocked_cursor.close.assert_called_once_with()
 
@@ -244,6 +268,6 @@ def test_execute_exception_4(mocked_connection, mocked_cursor, mocker):
         dummy.execute("select * from users")
     assert e.value.message == 'inner_error_message'
     mocked_cursor.execute.assert_has_calls(
-        [mocker.call('SELECT LAST_INSERT_ID(NULL)'), mocker.call('select * from users')]
+        [mocker.call('SET AUTOCOMMIT=0'), mocker.call('SELECT LAST_INSERT_ID(NULL)')]
     )
     mocked_cursor.close.assert_called_once_with()
