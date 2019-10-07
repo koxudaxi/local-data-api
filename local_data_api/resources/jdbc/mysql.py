@@ -22,6 +22,10 @@ class MySQLJDBC(JDBC):
         cursor.execute("SELECT LAST_INSERT_ID()")
         return int(str(cursor.fetchone()[0]))
 
+    def autocommit_off(self, cursor: jaydebeapi.Cursor) -> None:
+        cursor.execute('SET AUTOCOMMIT=0')
+        self.autocommit = False
+
     def execute(
         self,
         sql: str,
@@ -36,6 +40,10 @@ class MySQLJDBC(JDBC):
             cursor: Optional[jaydebeapi.Cursor] = None
             try:
                 cursor = self.connection.cursor()
+
+                if self.autocommit:
+                    self.autocommit_off(cursor)
+
                 self.reset_generated_id(cursor)
                 if params:
                     cursor.execute(self.create_query(sql, params))

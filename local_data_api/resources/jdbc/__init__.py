@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jaydebeapi
@@ -44,11 +44,17 @@ class JDBC(Resource, ABC):
     DRIVER: str
     DIALECT: Dialect = mysql.dialect(paramstyle='named')
 
+    autocommit: bool = True
+
     def __init__(self, connection: Connection, transaction_id: Optional[str] = None):
         if transaction_id:
             attach_thread_to_jvm()
 
         super().__init__(connection, transaction_id)
+
+    @abstractmethod
+    def autocommit_off(self, cursor: jaydebeapi.Cursor) -> None:
+        raise NotImplementedError
 
     @classmethod
     def create_connection_maker(

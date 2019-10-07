@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import jaydebeapi
 import pytest
 from local_data_api.models import ColumnMetadata
 from local_data_api.resources.jdbc import (
@@ -11,6 +12,9 @@ from local_data_api.resources.jdbc import (
 
 
 class DummyJDBC(JDBC):
+    def autocommit_off(self, cursor: jaydebeapi.Cursor) -> None:
+        pass
+
     JDBC_NAME = 'jdbc:dummy'
     DRIVER = 'dummy'
 
