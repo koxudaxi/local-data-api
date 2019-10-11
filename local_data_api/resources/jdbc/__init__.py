@@ -4,9 +4,10 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jaydebeapi
-from local_data_api.models import ColumnMetadata
+from local_data_api.exceptions import BadRequestException
+from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources.resource import Resource
-from sqlalchemy.dialects import mysql
+from sqlalchemy import text
 from sqlalchemy.engine import Dialect
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -42,19 +43,89 @@ def connection_maker(
 class JDBC(Resource, ABC):
     JDBC_NAME: str
     DRIVER: str
-    DIALECT: Dialect = mysql.dialect(paramstyle='named')
-
-    autocommit: bool = True
+    DIALECT: Dialect
 
     def __init__(self, connection: Connection, transaction_id: Optional[str] = None):
         if transaction_id:
             attach_thread_to_jvm()
-
+        self.autocommit: bool = True
         super().__init__(connection, transaction_id)
 
-    @abstractmethod
     def autocommit_off(self, cursor: jaydebeapi.Cursor) -> None:
+        self.connection.jconn.setAutoCommit(False)
+        self.autocommit = False
+
+    def use_database(self, database_name: str) -> None:
+        self.connection.jconn.setCatalog(database_name)
+
+    @staticmethod
+    @abstractmethod
+    def reset_generated_id(cursor: jaydebeapi.Cursor) -> None:
         raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def last_generated_id(cursor: jaydebeapi.Cursor) -> int:
+        raise NotImplementedError
+
+    def execute(
+        self,
+        sql: str,
+        params: Optional[Dict[str, Any]] = None,
+        database_name: Optional[str] = None,
+        include_result_metadata: bool = False,
+    ) -> ExecuteStatementResponse:
+        try:
+            if database_name:
+                self.use_database(database_name)
+
+            cursor: Optional[jaydebeapi.Cursor] = None
+            try:
+                cursor = self.connection.cursor()
+
+                if self.autocommit:
+                    self.autocommit_off(cursor)
+
+                self.reset_generated_id(cursor)
+                if params:
+                    cursor.execute(self.create_query(sql, params))
+                else:
+                    cursor.execute(str(text(sql)))
+                if cursor.description:
+                    response = ExecuteStatementResponse(
+                        numberOfRecordsUpdated=0,
+                        records=[
+                            [Field.from_value(column) for column in row]
+                            for row in cursor.fetchall()
+                        ],
+                    )
+                    if include_result_metadata:
+                        meta = getattr(cursor, '_meta')
+                        response.columnMetadata = create_column_metadata_set(meta)
+                    return response
+                else:
+                    rowcount: int = cursor.rowcount
+                    last_generated_id: int = self.last_generated_id(cursor)
+                    generated_fields: List[Field] = []
+                    if last_generated_id > 0:
+                        generated_fields.append(Field.from_value(last_generated_id))
+                    return ExecuteStatementResponse(
+                        numberOfRecordsUpdated=rowcount,
+                        generatedFields=generated_fields,
+                    )
+            finally:
+                if cursor:  # pragma: no cover
+                    cursor.close()
+
+        except jaydebeapi.DatabaseError as e:
+            message: str = 'Unknown'
+            if len(getattr(e, 'args', [])):
+                message = e.args[0]
+                if len(getattr(e.args[0], 'args', [])):
+                    message = e.args[0].args[0]
+                    if getattr(e.args[0].args[0], 'cause', None):
+                        message = e.args[0].args[0].cause.message
+            raise BadRequestException(str(message))
 
     @classmethod
     def create_connection_maker(
@@ -66,7 +137,7 @@ class JDBC(Resource, ABC):
         engine_kwargs: Dict[str, Any] = None,
     ) -> ConnectionMaker:
 
-        url: str = f'{cls.JDBC_NAME}://{host}:{port}'
+        url: str = f'{cls.JDBC_NAME}://{host}:{port}/'
 
         if not engine_kwargs or 'JAR_PATH' not in engine_kwargs:
             raise Exception('Not Found JAR_PATH in settings')
