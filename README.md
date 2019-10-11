@@ -3,7 +3,7 @@
 [![](https://images.microbadger.com/badges/version/koxudaxi/local-data-api.svg)](https://microbadger.com/images/koxudaxi/local-data-api "Get your own version badge on microbadger.com")
 [![codecov](https://codecov.io/gh/koxudaxi/local-data-api/branch/master/graph/badge.svg)](https://codecov.io/gh/koxudaxi/local-data-api)
 
-If you want to run tests on your local machine and CI then, local-data-api can run in your local machine with MySQL Server.
+If you want to run tests on your local machine and CI then, local-data-api can run in your local machine with MySQL and PostgreSQL Servers.
 
 ## What's AWS Aurora Serverless's Data API?
 https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
@@ -12,6 +12,11 @@ https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
 local-data-api is "proxy server" to real databases.
 
 The API converts RESTful request to SQL statements.
+
+## Support Database Types
+- MySQL
+- PostgreSQL
+
 
 ## How to use this image
 You set your MYSQL Server configs as environments.
@@ -24,7 +29,8 @@ In this case, you give local-data-api URL to aws client (like aws-cli).
 $ aws --endpoint-url http://127.0.0.1:8080 rds-data execute-statement --resource-arn "arn:aws:rds:us-east-1:123456789012:cluster:dummy" --sql "show databases"  --secret-arn "arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy" --database 'test'
 ```
 ## docker-compose
-docker-compose.yml
+### MySQL
+docker-compose-mysql.yml
 ```yaml
 version: '3.1'
 
@@ -104,17 +110,38 @@ Out[3]: {'ResponseMetadata': {'HTTPStatusCode': 200,
   [{'longValue': 3}, {'stringValue': 'lisa'}, {'isNull': True}],}
 ```
 
-## Features
-### Implemented
-- `BeginTransaction`  - core  
-- `CommitTransaction` - core 
-- `ExecuteStatement` - core 
-- `RollbackTransaction` - core
-- `BatchExecuteStatement` - core
 
-### Not Implemented
+### PostgreSQL
+Now, local-data-api supports PostgreSQL
 
-- `ExecuteSql(Deprecated API)`
+docker-compose-postgres.yml
+```yaml
+version: '3.1'
+
+services:
+  local-data-api:
+    image: koxudaxi/local-data-api
+    restart: always
+    environment:
+      ENGINE: PostgreSQLJDBC
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      RESOURCE_ARN: 'arn:aws:rds:us-east-1:123456789012:cluster:dummy'
+      SECRET_ARN: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy'
+    ports:
+      - "8080:80"
+  db:
+    image: postgres:10.7-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: test
+    ports:
+        - "5432:5432"
+
+```
 
 ## Related projects
 ### py-data-api

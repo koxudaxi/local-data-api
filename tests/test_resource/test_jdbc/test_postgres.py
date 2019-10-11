@@ -6,7 +6,7 @@ import jaydebeapi
 import pytest
 from local_data_api.exceptions import BadRequestException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
-from local_data_api.resources.jdbc.mysql import MySQLJDBC
+from local_data_api.resources.jdbc.postgres import PostgreSQLJDBC
 
 DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
     'SQLite': {'host': '', 'port': None, 'user_name': None, 'password': None}
@@ -33,16 +33,12 @@ def test_execute_insert(mocked_connection, mocked_cursor, mocker):
     mocked_cursor.description = ''
     mocked_cursor.rowcount = 1
     mocked_cursor.fetchone.side_effect = [[0]]
-    dummy = MySQLJDBC(mocked_connection)
+    dummy = PostgreSQLJDBC(mocked_connection)
     assert dummy.execute(
         "insert into users values (1, 'abc')"
     ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
     mocked_cursor.execute.assert_has_calls(
-        [
-            mocker.call('SELECT LAST_INSERT_ID(NULL)'),
-            mocker.call("insert into users values (1, 'abc')"),
-            mocker.call('SELECT LAST_INSERT_ID()'),
-        ]
+        [mocker.call("insert into users values (1, 'abc')")]
     )
     mocked_cursor.close.assert_called_once_with()
 
@@ -55,11 +51,7 @@ def test_execute_insert(mocked_connection, mocked_cursor, mocker):
         "insert into users values (1, 'abc')"
     ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
     mocked_cursor.execute.assert_has_calls(
-        [
-            mocker.call('SELECT LAST_INSERT_ID(NULL)'),
-            mocker.call("insert into users values (1, 'abc')"),
-            mocker.call('SELECT LAST_INSERT_ID()'),
-        ]
+        [mocker.call("insert into users values (1, 'abc')")]
     )
     mocked_cursor.close.assert_called_once_with()
 
@@ -68,18 +60,12 @@ def test_execute_insert_with_generated_field(mocked_connection, mocked_cursor, m
     mocked_cursor.description = ''
     mocked_cursor.rowcount = 1
     mocked_cursor.fetchone.side_effect = [[1]]
-    dummy = MySQLJDBC(mocked_connection)
+    dummy = PostgreSQLJDBC(mocked_connection)
     assert dummy.execute(
         "insert into users (name) values ('abc')"
-    ) == ExecuteStatementResponse(
-        numberOfRecordsUpdated=1, generatedFields=[Field(longValue=1)]
-    )
+    ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
     mocked_cursor.execute.assert_has_calls(
-        [
-            mocker.call('SELECT LAST_INSERT_ID(NULL)'),
-            mocker.call("insert into users (name) values ('abc')"),
-            mocker.call('SELECT LAST_INSERT_ID()'),
-        ]
+        [mocker.call("insert into users (name) values ('abc')")]
     )
     mocked_cursor.close.assert_called_once_with()
 
@@ -88,16 +74,12 @@ def test_execute_insert_with_params(mocked_connection, mocked_cursor, mocker):
     mocked_cursor.description = ''
     mocked_cursor.rowcount = 1
     mocked_cursor.fetchone.side_effect = [[0]]
-    dummy = MySQLJDBC(mocked_connection)
+    dummy = PostgreSQLJDBC(mocked_connection)
     assert dummy.execute(
         "insert into users values (:id, :name)", {'id': 1, 'name': 'abc'}
     ) == ExecuteStatementResponse(numberOfRecordsUpdated=1, generatedFields=[])
     mocked_cursor.execute.assert_has_calls(
-        [
-            mocker.call('SELECT LAST_INSERT_ID(NULL)'),
-            mocker.call("insert into users values (1, 'abc')"),
-            mocker.call('SELECT LAST_INSERT_ID()'),
-        ]
+        [mocker.call("insert into users values (1, 'abc')")]
     )
     mocked_cursor.close.assert_called_once_with()
 
@@ -105,7 +87,7 @@ def test_execute_insert_with_params(mocked_connection, mocked_cursor, mocker):
 def test_execute_select(mocked_connection, mocked_cursor, mocker):
     mocked_cursor.description = 1, 1, 1, 1, 1, 1, 1
     mocked_cursor.fetchall.side_effect = [((1, 'abc'),)]
-    dummy = MySQLJDBC(mocked_connection, transaction_id='123')
+    dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
     dummy.use_database = mocker.Mock()
     assert dummy.execute(
         "select * from users", database_name='test'
@@ -114,9 +96,7 @@ def test_execute_select(mocked_connection, mocked_cursor, mocker):
         records=[[Field.from_value(1), Field.from_value('abc')]],
     )
 
-    mocked_cursor.execute.assert_has_calls(
-        [mocker.call('SELECT LAST_INSERT_ID(NULL)'), mocker.call('select * from users')]
-    )
+    mocked_cursor.execute.assert_has_calls([mocker.call('select * from users')])
     mocked_cursor.close.assert_called_once_with()
 
 
@@ -125,7 +105,7 @@ def test_execute_select_with_include_metadata(mocked_connection, mocked_cursor, 
     mocked_cursor._meta = meta_mock
     mocked_cursor.description = (1, 2, 3, 4, 5, 6, 7), (8, 9, 10, 11, 12, 13, 14)
     mocked_cursor.fetchall.side_effect = [((1, 'abc'),)]
-    dummy = MySQLJDBC(mocked_connection, transaction_id='123')
+    dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
     dummy.use_database = mocker.Mock()
     create_column_metadata_set_mock = mocker.patch(
         'local_data_api.resources.jdbc.create_column_metadata_set'
@@ -201,22 +181,19 @@ def test_execute_select_with_include_metadata(mocked_connection, mocked_cursor, 
     )
 
     create_column_metadata_set_mock.assert_called_once_with(meta_mock)
-    mocked_cursor.execute.assert_has_calls(
-        [mocker.call('SELECT LAST_INSERT_ID(NULL)'), mocker.call('select * from users')]
-    )
+    mocked_cursor.execute.assert_has_calls([mocker.call('select * from users')])
     mocked_cursor.close.assert_called_once_with()
 
 
 def test_execute_exception_1(mocked_connection, mocked_cursor, mocker):
     error = jaydebeapi.DatabaseError('error_message')
     error.args = ['error_message']
-    mocked_cursor.execute.side_effect = [0, error]
+    mocked_cursor.execute.side_effect = [error]
     mocked_connection.cursor.side_effect = [mocked_cursor]
-    dummy = MySQLJDBC(mocked_connection, transaction_id='123')
+    dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
     with pytest.raises(BadRequestException) as e:
         dummy.execute("select * from users")
     assert e.value.message == 'error_message'
-    mocked_cursor.execute.assert_has_calls([mocker.call('SELECT LAST_INSERT_ID(NULL)')])
     mocked_cursor.close.assert_called_once_with()
 
 
@@ -227,19 +204,18 @@ def test_execute_exception_2(mocked_connection, mocked_cursor, mocker):
     inner_error = mocker.Mock()
     inner_error.args = [cause]
     error.args = [inner_error]
-    mocked_cursor.execute.side_effect = [0, error]
+    mocked_cursor.execute.side_effect = [error]
     mocked_connection.cursor.side_effect = [mocked_cursor]
-    dummy = MySQLJDBC(mocked_connection, transaction_id='123')
+    dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
     with pytest.raises(BadRequestException) as e:
         dummy.execute("select * from users")
     assert e.value.message == 'cause_error_message'
-    mocked_cursor.execute.assert_has_calls([mocker.call('SELECT LAST_INSERT_ID(NULL)')])
     mocked_cursor.close.assert_called_once_with()
 
 
 def test_execute_exception_3(mocked_connection, mocked_cursor, mocker):
     mocked_connection.cursor.side_effect = [jaydebeapi.DatabaseError()]
-    dummy = MySQLJDBC(mocked_connection, transaction_id='123')
+    dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
     with pytest.raises(BadRequestException):
         dummy.execute("select * from users")
     mocked_cursor.close.assert_not_called()
@@ -250,11 +226,10 @@ def test_execute_exception_4(mocked_connection, mocked_cursor, mocker):
     inner_error = mocker.Mock()
     inner_error.args = ['inner_error_message']
     error.args = [inner_error]
-    mocked_cursor.execute.side_effect = [0, error]
+    mocked_cursor.execute.side_effect = [error]
     mocked_connection.cursor.side_effect = [mocked_cursor]
-    dummy = MySQLJDBC(mocked_connection, transaction_id='123')
+    dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
     with pytest.raises(BadRequestException) as e:
         dummy.execute("select * from users")
     assert e.value.message == 'inner_error_message'
-    mocked_cursor.execute.assert_has_calls([mocker.call('SELECT LAST_INSERT_ID(NULL)')])
     mocked_cursor.close.assert_called_once_with()

@@ -11,6 +11,8 @@ RUN apk add --no-cache libstdc++ openjdk8-jre g++ libc-dev curl \
      &&  pip install JPype1==0.6.3 \
      && curl -o /usr/lib/jvm/mariadb-java-client.jar \
         https://downloads.mariadb.com/Connectors/java/connector-java-${MARIADB_CLIENT_VERSION}/mariadb-java-client-${MARIADB_CLIENT_VERSION}.jar \
+     && curl -o /usr/lib/jvm/postgresql-java-client.jar \
+        https://jdbc.postgresql.org/download/postgresql-42.2.8.jar \
      &&  apk del g++ libc-dev curl
 
 COPY setup.py /app

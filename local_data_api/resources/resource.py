@@ -47,6 +47,17 @@ if TYPE_CHECKING:  # pragma: no cover
         def cursor(self) -> Cursor:
             return Cursor()
 
+        @property
+        def jconn(self) -> Jconn:
+            pass
+
+    class Jconn:
+        def setAutoCommit(self, flag: bool) -> None:
+            pass
+
+        def setCatalog(self, catalog: str) -> None:
+            pass
+
     class Cursor:
         def execute(self, *args: Any, **kwargs: Any) -> Any:
             pass

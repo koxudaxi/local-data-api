@@ -18,6 +18,15 @@ class DummyJDBC(JDBC):
     JDBC_NAME = 'jdbc:dummy'
     DRIVER = 'dummy'
 
+    @staticmethod
+    def reset_generated_id(cursor: jaydebeapi.Cursor) -> None:
+        cursor.execute('SELECT LAST_INSERT_ID(NULL)')
+
+    @staticmethod
+    def last_generated_id(cursor: jaydebeapi.Cursor) -> int:
+        cursor.execute("SELECT LAST_INSERT_ID()")
+        return int(str(cursor.fetchone()[0]))
+
 
 def test_attach_thread_to_jvm(mocker):
     mock_jpype = mocker.Mock()
@@ -131,7 +140,7 @@ def test_create_connection_maker(mocker):
     connection_maker()
     mock_connect.assert_called_once_with(
         'dummy',
-        'jdbc:dummy://127.0.0.1:3306',
+        'jdbc:dummy://127.0.0.1:3306/',
         {'user': 'root', 'password': 'pass'},
         'test.jar',
     )
@@ -144,3 +153,10 @@ def test_create_connection_maker_error(mocker):
             host='127.0.0.1', port=3306, user_name='root', password='pass'
         )
     assert e.value.args[0] == 'Not Found JAR_PATH in settings'
+
+
+def test_use_database(mocker):
+    connection_mock = mocker.Mock()
+    dummy = DummyJDBC(connection_mock)
+    dummy.use_database('abc')
+    connection_mock.jconn.setCatalog.assert_called_once_with('abc')
