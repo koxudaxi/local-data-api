@@ -1,7 +1,8 @@
 # local-data-api - Local Data API for AWS Aurora Serverless Data API
 [![Build Status](https://travis-ci.org/koxudaxi/local-data-api.svg?branch=master)](https://travis-ci.org/koxudaxi/local-data-api)
-[![](https://images.microbadger.com/badges/version/koxudaxi/local-data-api.svg)](https://microbadger.com/images/koxudaxi/local-data-api "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/koxudaxi/local-data-api.svg)](https://hub.docker.com/r/koxudaxi/local-data-api)
 [![codecov](https://codecov.io/gh/koxudaxi/local-data-api/branch/master/graph/badge.svg)](https://codecov.io/gh/koxudaxi/local-data-api)
+![license](https://img.shields.io/github/license/koxudaxi/local-data-api.svg)
 
 If you want to run tests on your local machine and CI then, local-data-api can run in your local machine with MySQL and PostgreSQL Servers.
 
