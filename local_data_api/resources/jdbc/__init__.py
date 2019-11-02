@@ -10,8 +10,16 @@ from local_data_api.resources.resource import Resource
 from sqlalchemy import text
 from sqlalchemy.engine import Dialect
 
+
 if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker, Connection
+
+
+def _to_list(rs, col):
+    return rs.getObject(col).getArray()[:]
+
+
+jaydebeapi._DEFAULT_CONVERTERS.update({ 'ARRAY': _to_list })
 
 
 def attach_thread_to_jvm() -> None:

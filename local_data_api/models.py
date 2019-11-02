@@ -7,6 +7,31 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Schema
 
 
+class ArrayField(BaseModel):
+    blobValues: Optional[List[str]]  # Type: Base64-encoded binary data object
+    booleanValues: Optional[List[bool]]
+    doubleValues: Optional[List[float]]
+    longValues: Optional[List[int]]
+    stringValues: Optional[List[str]]  
+
+    @classmethod
+    def from_value(cls, values: list) -> Field:
+        if len(values) == 0:
+            return cls(stringValues=[])
+        value = values[0]
+        if isinstance(value, bool):
+            return cls(booleanValues=values)
+        elif isinstance(value, str):
+            return cls(stringValues=values)
+        elif isinstance(value, int):
+            return cls(longValues=values)
+        elif isinstance(value, float):
+            return cls(doubleValues=values)
+        #elif isinstance(value, bytes):
+        #    return cls(blobValues=b64encode(values))
+        else:
+            raise Exception(f'unsupported type {type(value)}: {value} ')
+
 class Field(BaseModel):
     blobValue: Optional[str]  # Type: Base64-encoded binary data object
     booleanValue: Optional[bool]
@@ -14,6 +39,7 @@ class Field(BaseModel):
     isNull: Optional[bool]
     longValue: Optional[int]
     stringValue: Optional[str]
+    arrayValue: Optional[ArrayField]
 
     @classmethod
     def from_value(cls, value: Any) -> Field:
@@ -27,6 +53,8 @@ class Field(BaseModel):
             return cls(doubleValue=value)
         elif isinstance(value, bytes):
             return cls(blobValue=b64encode(value))
+        elif isinstance(value, list):
+            return cls(arrayValue=ArrayField.from_value(value))
         elif value is None:
             return cls(isNull=True)
         else:
