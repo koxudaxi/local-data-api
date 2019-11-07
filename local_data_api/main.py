@@ -54,7 +54,7 @@ def commit_transaction(request: CommitTransactionRequest) -> CommitTransactionRe
 
 @app.post("/RollbackTransaction", response_model=RollbackTransactionResponse)
 def rollback_transaction(
-    request: RollbackTransactionRequest
+    request: RollbackTransactionRequest,
 ) -> RollbackTransactionResponse:
     resource: Resource = get_resource(
         request.resourceArn, request.secretArn, request.transactionId
@@ -108,7 +108,7 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
     response_model_skip_defaults=True,
 )
 def batch_execute_statement(
-    request: BatchExecuteStatementRequests
+    request: BatchExecuteStatementRequests,
 ) -> BatchExecuteStatementResponse:
     resource: Optional[Resource] = None
     try:

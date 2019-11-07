@@ -29,6 +29,8 @@ class Field(BaseModel):
             return cls(blobValue=b64encode(value))
         elif value is None:
             return cls(isNull=True)
+        elif type(value).__name__.endswith('UUID'):
+            return cls(stringValue=str(value))
         else:
             raise Exception(f'unsupported type {type(value)}: {value} ')
 

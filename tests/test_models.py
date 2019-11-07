@@ -23,6 +23,16 @@ def test_from_value() -> None:
     assert Field.from_value(b'bytes') == Field(blobValue=b64encode(b'bytes'))
     assert Field.from_value(None) == Field(isNull=True)
 
+    class JavaUUID:
+        def __init__(self, val: str):
+            self._val: str = val
+
+        def __str__(self) -> str:
+            return self._val
+
+    uuid = 'e9e1df6b-c6d3-4a34-9227-c27056d596c6'
+    assert Field.from_value(JavaUUID(uuid)) == Field(stringValue=uuid)
+
     class Dummy:
         pass
 
