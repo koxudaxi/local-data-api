@@ -82,7 +82,7 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
         if request.parameters:
             parameters: Optional[Dict[str, Any]] = {
                 parameter.name: parameter.valid_value
-                for parameter in request.parameters.__root__
+                for parameter in request.parameters
             }
         else:
             parameters = None
@@ -125,8 +125,7 @@ def batch_execute_statement(
         else:
             for parameter_set in request.parameterSets:
                 parameters: Dict[str, Any] = {
-                    parameter.name: parameter.valid_value
-                    for parameter in parameter_set.__root__
+                    parameter.name: parameter.valid_value for parameter in parameter_set
                 }
                 result: ExecuteStatementResponse = resource.execute(
                     request.sql, parameters, request.database
