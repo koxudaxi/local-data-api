@@ -48,10 +48,6 @@ class SqlParameter(BaseModel):
         return None
 
 
-class SqlParameters(BaseModel):
-    __root__: List[SqlParameter]
-
-
 class ExecuteSqlRequest(BaseModel):
     awsSecretStoreArn: str
     dbClusterOrInstanceArn: str
@@ -67,7 +63,7 @@ class ExecuteStatementRequests(BaseModel):
     database: Optional[str]
     continueAfterTimeout: Optional[bool]
     includeResultMetadata: bool = False
-    parameters: Optional[SqlParameters]
+    parameters: Optional[List[SqlParameter]]
     schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
 
@@ -139,7 +135,7 @@ class BatchExecuteStatementRequests(BaseModel):
     database: Optional[str]
     continueAfterTimeout: Optional[bool]
     includeResultMetadata: Optional[bool]
-    parameterSets: Optional[List[SqlParameters]]
+    parameterSets: Optional[List[List[SqlParameter]]]
     schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
 
