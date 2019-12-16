@@ -70,7 +70,7 @@ def rollback_transaction(
 @app.post(
     "/Execute",
     response_model=ExecuteStatementResponse,
-    response_model_skip_defaults=True,
+    response_model_exclude_unset=True,
 )
 def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResponse:
     resource: Optional[Resource] = None
@@ -105,7 +105,7 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
 @app.post(
     "/BatchExecute",
     response_model=BatchExecuteStatementResponse,
-    response_model_skip_defaults=True,
+    response_model_exclude_unset=True,
 )
 def batch_execute_statement(
     request: BatchExecuteStatementRequests,
