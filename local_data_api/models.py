@@ -31,6 +31,8 @@ class Field(BaseModel):
             return cls(isNull=True)
         elif type(value).__name__.endswith('UUID'):
             return cls(stringValue=str(value))
+        elif type(value).__name__.endswith('PGobject'):
+            return cls(stringValue=str(value))
         else:
             raise Exception(f'unsupported type {type(value)}: {value} ')
 
