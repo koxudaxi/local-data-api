@@ -38,7 +38,7 @@ def test_from_value() -> None:
             return self._val
 
     uuid = 'e9e1df6b-c6d3-4a34-9227-c27056d596c6'
-    assert Field.from_value(JavaUUID()) == Field(stringValue=uuid)
+    assert Field.from_value(JavaUUID(uuid)) == Field(stringValue=uuid)
 
     class PGObject:
         def __init__(self, val: str):
