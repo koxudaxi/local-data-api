@@ -7,6 +7,9 @@ ENV MARIADB_CLIENT_VERSION 2.5.0
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk/jre/
 ENV LD_LIBRARY_PATH /usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/server/
 
+# This app supports only single process to share connections on workers
+ENV WEB_CONCURRENCY 1
+
 RUN apk add --no-cache libstdc++ openjdk8-jre g++ libc-dev curl \
      &&  pip install JPype1==0.6.3 \
      && curl -o /usr/lib/jvm/mariadb-java-client.jar \
