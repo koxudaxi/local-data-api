@@ -1,16 +1,23 @@
 from base64 import b64encode
 
 import pytest
+
 from local_data_api.models import Field, SqlParameter
 
 
 def test_valid_field() -> None:
-    assert SqlParameter(name='abc', value=Field(stringValue='abc')).valid_value == 'abc'
-    assert SqlParameter(name='abc', value=Field(blobValue='abc')).valid_value == 'abc'
-    assert SqlParameter(name='abc', value=Field(doubleValue=0.1)).valid_value == 0.1
-    assert SqlParameter(name='abc', value=Field(isNull=True)).valid_value is None
-    assert SqlParameter(name='abc', value=Field(longValue=123)).valid_value == 123
-    assert SqlParameter(name='abc', value=Field(longValue=123)).valid_value == 123
+    assert SqlParameter(
+        name='abc', value=Field(stringValue='abc')).valid_value == 'abc'
+    assert SqlParameter(
+        name='abc', value=Field(blobValue='abc')).valid_value == 'abc'
+    assert SqlParameter(
+        name='abc', value=Field(doubleValue=0.1)).valid_value == 0.1
+    assert SqlParameter(
+        name='abc', value=Field(isNull=True)).valid_value is None
+    assert SqlParameter(
+        name='abc', value=Field(longValue=123)).valid_value == 123
+    assert SqlParameter(
+        name='abc', value=Field(longValue=123)).valid_value == 123
     assert SqlParameter(name='abc', value=Field()).valid_value is None
 
 
@@ -31,7 +38,16 @@ def test_from_value() -> None:
             return self._val
 
     uuid = 'e9e1df6b-c6d3-4a34-9227-c27056d596c6'
-    assert Field.from_value(JavaUUID(uuid)) == Field(stringValue=uuid)
+    assert Field.from_value(JavaUUID()) == Field(stringValue=uuid)
+
+    class PGObject:
+        def __init__(self, val: str):
+            self._val: str = val
+
+        def __str__(self) -> str:
+            return self._val
+
+    assert Field.from_value(PGObject("{}")) == Field(stringValue="{}")
 
     class Dummy:
         pass
