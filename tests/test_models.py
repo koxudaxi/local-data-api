@@ -1,23 +1,16 @@
 from base64 import b64encode
 
 import pytest
-
 from local_data_api.models import Field, SqlParameter
 
 
 def test_valid_field() -> None:
-    assert SqlParameter(
-        name='abc', value=Field(stringValue='abc')).valid_value == 'abc'
-    assert SqlParameter(
-        name='abc', value=Field(blobValue='abc')).valid_value == 'abc'
-    assert SqlParameter(
-        name='abc', value=Field(doubleValue=0.1)).valid_value == 0.1
-    assert SqlParameter(
-        name='abc', value=Field(isNull=True)).valid_value is None
-    assert SqlParameter(
-        name='abc', value=Field(longValue=123)).valid_value == 123
-    assert SqlParameter(
-        name='abc', value=Field(longValue=123)).valid_value == 123
+    assert SqlParameter(name='abc', value=Field(stringValue='abc')).valid_value == 'abc'
+    assert SqlParameter(name='abc', value=Field(blobValue='abc')).valid_value == 'abc'
+    assert SqlParameter(name='abc', value=Field(doubleValue=0.1)).valid_value == 0.1
+    assert SqlParameter(name='abc', value=Field(isNull=True)).valid_value is None
+    assert SqlParameter(name='abc', value=Field(longValue=123)).valid_value == 123
+    assert SqlParameter(name='abc', value=Field(longValue=123)).valid_value == 123
     assert SqlParameter(name='abc', value=Field()).valid_value is None
 
 
