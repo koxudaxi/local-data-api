@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from base64 import b64encode
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional, Union
 
-from pydantic import BaseModel, Schema
+from pydantic import BaseModel, Field as Field_
 
 
 class Field(BaseModel):
@@ -43,7 +43,7 @@ class SqlParameter(BaseModel):
 
     @property
     def valid_value(self: SqlParameter) -> Union[str, bool, float, None, int]:
-        for key, value in self.value.dict(skip_defaults=True).items():
+        for key, value in self.value.dict(exclude_unset=True).items():
             if key == 'isNull' and value:
                 return None
             return value
@@ -55,7 +55,7 @@ class ExecuteSqlRequest(BaseModel):
     dbClusterOrInstanceArn: str
     sqlStatements: str
     database: Optional[str]
-    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
+    schema_: Optional[str] = Field_(None, alias='schema')  # type: ignore
 
 
 class ExecuteStatementRequests(BaseModel):
@@ -66,7 +66,7 @@ class ExecuteStatementRequests(BaseModel):
     continueAfterTimeout: Optional[bool]
     includeResultMetadata: bool = False
     parameters: Optional[List[SqlParameter]]
-    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
+    schema_: Optional[str] = Field_(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
 
 
@@ -81,7 +81,7 @@ class ColumnMetadata(BaseModel):
     nullable: Optional[int]
     precision: Optional[int]
     scale: Optional[int]
-    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
+    schema_: Optional[str] = Field_(None, alias='schema')  # type: ignore
     tableName: Optional[str]
     type: Optional[int]
     typeName: Optional[str]
@@ -97,7 +97,7 @@ class ExecuteStatementResponse(BaseModel):
 class BeginTransactionRequest(BaseModel):
     resourceArn: str
     secretArn: str
-    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
+    schema_: Optional[str] = Field_(None, alias='schema')  # type: ignore
     database: Optional[str]
 
 
@@ -138,7 +138,7 @@ class BatchExecuteStatementRequests(BaseModel):
     continueAfterTimeout: Optional[bool]
     includeResultMetadata: Optional[bool]
     parameterSets: Optional[List[List[SqlParameter]]]
-    schema_: Optional[str] = Schema(None, alias='schema')  # type: ignore
+    schema_: Optional[str] = Field_(None, alias='schema')  # type: ignore
     transactionId: Optional[str]
 
 
