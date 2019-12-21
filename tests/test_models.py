@@ -33,6 +33,15 @@ def test_from_value() -> None:
     uuid = 'e9e1df6b-c6d3-4a34-9227-c27056d596c6'
     assert Field.from_value(JavaUUID(uuid)) == Field(stringValue=uuid)
 
+    class PGobject:
+        def __init__(self, val: str):
+            self._val: str = val
+
+        def __str__(self) -> str:
+            return self._val
+
+    assert Field.from_value(PGobject("{}")) == Field(stringValue="{}")
+
     class Dummy:
         pass
 
