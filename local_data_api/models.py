@@ -112,8 +112,8 @@ class CommitTransactionRequest(BaseModel):
 
 
 class TransactionStatus(Enum):
-    transaction_committed: str = 'Transaction Committed'
-    rollback_complete: str = 'Rollback Complete'
+    transaction_committed = 'Transaction Committed'
+    rollback_complete = 'Rollback Complete'
 
 
 class CommitTransactionResponse(BaseModel):

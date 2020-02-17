@@ -35,6 +35,8 @@ if TYPE_CHECKING:  # pragma: no cover
     connect = Callable
 
     class Connection:
+        database: Optional[str] = None
+
         def close(self) -> None:
             pass
 
@@ -78,7 +80,7 @@ if TYPE_CHECKING:  # pragma: no cover
         def description(self) -> Tuple[Tuple]:
             return ((),)
 
-    ConnectionMaker = Callable[[], Connection]
+    ConnectionMaker = Callable[[Optional[str]], Connection]
 
 
 def set_connection(transaction_id: str, connection: Connection) -> None:
@@ -97,6 +99,7 @@ class ResourceMeta:
     port: Optional[int] = None
     user_name: Optional[str] = None
     password: Optional[str] = None
+    database: Optional[str] = None
 
 
 def register_resource_type(resource: Type[Resource]) -> Type[Resource]:
@@ -154,10 +157,14 @@ def create_connection_maker(
     )
 
 
-def create_connection(resource_arn: str, **connection_kwargs: Any) -> Connection:
-    return RESOURCE_METAS[resource_arn].connection_maker(  # type: ignore
-        **connection_kwargs
+def create_connection(
+    resource_arn: str, database: Optional[str] = None, **connection_kwargs: Any
+) -> Connection:
+    connection = RESOURCE_METAS[resource_arn].connection_maker(  # type: ignore
+        database, **connection_kwargs
     )
+    connection.database = database
+    return connection
 
 
 def get_connection(transaction_id: str) -> Connection:
@@ -167,7 +174,10 @@ def get_connection(transaction_id: str) -> Connection:
 
 
 def get_resource(
-    resource_arn: str, secret_arn: str, transaction_id: Optional[str] = None
+    resource_arn: str,
+    secret_arn: str,
+    transaction_id: Optional[str] = None,
+    database: Optional[str] = None,
 ) -> Resource:
     if resource_arn not in RESOURCE_METAS:
         if transaction_id in CONNECTION_POOL:
@@ -188,9 +198,13 @@ def get_resource(
         raise BadRequestException('Invalid secret_arn')
 
     if transaction_id is None:
-        connection: Connection = create_connection(resource_arn)
+        connection: Connection = create_connection(resource_arn, database)
     else:
         connection = get_connection(transaction_id)
+        if database and database != connection.database:
+            raise BadRequestException(
+                'Database name is not the same as when transaction was created'
+            )
 
     return meta.resource_type(connection, transaction_id)
 
@@ -283,9 +297,6 @@ class Resource(ABC):
         if self.transaction_id in CONNECTION_POOL:
             delete_connection(self.transaction_id)
 
-    def use_database(self, database_name: str) -> None:
-        self.execute(f'use {database_name}')
-
     def begin(self) -> str:
         transaction_id = self.create_transaction_id()
         self._transaction_id = transaction_id
@@ -302,14 +313,10 @@ class Resource(ABC):
         self,
         sql: str,
         params: Optional[Dict[str, Any]] = None,
-        database_name: Optional[str] = None,
         include_result_metadata: bool = False,
     ) -> ExecuteStatementResponse:
 
         try:
-            if database_name:
-                self.use_database(database_name)
-
             cursor: Optional[Cursor] = None
             try:
                 cursor = self.connection.cursor()

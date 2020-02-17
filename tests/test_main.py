@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 from local_data_api.main import app
 from local_data_api.resources import SQLite
@@ -19,7 +21,7 @@ def mocked_mysql(mocker):
     secret = mocker.Mock()
     secret.user_name = 'test'
     secret.password = 'pw'
-    meta = ResourceMeta(SQLite, lambda: None, 'localhost', 3306, 'test', 'pw')
+    meta = ResourceMeta(SQLite, lambda x: Mock(), 'localhost', 3306, 'test', 'pw')
 
     mocker.patch('local_data_api.resources.resource.RESOURCE_METAS', {'abc': meta})
     mocker.patch('local_data_api.resources.resource.get_secret', return_value=secret)

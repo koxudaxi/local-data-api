@@ -76,7 +76,10 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
     resource: Optional[Resource] = None
     try:
         resource = get_resource(
-            request.resourceArn, request.secretArn, request.transactionId
+            request.resourceArn,
+            request.secretArn,
+            request.transactionId,
+            request.database,
         )
 
         if request.parameters:
@@ -90,7 +93,6 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
         response: ExecuteStatementResponse = resource.execute(
             request.sql,
             parameters,
-            request.database,
             include_result_metadata=request.includeResultMetadata,
         )
 
@@ -113,7 +115,10 @@ def batch_execute_statement(
     resource: Optional[Resource] = None
     try:
         resource = get_resource(
-            request.resourceArn, request.secretArn, request.transactionId
+            request.resourceArn,
+            request.secretArn,
+            request.transactionId,
+            request.database,
         )
 
         update_results: List[UpdateResult] = []
@@ -128,7 +133,7 @@ def batch_execute_statement(
                     parameter.name: parameter.valid_value for parameter in parameter_set
                 }
                 result: ExecuteStatementResponse = resource.execute(
-                    request.sql, parameters, request.database
+                    request.sql, parameters
                 )
 
                 if result.generatedFields:
