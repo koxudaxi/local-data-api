@@ -34,7 +34,7 @@ def execute_sql(request: ExecuteSqlRequest) -> None:
 
 @app.post("/BeginTransaction", response_model=BeginTransactionResponse)
 def begin_statement(request: BeginTransactionRequest) -> BeginTransactionResponse:
-    resource: Resource = get_resource(request.resourceArn, request.secretArn)
+    resource: Resource = get_resource(request.resourceArn, request.secretArn, database=request.database)
     transaction_id: str = resource.begin()
 
     return BeginTransactionResponse(transactionId=transaction_id)
