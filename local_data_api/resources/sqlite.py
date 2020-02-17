@@ -23,7 +23,7 @@ class SQLite(Resource):
         password: Optional[str] = None,
         engine_kwargs: Dict[str, Any] = None,
     ) -> ConnectionMaker:
-        def connect():  # type: ignore
+        def connect(_: Optional[str] = None):  # type: ignore
             return sqlite3.connect(':memory:')
 
         return connect

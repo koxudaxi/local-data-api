@@ -41,6 +41,7 @@ class DummyResource(Resource):
         port: Optional[int] = None,
         user_name: Optional[str] = None,
         password: Optional[str] = None,
+        database: Optional[str] = None,
         engine_kwargs: Dict[str, Any] = None,
     ) -> ConnectionMaker:
         pass
@@ -99,6 +100,9 @@ def test_get_resource(secrets, mocker) -> None:
     mock_get_connection.return_value = new_connection
     resource = get_resource(resource_arn, 'dummy', 'transaction')
     assert resource.connection, new_connection
+
+    with pytest.raises(BadRequestException):
+        get_resource(resource_arn, 'dummy', 'transaction', database='test')
 
 
 def test_get_resource_exception(clear, secrets, mocker) -> None:
@@ -271,14 +275,6 @@ def test_rollback(clear, mocker):
     assert connection_mock.rollback.call_count == 1
 
 
-def test_use_database(clear, mocker):
-    execute_mock = mocker.Mock()
-    dummy = DummyResource(mocker.Mock())
-    dummy.execute = execute_mock
-    dummy.use_database('abc')
-    execute_mock.assert_called_once_with('use abc')
-
-
 def test_begin(clear, mocker):
     create_transaction_id_mock = mocker.Mock(side_effect=['abc'])
     connection_mock = mocker.Mock()
@@ -371,10 +367,7 @@ def test_execute_select(clear, mocker):
     cursor_mock.description = 1, 1, 1, 1, 1, 1, 1
     cursor_mock.fetchall.side_effect = [((1, 'abc'),)]
     dummy = DummyResource(connection_mock, transaction_id='123')
-    dummy.use_database = mocker.Mock()
-    assert dummy.execute(
-        "select * from users", database_name='test'
-    ) == ExecuteStatementResponse(
+    assert dummy.execute("select * from users",) == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
         records=[[Field.from_value(1), Field.from_value('abc')]],
     )
@@ -389,9 +382,8 @@ def test_execute_select_with_include_metadata(clear, mocker):
     cursor_mock.description = (1, 2, 3, 4, 5, 6, 7), (8, 9, 10, 11, 12, 13, 14)
     cursor_mock.fetchall.side_effect = [((1, 'abc'),)]
     dummy = DummyResource(connection_mock, transaction_id='123')
-    dummy.use_database = mocker.Mock()
     assert dummy.execute(
-        "select * from users", database_name='test', include_result_metadata=True
+        "select * from users", include_result_metadata=True
     ).dict() == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
         records=[[Field.from_value(1), Field.from_value('abc')]],

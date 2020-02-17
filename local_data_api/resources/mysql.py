@@ -35,7 +35,9 @@ class MySQL(Resource):
         if engine_kwargs:
             kwargs.update(engine_kwargs)
 
-        def connect():  # type: ignore
+        def connect(database: Optional[str] = None):  # type: ignore
+            if database:
+                kwargs['db'] = database
             return pymysql.connect(**kwargs)
 
         return connect

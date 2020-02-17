@@ -12,9 +12,14 @@ def test_create_connection_maker(mocker):
         password='pass',
         engine_kwargs={'auto_commit': True},
     )
-    connection_maker()
+    connection_maker(database='test')
     mock_connect.assert_called_once_with(
-        auto_commit=True, host='127.0.0.1', password='pass', port=3306, user='root'
+        auto_commit=True,
+        host='127.0.0.1',
+        password='pass',
+        port=3306,
+        user='root',
+        db='test',
     )
 
     mock_connect = mocker.patch('local_data_api.resources.mysql.pymysql.connect')

@@ -153,10 +153,3 @@ def test_create_connection_maker_error(mocker):
             host='127.0.0.1', port=3306, user_name='root', password='pass'
         )
     assert e.value.args[0] == 'Not Found JAR_PATH in settings'
-
-
-def test_use_database(mocker):
-    connection_mock = mocker.Mock()
-    dummy = DummyJDBC(connection_mock)
-    dummy.use_database('abc')
-    connection_mock.jconn.setCatalog.assert_called_once_with('abc')

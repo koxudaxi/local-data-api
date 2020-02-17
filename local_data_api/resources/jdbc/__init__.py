@@ -33,9 +33,11 @@ def connection_maker(
     jars: Union[List[str], str] = None,
     libs: Union[List[str], str] = None,
 ) -> ConnectionMaker:
-    def connect(**kwargs):  # type: ignore
+    def connect(database: Optional[str] = None, **kwargs):  # type: ignore
         attach_thread_to_jvm()
-        return jaydebeapi.connect(jclassname, url, driver_args, jars, libs)
+        return jaydebeapi.connect(
+            jclassname, url + database if database else url, driver_args, jars, libs
+        )
 
     return connect
 
@@ -55,9 +57,6 @@ class JDBC(Resource, ABC):
         self.connection.jconn.setAutoCommit(False)
         self.autocommit = False
 
-    def use_database(self, database_name: str) -> None:
-        self.connection.jconn.setCatalog(database_name)
-
     @staticmethod
     @abstractmethod
     def reset_generated_id(cursor: jaydebeapi.Cursor) -> None:
@@ -72,13 +71,9 @@ class JDBC(Resource, ABC):
         self,
         sql: str,
         params: Optional[Dict[str, Any]] = None,
-        database_name: Optional[str] = None,
         include_result_metadata: bool = False,
     ) -> ExecuteStatementResponse:
         try:
-            if database_name:
-                self.use_database(database_name)
-
             cursor: Optional[jaydebeapi.Cursor] = None
             try:
                 cursor = self.connection.cursor()
