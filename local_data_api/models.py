@@ -1,10 +1,19 @@
 from __future__ import annotations
 
 from base64 import b64encode
+from datetime import date, datetime, time
+from decimal import Decimal
 from enum import Enum
-from typing import Any, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field as Field_
+
+TYPE_HINT_TO_CONVERTER: Dict[str, Callable[[Any], Any]] = {
+    'DECIMAL': Decimal,
+    'TIMESTAMP': datetime.fromisoformat,
+    'TIME': time.fromisoformat,
+    'DATE': date.fromisoformat,
+}
 
 
 class Field(BaseModel):
@@ -40,12 +49,16 @@ class Field(BaseModel):
 class SqlParameter(BaseModel):
     name: str
     value: Field
+    type_hint: Optional[str] = Field_(None, alias='typeHint')
 
     @property
-    def valid_value(self: SqlParameter) -> Union[str, bool, float, None, int]:
+    def valid_value(self: SqlParameter) -> Union[Union[None, Decimal, datetime], Any]:
         for key, value in self.value.dict(exclude_unset=True).items():
             if key == 'isNull' and value:
                 return None
+
+            if key == 'stringValue' and self.type_hint:
+                return TYPE_HINT_TO_CONVERTER[self.type_hint](value)
             return value
         return None
 
