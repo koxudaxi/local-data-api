@@ -14,20 +14,32 @@ def test_valid_field() -> None:
     assert SqlParameter(name='abc', value=Field(longValue=123)).valid_value == 123
     assert SqlParameter(name='abc', value=Field(longValue=123)).valid_value == 123
     assert SqlParameter(name='abc', value=Field()).valid_value is None
-    assert SqlParameter(
-        name='abc', value=Field(stringValue='123456789'), typeHint='DECIMAL'
-    ).valid_value == Decimal(123456789)
-    assert SqlParameter(
-        name='abc',
-        value=Field(stringValue='2020-02-27 00:30:15.290'),
-        typeHint='TIMESTAMP',
-    ).valid_value == datetime.datetime(2020, 2, 27, 0, 30, 15, 290000)
-    assert SqlParameter(
-        name='abc', value=Field(stringValue='00:30:15.290'), typeHint='TIME'
-    ).valid_value == datetime.time(0, 30, 15, 290000)
-    assert SqlParameter(
-        name='abc', value=Field(stringValue='2020-02-27'), typeHint='DATE'
-    ).valid_value == datetime.date(2020, 2, 27)
+    assert (
+        SqlParameter(
+            name='abc', value=Field(stringValue='123456789'), typeHint='DECIMAL'
+        ).valid_value
+        == '123456789'
+    )
+    assert (
+        SqlParameter(
+            name='abc',
+            value=Field(stringValue='2020-02-27 00:30:15.290'),
+            typeHint='TIMESTAMP',
+        ).valid_value
+        == '2020-02-27 00:30:15.290'
+    )
+    assert (
+        SqlParameter(
+            name='abc', value=Field(stringValue='00:30:15.290'), typeHint='TIME'
+        ).valid_value
+        == '00:30:15.290'
+    )
+    assert (
+        SqlParameter(
+            name='abc', value=Field(stringValue='2020-02-27'), typeHint='DATE'
+        ).valid_value
+        == '2020-02-27'
+    )
 
 
 def test_from_value() -> None:

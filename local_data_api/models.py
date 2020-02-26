@@ -58,7 +58,7 @@ class SqlParameter(BaseModel):
                 return None
 
             if key == 'stringValue' and self.type_hint:
-                return TYPE_HINT_TO_CONVERTER[self.type_hint](value)
+                TYPE_HINT_TO_CONVERTER[self.type_hint](value)  # only validation
             return value
         return None
 
