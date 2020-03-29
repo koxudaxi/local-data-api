@@ -241,6 +241,13 @@ def test_create_query_undefined_param(clear):
     assert query == "insert into users values (1, 'abc')"
 
 
+def test_create_query_none_param(clear):
+    query = DummyResource.create_query(
+        'insert into users values (:id, :name)', {'id': 1, 'name': None},
+    )
+    assert query == "insert into users values (1, NULL)"
+
+
 def test_transaction_id(clear, mocker):
     connection_mock = mocker.Mock()
     dummy = DummyResource(connection_mock, transaction_id='123')
