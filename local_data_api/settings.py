@@ -54,5 +54,5 @@ def setup() -> None:
         db_setting.PORT,
         db_setting.USER,
         db_setting.PASSWORD,
-        {'JAR_PATH': db_setting.JAR_PATH},
+        {'JAR_PATH': db_setting.JAR_PATH} if 'JDBC' in engine.upper() else {},
     )
