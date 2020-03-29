@@ -15,6 +15,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Dialect
 from sqlalchemy.exc import ArgumentError, CompileError
 from sqlalchemy.sql.elements import TextClause
+from sqlalchemy.sql.expression import null
 
 INVALID_PARAMETER_MESSAGE: str = r"Bind parameter '([^\']+)' without a renderable value not allowed here."
 UNDEFINED_PARAMETER_MESSAGE: str = r"This text\(\) construct doesn't define a bound parameter named '([^\']+)'"
@@ -248,7 +249,11 @@ class Resource(ABC):
         text_sql: TextClause = text(sql)
         kwargs = {'dialect': cls.DIALECT, 'compile_kwargs': {"literal_binds": True}}
         try:
-            return str(text_sql.bindparams(**params).compile(**kwargs))
+            return str(
+                text_sql.bindparams(
+                    **{k: null() if v is None else v for k, v in params.items()}
+                ).compile(**kwargs)
+            )
         except CompileError as e:
             invalid_param_match = re.match(INVALID_PARAMETER_MESSAGE, e.args[0])
             if invalid_param_match:  # pragma: no cover
