@@ -42,6 +42,8 @@ class Field(BaseModel):
             return cls(stringValue=str(value))
         elif type(value).__name__.endswith('PGobject'):
             return cls(stringValue=str(value))
+        elif type(value).__name__.endswith('BigInteger'):
+            return cls(longValue=int(str(value)))
         else:
             raise Exception(f'unsupported type {type(value)}: {value} ')
 
