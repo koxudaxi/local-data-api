@@ -70,6 +70,15 @@ def test_from_value() -> None:
 
     assert Field.from_value(PGobject("{}")) == Field(stringValue="{}")
 
+    class BigInteger:
+        def __init__(self, val: int):
+            self._val: int = val
+
+        def __str__(self) -> int:
+            return self._val
+
+    assert Field.from_value(BigInteger("55")) == Field(longValue=55)
+
     class Dummy:
         pass
 
