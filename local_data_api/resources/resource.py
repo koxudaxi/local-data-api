@@ -55,6 +55,9 @@ if TYPE_CHECKING:  # pragma: no cover
         def jconn(self) -> Jconn:
             pass
 
+        def get_dsn_parameters(self) -> Dict[str, str]:
+            pass
+
     class Jconn:
         def setAutoCommit(self, flag: bool) -> None:
             pass
@@ -165,7 +168,8 @@ def create_connection(
     connection = RESOURCE_METAS[resource_arn].connection_maker(  # type: ignore
         database, **connection_kwargs
     )
-    connection.database = database
+    if hasattr(connection, 'database'):  # pragma: no cover
+        connection.database = database
     return connection
 
 
@@ -203,10 +207,17 @@ def get_resource(
         connection: Connection = create_connection(resource_arn, database)
     else:
         connection = get_connection(transaction_id)
-        if database and database != connection.database:
-            raise BadRequestException(
-                'Database name is not the same as when transaction was created'
-            )
+        if database:
+            if hasattr(connection, 'database'):  # pragma: no cover
+                connected_database: Optional[str] = connection.database
+            else:
+                connected_database = connection.get_dsn_parameters()[
+                    'dbname'
+                ]  # pragma: no cover
+            if database != connected_database:  # pragma: no cover
+                raise BadRequestException(
+                    'Database name is not the same as when transaction was created'
+                )
 
     return meta.resource_type(connection, transaction_id)
 

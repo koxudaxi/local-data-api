@@ -10,13 +10,13 @@ ENV LD_LIBRARY_PATH /usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/server/
 # This app supports only single process to share connections on workers
 ENV WEB_CONCURRENCY 1
 
-RUN apk add --no-cache libstdc++ openjdk8-jre g++ libc-dev curl \
-     &&  pip install JPype1==0.6.3 \
+RUN apk add --no-cache libstdc++ openjdk8-jre g++ libc-dev curl gcc postgresql-dev \
+     &&  pip install JPype1==0.6.3  psycopg2==2.8.5\
      && curl -o /usr/lib/jvm/mariadb-java-client.jar \
         https://downloads.mariadb.com/Connectors/java/connector-java-${MARIADB_CLIENT_VERSION}/mariadb-java-client-${MARIADB_CLIENT_VERSION}.jar \
      && curl -o /usr/lib/jvm/postgresql-java-client.jar \
         https://jdbc.postgresql.org/download/postgresql-42.2.8.jar \
-     &&  apk del g++ libc-dev curl
+     &&  apk del g++ gcc libc-dev curl
 
 COPY setup.py /app
 COPY setup.cfg /app
