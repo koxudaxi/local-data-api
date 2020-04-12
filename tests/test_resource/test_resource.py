@@ -4,6 +4,8 @@ import re
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import pytest
+from sqlalchemy.dialects import mysql
+
 from local_data_api.exceptions import BadRequestException, InternalServerErrorException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources import SQLite
@@ -21,7 +23,6 @@ from local_data_api.resources.resource import (
     register_resource,
     set_connection,
 )
-from sqlalchemy.dialects import mysql
 
 DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
     'SQLite': {'host': '', 'port': None, 'user_name': None, 'password': None}

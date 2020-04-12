@@ -8,14 +8,15 @@ from dataclasses import dataclass
 from hashlib import sha1
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Pattern, Tuple, Type, Union
 
-from local_data_api.exceptions import BadRequestException, InternalServerErrorException
-from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
-from local_data_api.secret_manager import Secret, get_secret
 from sqlalchemy import text
 from sqlalchemy.engine import Dialect
 from sqlalchemy.exc import ArgumentError, CompileError
 from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.sql.expression import null
+
+from local_data_api.exceptions import BadRequestException, InternalServerErrorException
+from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
+from local_data_api.secret_manager import Secret, get_secret
 
 INVALID_PARAMETER_MESSAGE: str = r"Bind parameter '([^\']+)' without a renderable value not allowed here."
 UNDEFINED_PARAMETER_MESSAGE: str = r"This text\(\) construct doesn't define a bound parameter named '([^\']+)'"

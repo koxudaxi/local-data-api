@@ -1,0 +1,30 @@
+[tool.black]
+line-length = 88
+skip-string-normalization = true
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+
+[tool.pytest]
+filterwarnings = "ignore::DeprecationWarning:distutils"
+
+[tool.coverage.run]
+source = ["local_data_api"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+ignore_errors = true
+exclude_lines = [
+    "if self.debug:",
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:"
+]
+omit = [
+    "tests/*"
+]

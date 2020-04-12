@@ -3,8 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import pymysql
-from local_data_api.resources.resource import Resource, register_resource_type
 from sqlalchemy.dialects import mysql
+
+from local_data_api.resources.resource import Resource, register_resource_type
 
 if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker
