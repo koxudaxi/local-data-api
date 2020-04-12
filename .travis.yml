@@ -9,7 +9,6 @@ services:
 
 install:
 - pip install ".[all]"
-- apt-get install libpq-dev
 
 cache: pip
 
