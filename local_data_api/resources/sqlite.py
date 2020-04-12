@@ -3,8 +3,9 @@ from __future__ import annotations
 import sqlite3
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from local_data_api.resources.resource import Resource, register_resource_type
 from sqlalchemy.dialects import sqlite
+
+from local_data_api.resources.resource import Resource, register_resource_type
 
 if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker

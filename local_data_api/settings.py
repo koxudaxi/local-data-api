@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import os
 
+from pydantic import BaseModel
+
 from local_data_api.resources.resource import register_resource
 from local_data_api.secret_manager import register_secret
-from pydantic import BaseModel
 
 RESOURCE_ARN: str = os.environ.get(
     'RESOURCE_ARN', 'arn:aws:rds:us-east-1:123456789012:cluster:dummy'

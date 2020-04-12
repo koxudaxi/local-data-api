@@ -1,4 +1,5 @@
 import pytest
+
 from local_data_api.exceptions import BadRequestException
 from local_data_api.secret_manager import (
     SECRETS,

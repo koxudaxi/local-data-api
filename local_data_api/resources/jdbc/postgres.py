@@ -1,8 +1,9 @@
 import jaydebeapi
-from local_data_api.resources.jdbc import JDBC
-from local_data_api.resources.resource import register_resource_type
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.engine import Dialect
+
+from local_data_api.resources.jdbc import JDBC
+from local_data_api.resources.resource import register_resource_type
 
 
 @register_resource_type

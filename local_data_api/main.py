@@ -1,6 +1,9 @@
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
 from local_data_api.exceptions import DataAPIException
 from local_data_api.models import (
     BatchExecuteStatementRequests,
@@ -19,8 +22,6 @@ from local_data_api.models import (
 )
 from local_data_api.resources.resource import Resource, get_resource
 from local_data_api.settings import setup
-from starlette.requests import Request
-from starlette.responses import JSONResponse
 
 app = FastAPI()
 

@@ -1,6 +1,8 @@
 from unittest.mock import Mock
 
 import pytest
+from starlette.testclient import TestClient
+
 from local_data_api.main import app
 from local_data_api.resources import SQLite
 from local_data_api.resources.resource import (
@@ -8,7 +10,6 @@ from local_data_api.resources.resource import (
     RESOURCE_METAS,
     ResourceMeta,
 )
-from starlette.testclient import TestClient
 
 client = TestClient(app)
 

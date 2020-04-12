@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Dict, Union
 
 import jaydebeapi
 import pytest
+
 from local_data_api.exceptions import BadRequestException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources.jdbc.postgres import PostgreSQLJDBC

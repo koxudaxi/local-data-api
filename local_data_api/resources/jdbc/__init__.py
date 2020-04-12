@@ -4,11 +4,12 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jaydebeapi
+from sqlalchemy import text
+from sqlalchemy.engine import Dialect
+
 from local_data_api.exceptions import BadRequestException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources.resource import Resource
-from sqlalchemy import text
-from sqlalchemy.engine import Dialect
 
 if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker, Connection

@@ -3,6 +3,7 @@ from base64 import b64encode
 from decimal import Decimal
 
 import pytest
+
 from local_data_api.models import Field, SqlParameter
 
 
