@@ -5,9 +5,11 @@ import re
 import string
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 from hashlib import sha1
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Pattern, Tuple, Type, Union
 
+from pydantic.main import BaseModel
 from sqlalchemy import text
 from sqlalchemy.engine import Dialect
 from sqlalchemy.exc import ArgumentError, CompileError
@@ -222,31 +224,46 @@ def get_resource(
     return meta.resource_type(connection, transaction_id)
 
 
-def create_column_metadata(
-    name: str,
-    type_code: int,
-    display_size: Optional[int],
-    internal_size: int,
-    precision: int,
-    scale: int,
-    null_ok: bool,
-) -> ColumnMetadata:
-    return ColumnMetadata(
-        arrayBaseColumnType=0,
-        isAutoIncrement=False,
-        isCaseSensitive=False,
-        isCurrency=False,
-        isSigned=False,
-        label=name,
-        name=name,
-        nullable=1 if null_ok else 0,
-        precision=precision,
-        scale=scale,
-        schema=None,
-        tableName=None,
-        type=None,
-        typeName=None,
-    )
+class JDBCType(Enum):
+    BIT = -7
+    TINYINT = -6
+    SMALLINT = 5
+    INTEGER = 4
+    BIGINT = -5
+    FLOAT = 6
+    REAL = 7
+    DOUBLE = 8
+    NUMERIC = 2
+    DECIMAL = 3
+    CHAR = 1
+    VARCHAR = 12
+    LONGVARCHAR = -1
+    DATE = 91
+    TIME = 92
+    TIMESTAMP = 93
+    BINARY = -2
+    VARBINARY = -3
+    LONGVARBINARY = -4
+    NULL = 0
+    OTHER = 1111
+    JAVA_OBJECT = 2000
+    DISTINCT = 2001
+    STRUCT = 2002
+    ARRAY = 2003
+    BLOB = 2004
+    CLOB = 2005
+    REF = 2006
+    DATALINK = 70
+    BOOLEAN = 16
+    ROWID = -8
+    NCHAR = -15
+    NVARCHAR = -9
+    LONGNVARCHAR = -16
+    NCLOB = 2011
+    SQLXML = 2009
+    REF_CURSOR = 2012
+    TIME_WITH_TIMEZONE = 2013
+    TIMESTAMP_WITH_TIMEZONE = 2014
 
 
 class Resource(ABC):
@@ -309,6 +326,10 @@ class Resource(ABC):
             for _ in range(TRANSACTION_ID_LENGTH)
         )
 
+    @abstractmethod
+    def create_column_metadata_set(self, cursor: Cursor) -> List[ColumnMetadata]:
+        raise NotImplementedError
+
     def close(self) -> None:
         self.connection.close()
         if self.transaction_id in CONNECTION_POOL:
@@ -351,9 +372,9 @@ class Resource(ABC):
                         ],
                     )
                     if include_result_metadata:
-                        response.columnMetadata = [
-                            create_column_metadata(*d) for d in cursor.description
-                        ]
+                        response.columnMetadata = self.create_column_metadata_set(
+                            cursor
+                        )
                     return response
                 else:
                     rowcount: int = cursor.rowcount

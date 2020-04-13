@@ -4,12 +4,7 @@ import jaydebeapi
 import pytest
 
 from local_data_api.models import ColumnMetadata
-from local_data_api.resources.jdbc import (
-    JDBC,
-    attach_thread_to_jvm,
-    connection_maker,
-    create_column_metadata_set,
-)
+from local_data_api.resources.jdbc import JDBC, attach_thread_to_jvm, connection_maker
 
 
 class DummyJDBC(JDBC):
@@ -78,8 +73,9 @@ def test_create_column_metadata_set(mocker):
     mock_meta.getColumnType.side_effect = [5, 6]
     mock_meta.getColumnTypeName.side_effect = ['i', 'j']
     mock_meta.getColumnCount.return_value = 2
-
-    assert create_column_metadata_set(mock_meta) == [
+    mock_cursor = mocker.Mock()
+    mock_cursor._meta = mock_meta
+    assert DummyJDBC(mocker.Mock()).create_column_metadata_set(mock_cursor) == [
         ColumnMetadata(
             arrayBaseColumnType=0,
             isAutoIncrement=True,

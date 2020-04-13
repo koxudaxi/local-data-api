@@ -1,18 +1,22 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import psycopg2
 from sqlalchemy.dialects import postgresql
 
+from local_data_api.models import ColumnMetadata
 from local_data_api.resources.resource import Resource, register_resource_type
 
 if TYPE_CHECKING:  # pragma: no cover
-    from local_data_api.resources.resource import ConnectionMaker
+    from local_data_api.resources.resource import ConnectionMaker, Cursor
 
 
 @register_resource_type
 class PostgresSQL(Resource):
+    def create_column_metadata_set(self, cursor: Cursor) -> List[ColumnMetadata]:  # pragma: no cover
+        raise NotImplementedError
+
     DIALECT = postgresql.dialect(paramstyle='named')
 
     @classmethod
