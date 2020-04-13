@@ -29,7 +29,7 @@ def test_create_connection_maker(mocker):
         password='pass',
         port=3306,
         user='root',
-        db='test',
+        database='test',
     )
 
     mock_connect = mocker.patch('local_data_api.resources.mysql.pymysql.connect')

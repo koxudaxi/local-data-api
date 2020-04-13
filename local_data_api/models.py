@@ -37,6 +37,8 @@ class Field(BaseModel):
             return cls(doubleValue=value)
         elif isinstance(value, bytes):
             return cls(blobValue=b64encode(value))
+        elif isinstance(value, (date, datetime)):
+            return cls(stringValue=str(value))
         elif value is None:
             return cls(isNull=True)
         elif type(value).__name__.endswith('UUID'):

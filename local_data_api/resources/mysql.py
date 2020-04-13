@@ -69,7 +69,7 @@ class MySQL(Resource):
 
         def connect(database: Optional[str] = None):  # type: ignore
             if database:
-                kwargs['db'] = database
+                kwargs['database'] = database
             return pymysql.connect(**kwargs)
 
         return connect
