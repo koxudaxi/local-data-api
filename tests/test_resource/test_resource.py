@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import List, TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pytest
 from sqlalchemy.dialects import mysql
@@ -177,25 +177,6 @@ def test_get_database_invalid_resource_arn(clear) -> None:
 
     with pytest.raises(BadRequestException):
         get_resource('invalid_arn', 'secret_arn')
-
-
-# def test_create_column_metadata(clear):
-#     assert create_column_metadata('name', 1, 2, 3, 4, 5, True) == ColumnMetadata(
-#         arrayBaseColumnType=0,
-#         isAutoIncrement=False,
-#         isCaseSensitive=False,
-#         isCurrency=False,
-#         isSigned=False,
-#         label='name',
-#         name='name',
-#         nullable=1,
-#         precision=4,
-#         scale=5,
-#         tableName=None,
-#         type=None,
-#         typeName=None,
-#         schema_=None,
-#     )
 
 
 def test_set_connection(clear, mocker) -> None:

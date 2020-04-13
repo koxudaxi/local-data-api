@@ -61,44 +61,45 @@ def test_execute_select_with_include_metadata(clear, mocker):
     field_2.table_name = None
     cursor_mock._result.fields = [field_1, field_2]
     dummy = MySQL(connection_mock, transaction_id='123')
-    assert dummy.execute(
-        "select * from users", include_result_metadata=True
-    ).dict() == ExecuteStatementResponse(
-        numberOfRecordsUpdated=0,
-        records=[[Field.from_value(1), Field.from_value('abc')]],
-        columnMetadata=[
-            ColumnMetadata(
-                arrayBaseColumnType=0,
-                isAutoIncrement=False,
-                isCaseSensitive=False,
-                isCurrency=False,
-                isSigned=False,
-                label='1',
-                name='1',
-                nullable=1,
-                precision=5,
-                scale=6,
-                tableName=None,
-                type=None,
-                typeName=None,
-            ),
-            ColumnMetadata(
-                arrayBaseColumnType=0,
-                isAutoIncrement=False,
-                isCaseSensitive=False,
-                isCurrency=False,
-                isSigned=False,
-                label='8',
-                name='8',
-                nullable=1,
-                precision=12,
-                scale=13,
-                tableName=None,
-                type=None,
-                typeName=None,
-            ),
-        ],
-    ).dict()
+    assert (
+        dummy.execute("select * from users", include_result_metadata=True).dict()
+        == ExecuteStatementResponse(
+            numberOfRecordsUpdated=0,
+            records=[[Field.from_value(1), Field.from_value('abc')]],
+            columnMetadata=[
+                ColumnMetadata(
+                    arrayBaseColumnType=0,
+                    isAutoIncrement=False,
+                    isCaseSensitive=False,
+                    isCurrency=False,
+                    isSigned=False,
+                    label='1',
+                    name='1',
+                    nullable=1,
+                    precision=5,
+                    scale=6,
+                    tableName=None,
+                    type=None,
+                    typeName=None,
+                ),
+                ColumnMetadata(
+                    arrayBaseColumnType=0,
+                    isAutoIncrement=False,
+                    isCaseSensitive=False,
+                    isCurrency=False,
+                    isSigned=False,
+                    label='8',
+                    name='8',
+                    nullable=1,
+                    precision=12,
+                    scale=13,
+                    tableName=None,
+                    type=None,
+                    typeName=None,
+                ),
+            ],
+        ).dict()
+    )
 
     cursor_mock.execute.assert_called_once_with('select * from users')
     cursor_mock.close.assert_called_once_with()

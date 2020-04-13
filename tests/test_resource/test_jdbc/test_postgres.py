@@ -102,7 +102,7 @@ def test_execute_select_with_include_metadata(mocked_connection, mocked_cursor, 
     mocked_cursor.description = (1, 2, 3, 4, 5, 6, 7), (8, 9, 10, 11, 12, 13, 14)
     mocked_cursor.fetchall.side_effect = [((1, 'abc'),)]
     dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
-    dummy.create_column_metadata_set =  create_column_metadata_set_mock = mocker.Mock()
+    dummy.create_column_metadata_set = create_column_metadata_set_mock = mocker.Mock()
     create_column_metadata_set_mock.side_effect = [
         [
             ColumnMetadata(

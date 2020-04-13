@@ -14,7 +14,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @register_resource_type
 class PostgresSQL(Resource):
-    def create_column_metadata_set(self, cursor: Cursor) -> List[ColumnMetadata]:  # pragma: no cover
+    def create_column_metadata_set(
+        self, cursor: Cursor
+    ) -> List[ColumnMetadata]:  # pragma: no cover
         raise NotImplementedError
 
     DIALECT = postgresql.dialect(paramstyle='named')

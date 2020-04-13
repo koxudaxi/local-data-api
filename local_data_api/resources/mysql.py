@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import pymysql
-from pymysql import protocol
 from pymysql.constants import FIELD_TYPE
 from pymysql.protocol import FieldDescriptorPacket
 from sqlalchemy.dialects import mysql
