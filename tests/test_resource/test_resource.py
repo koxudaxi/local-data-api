@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pytest
 from sqlalchemy.dialects import mysql
@@ -14,7 +14,6 @@ from local_data_api.resources.resource import (
     RESOURCE_METAS,
     Resource,
     ResourceMeta,
-    create_column_metadata,
     create_resource_arn,
     delete_connection,
     get_connection,
@@ -33,6 +32,9 @@ if TYPE_CHECKING:
 
 
 class DummyResource(Resource):
+    def create_column_metadata_set(self, cursor: Cursor) -> List[ColumnMetadata]:
+        pass
+
     DIALECT = mysql.dialect(paramstyle='named')
 
     @classmethod
@@ -175,25 +177,6 @@ def test_get_database_invalid_resource_arn(clear) -> None:
 
     with pytest.raises(BadRequestException):
         get_resource('invalid_arn', 'secret_arn')
-
-
-def test_create_column_metadata(clear):
-    assert create_column_metadata('name', 1, 2, 3, 4, 5, True) == ColumnMetadata(
-        arrayBaseColumnType=0,
-        isAutoIncrement=False,
-        isCaseSensitive=False,
-        isCurrency=False,
-        isSigned=False,
-        label='name',
-        name='name',
-        nullable=1,
-        precision=4,
-        scale=5,
-        tableName=None,
-        type=None,
-        typeName=None,
-        schema_=None,
-    )
 
 
 def test_set_connection(clear, mocker) -> None:
@@ -379,56 +362,6 @@ def test_execute_select(clear, mocker):
         numberOfRecordsUpdated=0,
         records=[[Field.from_value(1), Field.from_value('abc')]],
     )
-    cursor_mock.execute.assert_called_once_with('select * from users')
-    cursor_mock.close.assert_called_once_with()
-
-
-def test_execute_select_with_include_metadata(clear, mocker):
-    connection_mock = mocker.Mock()
-    cursor_mock = mocker.Mock()
-    connection_mock.cursor.side_effect = [cursor_mock]
-    cursor_mock.description = (1, 2, 3, 4, 5, 6, 7), (8, 9, 10, 11, 12, 13, 14)
-    cursor_mock.fetchall.side_effect = [((1, 'abc'),)]
-    dummy = DummyResource(connection_mock, transaction_id='123')
-    assert dummy.execute(
-        "select * from users", include_result_metadata=True
-    ).dict() == ExecuteStatementResponse(
-        numberOfRecordsUpdated=0,
-        records=[[Field.from_value(1), Field.from_value('abc')]],
-        columnMetadata=[
-            ColumnMetadata(
-                arrayBaseColumnType=0,
-                isAutoIncrement=False,
-                isCaseSensitive=False,
-                isCurrency=False,
-                isSigned=False,
-                label='1',
-                name='1',
-                nullable=1,
-                precision=5,
-                scale=6,
-                tableName=None,
-                type=None,
-                typeName=None,
-            ),
-            ColumnMetadata(
-                arrayBaseColumnType=0,
-                isAutoIncrement=False,
-                isCaseSensitive=False,
-                isCurrency=False,
-                isSigned=False,
-                label='8',
-                name='8',
-                nullable=1,
-                precision=12,
-                scale=13,
-                tableName=None,
-                type=None,
-                typeName=None,
-            ),
-        ],
-    )
-
     cursor_mock.execute.assert_called_once_with('select * from users')
     cursor_mock.close.assert_called_once_with()
 

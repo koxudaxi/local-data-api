@@ -54,6 +54,30 @@ class JDBC(Resource, ABC):
         self.autocommit: bool = True
         super().__init__(connection, transaction_id)
 
+    def create_column_metadata_set(
+        self, cursor: jaydebeapi.Cursor
+    ) -> List[ColumnMetadata]:
+        meta = getattr(cursor, '_meta')
+        return [
+            ColumnMetadata(
+                arrayBaseColumnType=0,
+                isAutoIncrement=meta.isAutoIncrement(i),
+                isCaseSensitive=meta.isCaseSensitive(i),
+                isCurrency=meta.isCurrency(i),
+                isSigned=meta.isSigned(i),
+                label=meta.getColumnLabel(i),
+                name=meta.getColumnName(i),
+                nullable=meta.isNullable(i),
+                precision=meta.getPrecision(i),
+                scale=meta.getScale(i),
+                schema=meta.getSchemaName(i),
+                tableName=meta.getTableName(i),
+                type=meta.getColumnType(i),
+                typeName=meta.getColumnTypeName(i),
+            )
+            for i in range(1, meta.getColumnCount() + 1)
+        ]
+
     def autocommit_off(self, cursor: jaydebeapi.Cursor) -> None:
         self.connection.jconn.setAutoCommit(False)
         self.autocommit = False
@@ -96,8 +120,9 @@ class JDBC(Resource, ABC):
                         ],
                     )
                     if include_result_metadata:
-                        meta = getattr(cursor, '_meta')
-                        response.columnMetadata = create_column_metadata_set(meta)
+                        response.columnMetadata = self.create_column_metadata_set(
+                            cursor
+                        )
                     return response
                 else:
                     rowcount: int = cursor.rowcount
@@ -144,25 +169,3 @@ class JDBC(Resource, ABC):
             {"user": user_name, "password": password},
             engine_kwargs['JAR_PATH'],
         )
-
-
-def create_column_metadata_set(meta: Any) -> List[ColumnMetadata]:
-    return [
-        ColumnMetadata(
-            arrayBaseColumnType=0,
-            isAutoIncrement=meta.isAutoIncrement(i),
-            isCaseSensitive=meta.isCaseSensitive(i),
-            isCurrency=meta.isCurrency(i),
-            isSigned=meta.isSigned(i),
-            label=meta.getColumnLabel(i),
-            name=meta.getColumnName(i),
-            nullable=meta.isNullable(i),
-            precision=meta.getPrecision(i),
-            scale=meta.getScale(i),
-            schema=meta.getSchemaName(i),
-            tableName=meta.getTableName(i),
-            type=meta.getColumnType(i),
-            typeName=meta.getColumnTypeName(i),
-        )
-        for i in range(1, meta.getColumnCount() + 1)
-    ]

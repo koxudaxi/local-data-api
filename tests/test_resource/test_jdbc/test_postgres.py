@@ -99,14 +99,10 @@ def test_execute_select(mocked_connection, mocked_cursor, mocker):
 
 
 def test_execute_select_with_include_metadata(mocked_connection, mocked_cursor, mocker):
-    meta_mock = mocker.Mock()
-    mocked_cursor._meta = meta_mock
     mocked_cursor.description = (1, 2, 3, 4, 5, 6, 7), (8, 9, 10, 11, 12, 13, 14)
     mocked_cursor.fetchall.side_effect = [((1, 'abc'),)]
     dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
-    create_column_metadata_set_mock = mocker.patch(
-        'local_data_api.resources.jdbc.create_column_metadata_set'
-    )
+    dummy.create_column_metadata_set = create_column_metadata_set_mock = mocker.Mock()
     create_column_metadata_set_mock.side_effect = [
         [
             ColumnMetadata(
@@ -177,7 +173,7 @@ def test_execute_select_with_include_metadata(mocked_connection, mocked_cursor, 
         ],
     )
 
-    create_column_metadata_set_mock.assert_called_once_with(meta_mock)
+    create_column_metadata_set_mock.assert_called_once_with(mocked_cursor)
     mocked_cursor.execute.assert_has_calls([mocker.call('select * from users')])
     mocked_cursor.close.assert_called_once_with()
 
