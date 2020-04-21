@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -20,13 +21,13 @@ class DBSetting(BaseModel):
     PORT: int
     USER: str
     PASSWORD: str
-    JAR_PATH: str
+    JAR_PATH: Optional[str]
 
 
 def setup() -> None:
     # TODO: implement to create custom resource
     engine: str = os.environ.get('ENGINE', 'MySQLJDBC')
-    if engine.upper().startswith('MYSQL'):
+    if engine == 'MySQLJDBC':
         db_setting: DBSetting = DBSetting(
             HOST=os.environ.get('MYSQL_HOST', '127.0.0.1'),
             PORT=os.environ.get('MYSQL_PORT', '3306'),
@@ -36,7 +37,7 @@ def setup() -> None:
                 'MYSQL_JDBC_JAR_PATH', '/usr/lib/jvm/mariadb-java-client.jar'
             ),
         )
-    else:
+    elif engine == 'PostgreSQLJDBC':
         db_setting = DBSetting(
             HOST=os.environ.get('POSTGRES_HOST', '127.0.0.1'),
             PORT=os.environ.get('POSTGRES_PORT', '5432'),
@@ -46,6 +47,15 @@ def setup() -> None:
                 'POSTGRES_JDBC_JAR_PATH', '/usr/lib/jvm/postgresql-java-client.jar'
             ),
         )
+    elif engine == 'PostgresSQL':
+        db_setting = DBSetting(
+            HOST=os.environ.get('POSTGRES_HOST', '127.0.0.1'),
+            PORT=os.environ.get('POSTGRES_PORT', '5432'),
+            USER=os.environ.get('POSTGRES_USER', 'postgres'),
+            PASSWORD=os.environ.get('POSTGRES_PASSWORD', 'example'),
+        )
+    else:
+        raise NotImplementedError("Engine not already implemented")
 
     register_secret(db_setting.USER, db_setting.PASSWORD, SECRET_ARN)
     register_resource(
