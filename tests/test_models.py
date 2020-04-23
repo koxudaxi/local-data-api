@@ -1,6 +1,6 @@
 import datetime
 from base64 import b64encode
-from decimal import Decimal
+from datetime import datetime
 
 import pytest
 
@@ -15,6 +15,7 @@ def test_valid_field() -> None:
     assert SqlParameter(name='abc', value=Field(longValue=123)).valid_value == 123
     assert SqlParameter(name='abc', value=Field(longValue=123)).valid_value == 123
     assert SqlParameter(name='abc', value=Field()).valid_value is None
+
     assert (
         SqlParameter(
             name='abc', value=Field(stringValue='123456789'), typeHint='DECIMAL'
@@ -51,6 +52,9 @@ def test_from_value() -> None:
     assert Field.from_value(False) == Field(booleanValue=False)
     assert Field.from_value(b'bytes') == Field(blobValue=b64encode(b'bytes'))
     assert Field.from_value(None) == Field(isNull=True)
+    assert Field.from_value(datetime(2019, 5, 18, 15, 17, 8)) == Field(
+        stringValue='2019-05-18 15:17:08'
+    )
 
     class JavaUUID:
         def __init__(self, val: str):

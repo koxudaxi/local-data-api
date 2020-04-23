@@ -31,6 +31,8 @@ class Field(BaseModel):
             return cls(booleanValue=value)
         elif isinstance(value, str):
             return cls(stringValue=value)
+        elif isinstance(value, datetime):
+            return cls(stringValue=str(value))
         elif isinstance(value, int):
             return cls(longValue=value)
         elif isinstance(value, float):
