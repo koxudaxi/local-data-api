@@ -44,6 +44,7 @@ def test_setup_postgres(mocker) -> None:
         {'JAR_PATH': '/usr/lib/jvm/postgresql-java-client.jar'},
     )
 
+
 def test_setup_postgres_no_jdbc(mocker) -> None:
     mock_register_secret = mocker.patch('local_data_api.settings.register_secret')
     mock_register_resource = mocker.patch('local_data_api.settings.register_resource')
@@ -63,5 +64,5 @@ def test_setup_postgres_no_jdbc(mocker) -> None:
         5432,
         'postgres',
         'example',
-        {}
+        {},
     )

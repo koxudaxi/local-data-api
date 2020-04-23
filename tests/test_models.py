@@ -52,7 +52,9 @@ def test_from_value() -> None:
     assert Field.from_value(False) == Field(booleanValue=False)
     assert Field.from_value(b'bytes') == Field(blobValue=b64encode(b'bytes'))
     assert Field.from_value(None) == Field(isNull=True)
-    assert Field.from_value(datetime(2019, 5, 18, 15, 17, 8)) == Field(stringValue='2019-05-18 15:17:08')
+    assert Field.from_value(datetime(2019, 5, 18, 15, 17, 8)) == Field(
+        stringValue='2019-05-18 15:17:08'
+    )
 
     class JavaUUID:
         def __init__(self, val: str):
