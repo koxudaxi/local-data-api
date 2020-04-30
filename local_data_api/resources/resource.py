@@ -170,8 +170,10 @@ def create_connection(
     connection = RESOURCE_METAS[resource_arn].connection_maker(  # type: ignore
         database, **connection_kwargs
     )
-    if hasattr(connection, 'database'):  # pragma: no cover
+    try:
         connection.database = database
+    except AttributeError:  # pragma: no cover
+        pass  # for psycopg2
     return connection
 
 
@@ -210,12 +212,12 @@ def get_resource(
     else:
         connection = get_connection(transaction_id)
         if database:
-            if hasattr(connection, 'database'):  # pragma: no cover
+            try:
                 connected_database: Optional[str] = connection.database
-            else:
-                connected_database = connection.get_dsn_parameters()[
+            except AttributeError:  # pragma: no cover
+                connected_database = connection.get_dsn_parameters()[  # for psycopg2
                     'dbname'
-                ]  # pragma: no cover
+                ]
             if database != connected_database:  # pragma: no cover
                 raise BadRequestException(
                     'Database name is not the same as when transaction was created'
