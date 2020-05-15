@@ -84,6 +84,15 @@ def test_from_value() -> None:
 
     assert Field.from_value(BigInteger("55")) == Field(longValue=55)
 
+    class PgArray:
+        def __init__(self, val: str):
+            self._val: str = val
+
+        def __str__(self) -> str:
+            return self._val
+
+    assert Field.from_value(PgArray("{ITEM1,ITEM2}")) == Field(stringValue="{ITEM1,ITEM2}")
+
     class Dummy:
         pass
 
