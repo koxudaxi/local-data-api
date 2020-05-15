@@ -91,7 +91,9 @@ def test_from_value() -> None:
         def __str__(self) -> str:
             return self._val
 
-    assert Field.from_value(PgArray("{ITEM1,ITEM2}")) == Field(stringValue="{ITEM1,ITEM2}")
+    assert Field.from_value(PgArray("{ITEM1,ITEM2}")) == Field(
+        stringValue="{ITEM1,ITEM2}"
+    )
 
     class Dummy:
         pass
