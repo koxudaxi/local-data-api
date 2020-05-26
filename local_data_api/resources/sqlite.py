@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from sqlalchemy.dialects import sqlite
 
-from local_data_api.models import ColumnMetadata
+from local_data_api.models import ColumnMetadata, Field
 from local_data_api.resources.resource import Resource, register_resource_type
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -32,3 +32,6 @@ class SQLite(Resource):
             return sqlite3.connect(':memory:')
 
         return connect
+
+    def get_field_from_value(self, value: Any) -> Field:
+        return super().get_field_from_value(value)

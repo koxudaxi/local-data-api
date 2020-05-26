@@ -8,6 +8,7 @@ import pytest
 from local_data_api.exceptions import BadRequestException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources.jdbc.postgres import PostgreSQLJDBC
+from tests.test_resource.test_resource import helper_default_test_field
 
 DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
     'SQLite': {'host': '', 'port': None, 'user_name': None, 'password': None}
@@ -91,7 +92,7 @@ def test_execute_select(mocked_connection, mocked_cursor, mocker):
     dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
     assert dummy.execute("select * from users",) == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
-        records=[[Field.from_value(1), Field.from_value('abc')]],
+        records=[[dummy.get_field_from_value(1), dummy.get_field_from_value('abc')]],
     )
 
     mocked_cursor.execute.assert_has_calls([mocker.call('select * from users')])
@@ -140,7 +141,7 @@ def test_execute_select_with_include_metadata(mocked_connection, mocked_cursor, 
         "select * from users", include_result_metadata=True
     ) == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
-        records=[[Field.from_value(1), Field.from_value('abc')]],
+        records=[[dummy.get_field_from_value(1), dummy.get_field_from_value('abc')]],
         columnMetadata=[
             ColumnMetadata(
                 arrayBaseColumnType=0,
@@ -226,3 +227,40 @@ def test_execute_exception_4(mocked_connection, mocked_cursor, mocker):
         dummy.execute("select * from users")
     assert e.value.message == 'inner_error_message'
     mocked_cursor.close.assert_called_once_with()
+
+
+def test_from_value(mocker) -> None:
+    connection_mock = mocker.Mock()
+    dummy = PostgreSQLJDBC(connection_mock)
+
+    class JavaUUID:
+        def __init__(self, val: str):
+            self._val: str = val
+
+        def __str__(self) -> str:
+            return self._val
+
+    uuid = 'e9e1df6b-c6d3-4a34-9227-c27056d596c6'
+    assert dummy.get_field_from_value(JavaUUID(uuid)) == Field(stringValue=uuid)
+
+    class PGobject:
+        def __init__(self, val: str):
+            self._val: str = val
+
+        def __str__(self) -> str:
+            return self._val
+
+    assert dummy.get_field_from_value(PGobject("{}")) == Field(stringValue="{}")
+
+    class PgArray:
+        def __init__(self, val: str):
+            self._val: str = val
+
+        def __str__(self) -> str:
+            return self._val
+
+    assert dummy.get_field_from_value(PgArray("{ITEM1,ITEM2}")) == Field(
+        stringValue="{ITEM1,ITEM2}"
+    )
+
+    helper_default_test_field(dummy)

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+from base64 import b64encode
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pytest
@@ -48,6 +50,9 @@ class DummyResource(Resource):
         engine_kwargs: Dict[str, Any] = None,
     ) -> ConnectionMaker:
         pass
+
+    def get_field_from_value(cls, value: Any) -> Field:
+        return super(DummyResource, cls).get_field_from_value(value)
 
 
 @pytest.fixture
@@ -360,7 +365,7 @@ def test_execute_select(clear, mocker):
     dummy = DummyResource(connection_mock, transaction_id='123')
     assert dummy.execute("select * from users",) == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
-        records=[[Field.from_value(1), Field.from_value('abc')]],
+        records=[[dummy.get_field_from_value(1), dummy.get_field_from_value('abc')]],
     )
     cursor_mock.execute.assert_called_once_with('select * from users')
     cursor_mock.close.assert_called_once_with()
@@ -427,3 +432,30 @@ def test_execute_exception_4(clear, mocker):
 
     cursor_mock.execute.assert_called_once_with('select * from users')
     cursor_mock.close.assert_called_once_with()
+
+
+def test_from_value(clear, mocker) -> None:
+    connection_mock = mocker.Mock()
+    dummy = DummyResource(connection_mock)
+    helper_default_test_field(dummy)
+
+
+def helper_default_test_field(dummyResource: Resource) -> None:
+    assert dummyResource.get_field_from_value('str') == Field(stringValue='str')
+    assert dummyResource.get_field_from_value(123) == Field(longValue=123)
+    assert dummyResource.get_field_from_value(1.23) == Field(doubleValue=1.23)
+    assert dummyResource.get_field_from_value(True) == Field(booleanValue=True)
+    assert dummyResource.get_field_from_value(False) == Field(booleanValue=False)
+    assert dummyResource.get_field_from_value(b'bytes') == Field(
+        blobValue=b64encode(b'bytes')
+    )
+    assert dummyResource.get_field_from_value(None) == Field(isNull=True)
+    assert dummyResource.get_field_from_value(
+        datetime(2019, 5, 18, 15, 17, 8)
+    ) == Field(stringValue='2019-05-18 15:17:08')
+
+    class Dummy:
+        pass
+
+    with pytest.raises(Exception):
+        dummyResource.get_field_from_value(Dummy())

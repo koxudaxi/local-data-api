@@ -115,7 +115,7 @@ class JDBC(Resource, ABC):
                     response = ExecuteStatementResponse(
                         numberOfRecordsUpdated=0,
                         records=[
-                            [Field.from_value(column) for column in row]
+                            [self.get_field_from_value(column) for column in row]
                             for row in cursor.fetchall()
                         ],
                     )
@@ -129,7 +129,9 @@ class JDBC(Resource, ABC):
                     last_generated_id: int = self.last_generated_id(cursor)
                     generated_fields: List[Field] = []
                     if last_generated_id > 0:
-                        generated_fields.append(Field.from_value(last_generated_id))
+                        generated_fields.append(
+                            self.get_field_from_value(last_generated_id)
+                        )
                     return ExecuteStatementResponse(
                         numberOfRecordsUpdated=rowcount,
                         generatedFields=generated_fields,

@@ -7,7 +7,7 @@ from pymysql.constants import FIELD_TYPE
 from pymysql.protocol import FieldDescriptorPacket
 from sqlalchemy.dialects import mysql
 
-from local_data_api.models import ColumnMetadata
+from local_data_api.models import ColumnMetadata, Field
 from local_data_api.resources.resource import Resource, register_resource_type
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -73,3 +73,6 @@ class MySQL(Resource):
             return pymysql.connect(**kwargs)
 
         return connect
+
+    def get_field_from_value(self, value: Any) -> Field:
+        return super().get_field_from_value(value)

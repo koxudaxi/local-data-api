@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from base64 import b64encode
 from datetime import date, datetime, time
 from decimal import Decimal
 from enum import Enum
@@ -24,33 +23,6 @@ class Field(BaseModel):
     isNull: Optional[bool]
     longValue: Optional[int]
     stringValue: Optional[str]
-
-    @classmethod
-    def from_value(cls, value: Any) -> Field:
-        if isinstance(value, bool):
-            return cls(booleanValue=value)
-        elif isinstance(value, str):
-            return cls(stringValue=value)
-        elif isinstance(value, datetime):
-            return cls(stringValue=str(value))
-        elif isinstance(value, int):
-            return cls(longValue=value)
-        elif isinstance(value, float):
-            return cls(doubleValue=value)
-        elif isinstance(value, bytes):
-            return cls(blobValue=b64encode(value))
-        elif value is None:
-            return cls(isNull=True)
-        elif type(value).__name__.endswith('UUID'):
-            return cls(stringValue=str(value))
-        elif type(value).__name__.endswith('PGobject'):
-            return cls(stringValue=str(value))
-        elif type(value).__name__.endswith('BigInteger'):
-            return cls(longValue=int(str(value)))
-        elif type(value).__name__.endswith('PgArray'):
-            return cls(stringValue=str(value))
-        else:
-            raise Exception(f'unsupported type {type(value)}: {value} ')
 
 
 class SqlParameter(BaseModel):
