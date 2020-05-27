@@ -5,6 +5,7 @@ import pytest
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources import MySQL
 from local_data_api.resources.resource import CONNECTION_POOL, RESOURCE_METAS
+from tests.test_resource.test_resource import helper_default_test_field
 
 
 @pytest.fixture
@@ -65,7 +66,9 @@ def test_execute_select_with_include_metadata(clear, mocker):
         dummy.execute("select * from users", include_result_metadata=True).dict()
         == ExecuteStatementResponse(
             numberOfRecordsUpdated=0,
-            records=[[Field.from_value(1), Field.from_value('abc')]],
+            records=[
+                [dummy.get_field_from_value(1), dummy.get_field_from_value('abc')]
+            ],
             columnMetadata=[
                 ColumnMetadata(
                     arrayBaseColumnType=0,
@@ -103,3 +106,9 @@ def test_execute_select_with_include_metadata(clear, mocker):
 
     cursor_mock.execute.assert_called_once_with('select * from users')
     cursor_mock.close.assert_called_once_with()
+
+
+def test_from_value(mocker) -> None:
+    connection_mock = mocker.Mock()
+    dummy = MySQL(connection_mock)
+    helper_default_test_field(dummy)

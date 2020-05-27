@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from typing import Any
+
 import jaydebeapi
 import pytest
 
-from local_data_api.models import ColumnMetadata
+from local_data_api.models import ColumnMetadata, Field
 from local_data_api.resources.jdbc import JDBC, attach_thread_to_jvm, connection_maker
 
 
@@ -22,6 +24,9 @@ class DummyJDBC(JDBC):
     def last_generated_id(cursor: jaydebeapi.Cursor) -> int:
         cursor.execute("SELECT LAST_INSERT_ID()")
         return int(str(cursor.fetchone()[0]))
+
+    def get_field_from_value(self, value: Any) -> Field:
+        return super().get_field_from_value(value)
 
 
 def test_attach_thread_to_jvm(mocker):

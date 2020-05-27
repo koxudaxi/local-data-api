@@ -8,6 +8,7 @@ import pytest
 from local_data_api.exceptions import BadRequestException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.resources.jdbc.mysql import MySQLJDBC
+from tests.test_resource.test_resource import helper_default_test_field
 
 DATABASE_SETTINGS: Dict[str, Dict[str, Union[str, int]]] = {
     'SQLite': {'host': '', 'port': None, 'user_name': None, 'password': None}
@@ -109,7 +110,7 @@ def test_execute_select(mocked_connection, mocked_cursor, mocker):
     dummy = MySQLJDBC(mocked_connection, transaction_id='123')
     assert dummy.execute("select * from users",) == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
-        records=[[Field.from_value(1), Field.from_value('abc')]],
+        records=[[dummy.get_field_from_value(1), dummy.get_field_from_value('abc')]],
     )
 
     mocked_cursor.execute.assert_has_calls(
@@ -162,7 +163,7 @@ def test_execute_select_with_include_metadata(mocked_connection, mocked_cursor, 
         "select * from users", include_result_metadata=True
     ) == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
-        records=[[Field.from_value(1), Field.from_value('abc')]],
+        records=[[dummy.get_field_from_value(1), dummy.get_field_from_value('abc')]],
         columnMetadata=[
             ColumnMetadata(
                 arrayBaseColumnType=0,
@@ -253,3 +254,19 @@ def test_execute_exception_4(mocked_connection, mocked_cursor, mocker):
     assert e.value.message == 'inner_error_message'
     mocked_cursor.execute.assert_has_calls([mocker.call('SELECT LAST_INSERT_ID(NULL)')])
     mocked_cursor.close.assert_called_once_with()
+
+
+def test_from_value(mocker) -> None:
+    connection_mock = mocker.Mock()
+    dummy = MySQLJDBC(connection_mock)
+
+    class BigInteger:
+        def __init__(self, val: int):
+            self._val: int = val
+
+        def __str__(self) -> int:
+            return self._val
+
+    assert dummy.get_field_from_value(BigInteger("55")) == Field(longValue=55)
+
+    helper_default_test_field(dummy)

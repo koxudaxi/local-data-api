@@ -4,12 +4,12 @@ import random
 import re
 import string
 from abc import ABC, abstractmethod
+from base64 import b64encode
 from dataclasses import dataclass
 from enum import Enum
 from hashlib import sha1
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Pattern, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
-from pydantic.main import BaseModel
 from sqlalchemy import text
 from sqlalchemy.engine import Dialect
 from sqlalchemy.exc import ArgumentError, CompileError
@@ -329,6 +329,25 @@ class Resource(ABC):
         )
 
     @abstractmethod
+    def get_field_from_value(self, value: Any) -> Field:
+        if isinstance(value, bool):
+            return Field(booleanValue=value)
+        elif isinstance(value, str):
+            return Field(stringValue=value)
+        elif type(value).__name__ == 'datetime':
+            return Field(stringValue=str(value))
+        elif isinstance(value, int):
+            return Field(longValue=value)
+        elif isinstance(value, float):
+            return Field(doubleValue=value)
+        elif isinstance(value, bytes):
+            return Field(blobValue=b64encode(value))
+        elif value is None:
+            return Field(isNull=True)
+        else:
+            raise Exception(f'unsupported type {type(value)}: {value} ')
+
+    @abstractmethod
     def create_column_metadata_set(self, cursor: Cursor) -> List[ColumnMetadata]:
         raise NotImplementedError
 
@@ -369,7 +388,7 @@ class Resource(ABC):
                     response: ExecuteStatementResponse = ExecuteStatementResponse(
                         numberOfRecordsUpdated=0,
                         records=[
-                            [Field.from_value(column) for column in row]
+                            [self.get_field_from_value(column) for column in row]
                             for row in cursor.fetchall()
                         ],
                     )
@@ -383,7 +402,9 @@ class Resource(ABC):
                     last_generated_id: int = cursor.lastrowid
                     generated_fields: List[Field] = []
                     if last_generated_id > 0:
-                        generated_fields.append(Field.from_value(last_generated_id))
+                        generated_fields.append(
+                            self.get_field_from_value(last_generated_id)
+                        )
                     return ExecuteStatementResponse(
                         numberOfRecordsUpdated=rowcount,
                         generatedFields=generated_fields,

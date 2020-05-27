@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from psycopg2._psycopg import Column
 
+from local_data_api.models import Field
 from local_data_api.resources import PostgresSQL
+from tests.test_resource.test_resource import helper_default_test_field
 
 
 def test_create_connection_maker(mocker):
@@ -40,3 +42,9 @@ def test_create_column_metadata(mocker):
     dummy = PostgresSQL(connection_mock)
     dummy.create_column_metadata_set(cursor_mock)
     assert True
+
+
+def test_from_value(mocker) -> None:
+    connection_mock = mocker.Mock()
+    dummy = PostgresSQL(connection_mock)
+    helper_default_test_field(dummy)
