@@ -34,6 +34,10 @@ def create_column_metadata(field_descriptor_packet: Column) -> ColumnMetadata:
 
 @register_resource_type
 class PostgresSQL(Resource):
+    def autocommit_off(self) -> None:  # pragma: no cover
+        # default is off
+        pass
+
     def create_column_metadata_set(
         self, cursor: Cursor
     ) -> List[ColumnMetadata]:  # pragma: no cover

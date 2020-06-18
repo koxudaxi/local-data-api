@@ -41,6 +41,10 @@ def create_column_metadata(
 
 @register_resource_type
 class MySQL(Resource):
+    def autocommit_off(self) -> None:  # pragma: no cover
+        # default is off
+        pass
+
     def create_column_metadata_set(self, cursor: Cursor) -> List[ColumnMetadata]:
         return [create_column_metadata(f) for f in getattr(cursor, '_result').fields]
 
