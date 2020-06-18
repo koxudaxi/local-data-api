@@ -51,7 +51,6 @@ class JDBC(Resource, ABC):
     def __init__(self, connection: Connection, transaction_id: Optional[str] = None):
         if transaction_id:
             attach_thread_to_jvm()
-        self.autocommit: bool = True
         super().__init__(connection, transaction_id)
 
     def create_column_metadata_set(
@@ -78,9 +77,8 @@ class JDBC(Resource, ABC):
             for i in range(1, meta.getColumnCount() + 1)
         ]
 
-    def autocommit_off(self, cursor: jaydebeapi.Cursor) -> None:
+    def autocommit_off(self) -> None:  # pragma: no cover
         self.connection.jconn.setAutoCommit(False)
-        self.autocommit = False
 
     @staticmethod
     @abstractmethod
@@ -102,9 +100,6 @@ class JDBC(Resource, ABC):
             cursor: Optional[jaydebeapi.Cursor] = None
             try:
                 cursor = self.connection.cursor()
-
-                if self.autocommit:
-                    self.autocommit_off(cursor)
 
                 self.reset_generated_id(cursor)
                 if params:

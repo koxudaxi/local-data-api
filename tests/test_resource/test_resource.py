@@ -34,6 +34,9 @@ if TYPE_CHECKING:
 
 
 class DummyResource(Resource):
+    def autocommit_off(self) -> None:
+        pass
+
     def create_column_metadata_set(self, cursor: Cursor) -> List[ColumnMetadata]:
         pass
 
@@ -279,9 +282,11 @@ def test_begin(clear, mocker):
     set_connection_mock = mocker.patch(
         'local_data_api.resources.resource.set_connection'
     )
+    dummy.autocommit_off = mocker.Mock()
     result = dummy.begin()
     assert result == 'abc'
     set_connection_mock.assert_called_once_with('abc', connection_mock)
+    dummy.autocommit_off.assert_called_once()
 
 
 def test_close(clear, mocker):

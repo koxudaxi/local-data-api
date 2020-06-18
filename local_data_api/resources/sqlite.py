@@ -14,6 +14,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @register_resource_type
 class SQLite(Resource):
+    def autocommit_off(self) -> None:
+        # default is off
+        pass
+
     def create_column_metadata_set(self, cursor: Cursor) -> List[ColumnMetadata]:
         raise NotImplementedError
 

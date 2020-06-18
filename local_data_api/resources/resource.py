@@ -356,10 +356,15 @@ class Resource(ABC):
         if self.transaction_id in CONNECTION_POOL:
             delete_connection(self.transaction_id)
 
+    @abstractmethod
+    def autocommit_off(self) -> None:
+        raise NotImplementedError
+
     def begin(self) -> str:
         transaction_id = self.create_transaction_id()
         self._transaction_id = transaction_id
         set_connection(transaction_id, self.connection)
+        self.autocommit_off()
         return transaction_id
 
     def commit(self) -> None:
