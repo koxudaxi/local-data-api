@@ -85,6 +85,9 @@ def execute_statement(request: ExecuteStatementRequests) -> ExecuteStatementResp
             request.database,
         )
 
+        if not resource.transaction_id:
+            resource.autocommit_off()
+
         if request.parameters:
             parameters: Optional[Dict[str, Any]] = {
                 parameter.name: parameter.valid_value
