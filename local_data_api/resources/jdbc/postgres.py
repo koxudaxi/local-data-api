@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Any, Optional
 
 import jaydebeapi
+from jpype import java
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.engine import Dialect
 
@@ -23,12 +24,13 @@ class PostgreSQLJDBC(JDBC):
     def last_generated_id(cursor: jaydebeapi.Cursor) -> int:
         return 0
 
-    def get_field_from_value(self, value: Any) -> Field:
-        if type(value).__name__.endswith('UUID'):
+    def get_filed_from_jdbc_type(self, value: Any, jdbc_type: Optional[int]) -> Field:
+        type_ = type(value)
+        if type_.__name__.endswith('UUID'):
             return Field(stringValue=str(value))
-        elif type(value).__name__.endswith('PGobject'):
+        elif type_.__name__.endswith('PGobject'):
             return Field(stringValue=str(value))
-        elif type(value).__name__.endswith('PgArray'):
+        elif type_.__name__.endswith('PgArray'):
             return Field(stringValue=str(value))
         else:
-            return super().get_field_from_value(value)
+            return super().get_filed_from_jdbc_type(value, jdbc_type)

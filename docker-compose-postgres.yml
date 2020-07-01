@@ -2,7 +2,8 @@ version: '3.1'
 
 services:
   local-data-api:
-    image: koxudaxi/local-data-api
+#    image: koxudaxi/local-data-api:0.4.15.15
+    build: .
     restart: always
     environment:
       ENGINE: PostgreSQLJDBC

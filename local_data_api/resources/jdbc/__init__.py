@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from base64 import b64encode
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jaydebeapi
@@ -9,10 +10,29 @@ from sqlalchemy.engine import Dialect
 
 from local_data_api.exceptions import BadRequestException
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
-from local_data_api.resources.resource import Resource
+from local_data_api.resources.resource import JDBCType, Resource
 
 if TYPE_CHECKING:  # pragma: no cover
     from local_data_api.resources.resource import ConnectionMaker, Connection
+
+# https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
+"""
+
+JDBC Data Type                                        | Data API Data Type
+INTEGER, TINYINT, SMALLINT, BIGINT                    | LONG
+FLOAT, REAL, DOUBLE                                   | DOUBLE
+DECIMAL                                               | STRING
+BOOLEAN, BIT                                          | BOOLEAN
+BLOB, BINARY, LONGVARBINARY, VARBINARY                | BLOB
+CLOB                                                  | STRING
+Other types (including types related to date and time)| STRING
+"""
+
+LONG = [JDBCType.INTEGER, JDBCType.TINYINT, JDBCType.SMALLINT, JDBCType.BIGINT]
+DOUBLE = [JDBCType.FLOAT, JDBCType.REAL, JDBCType.DOUBLE]
+STRING = [JDBCType.DECIMAL, JDBCType.CLOB]
+BOOLEAN = [JDBCType.BOOLEAN, JDBCType.BIT]
+BLOB = [JDBCType.BLOB, JDBCType.BINARY, JDBCType.LONGVARBINARY, JDBCType.VARBINARY]
 
 
 def attach_thread_to_jvm() -> None:
@@ -52,6 +72,31 @@ class JDBC(Resource, ABC):
         if transaction_id:
             attach_thread_to_jvm()
         super().__init__(connection, transaction_id)
+
+    def get_field_from_value(self, value: Any) -> Field:
+        return super().get_field_from_value(value)
+
+    @abstractmethod
+    def get_filed_from_jdbc_type(self, value: Any, jdbc_type: Optional[int]) -> Field:
+        type_: Optional[JDBCType] = None
+        if jdbc_type:
+            try:
+                type_ = JDBCType(jdbc_type)
+            except ValueError:
+                pass
+        if type_:
+            if type_ in LONG:
+                return Field(longValue=value)
+            elif type_ in DOUBLE:
+                return Field(doubleValue=value)
+            elif type_ in STRING:
+                return Field(stringValue=value)
+            elif type_ in BOOLEAN:
+                return Field(booleanValue=value)
+            elif type_ in BLOB:
+                return Field(blobValue=b64encode(value))
+
+        return self.get_field_from_value(value)
 
     def create_column_metadata_set(
         self, cursor: jaydebeapi.Cursor
@@ -107,17 +152,23 @@ class JDBC(Resource, ABC):
                 else:
                     cursor.execute(str(text(sql)))
                 if cursor.description:
+                    column_metadata_set = self.create_column_metadata_set(cursor)
                     response = ExecuteStatementResponse(
                         numberOfRecordsUpdated=0,
                         records=[
-                            [self.get_field_from_value(column) for column in row]
+                            [
+                                self.get_filed_from_jdbc_type(
+                                    column, column_metadata.type
+                                )
+                                for column, column_metadata in zip(
+                                    row, column_metadata_set
+                                )
+                            ]
                             for row in cursor.fetchall()
                         ],
                     )
                     if include_result_metadata:
-                        response.columnMetadata = self.create_column_metadata_set(
-                            cursor
-                        )
+                        response.columnMetadata = column_metadata_set
                     return response
                 else:
                     rowcount: int = cursor.rowcount
