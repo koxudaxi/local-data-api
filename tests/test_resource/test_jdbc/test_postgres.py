@@ -90,6 +90,39 @@ def test_execute_select(mocked_connection, mocked_cursor, mocker):
     mocked_cursor.description = 1, 1, 1, 1, 1, 1, 1
     mocked_cursor.fetchall.side_effect = [((1, 'abc'),)]
     dummy = PostgreSQLJDBC(mocked_connection, transaction_id='123')
+    dummy.create_column_metadata_set = create_column_metadata_set_mock = mocker.Mock()
+    create_column_metadata_set_mock.side_effect = [
+        [
+            ColumnMetadata(
+                arrayBaseColumnType=0,
+                isAutoIncrement=False,
+                isCaseSensitive=False,
+                isCurrency=False,
+                isSigned=False,
+                label=1,
+                name=1,
+                precision=5,
+                scale=6,
+                tableName=None,
+                type=None,
+                typeName=None,
+            ),
+            ColumnMetadata(
+                arrayBaseColumnType=0,
+                isAutoIncrement=False,
+                isCaseSensitive=False,
+                isCurrency=False,
+                isSigned=False,
+                label=8,
+                name=8,
+                precision=12,
+                scale=13,
+                tableName=None,
+                type=None,
+                typeName=None,
+            ),
+        ]
+    ]
     assert dummy.execute("select * from users",) == ExecuteStatementResponse(
         numberOfRecordsUpdated=0,
         records=[[dummy.get_field_from_value(1), dummy.get_field_from_value('abc')]],
@@ -241,7 +274,9 @@ def test_from_value(mocker) -> None:
             return self._val
 
     uuid = 'e9e1df6b-c6d3-4a34-9227-c27056d596c6'
-    assert dummy.get_field_from_value(JavaUUID(uuid)) == Field(stringValue=uuid)
+    assert dummy.get_filed_from_jdbc_type(JavaUUID(uuid), None) == Field(
+        stringValue=uuid
+    )
 
     class PGobject:
         def __init__(self, val: str):
@@ -250,7 +285,9 @@ def test_from_value(mocker) -> None:
         def __str__(self) -> str:
             return self._val
 
-    assert dummy.get_field_from_value(PGobject("{}")) == Field(stringValue="{}")
+    assert dummy.get_filed_from_jdbc_type(PGobject("{}"), None) == Field(
+        stringValue="{}"
+    )
 
     class PgArray:
         def __init__(self, val: str):
@@ -259,7 +296,7 @@ def test_from_value(mocker) -> None:
         def __str__(self) -> str:
             return self._val
 
-    assert dummy.get_field_from_value(PgArray("{ITEM1,ITEM2}")) == Field(
+    assert dummy.get_filed_from_jdbc_type(PgArray("{ITEM1,ITEM2}"), None) == Field(
         stringValue="{ITEM1,ITEM2}"
     )
 

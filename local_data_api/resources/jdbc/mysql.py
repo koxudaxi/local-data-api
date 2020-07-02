@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 import jaydebeapi
 from sqlalchemy.dialects import mysql
@@ -24,8 +24,8 @@ class MySQLJDBC(JDBC):
         cursor.execute("SELECT LAST_INSERT_ID()")
         return int(str(cursor.fetchone()[0]))
 
-    def get_field_from_value(self, value: Any) -> Field:
+    def get_filed_from_jdbc_type(self, value: Any, jdbc_type: Optional[int]) -> Field:
         if type(value).__name__.endswith('BigInteger'):
             return Field(longValue=int(str(value)))
         else:
-            return super().get_field_from_value(value)
+            return super().get_filed_from_jdbc_type(value, jdbc_type)

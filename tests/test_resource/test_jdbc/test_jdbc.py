@@ -1,15 +1,20 @@
 from __future__ import annotations
 
-from typing import Any
+from base64 import b64encode
+from typing import Any, Optional
 
 import jaydebeapi
 import pytest
 
 from local_data_api.models import ColumnMetadata, Field
 from local_data_api.resources.jdbc import JDBC, attach_thread_to_jvm, connection_maker
+from local_data_api.resources.resource import JDBCType
 
 
 class DummyJDBC(JDBC):
+    def get_filed_from_jdbc_type(self, value: Any, jdbc_type: Optional[int]) -> Field:
+        return super().get_filed_from_jdbc_type(value, jdbc_type)
+
     def autocommit_off(self, cursor: jaydebeapi.Cursor) -> None:
         pass
 
@@ -24,9 +29,6 @@ class DummyJDBC(JDBC):
     def last_generated_id(cursor: jaydebeapi.Cursor) -> int:
         cursor.execute("SELECT LAST_INSERT_ID()")
         return int(str(cursor.fetchone()[0]))
-
-    def get_field_from_value(self, value: Any) -> Field:
-        return super().get_field_from_value(value)
 
 
 def test_attach_thread_to_jvm(mocker):
@@ -155,3 +157,27 @@ def test_create_connection_maker_error(mocker):
             host='127.0.0.1', port=3306, user_name='root', password='pass'
         )
     assert e.value.args[0] == 'Not Found JAR_PATH in settings'
+
+
+@pytest.mark.parametrize(
+    'value, jdbc_type, expected',
+    [
+        (1, JDBCType.INTEGER, {'longValue': 1}),
+        (1, JDBCType.INTEGER, {'longValue': 1}),
+        (0.1, JDBCType.FLOAT, {'doubleValue': 0.1}),
+        (1, JDBCType.DECIMAL, {'stringValue': '1'}),
+        (1, JDBCType.BOOLEAN, {'booleanValue': True}),
+        (b'bytes', JDBCType.BLOB, {'blobValue': b64encode(b'bytes').decode()}),
+        (1, JDBCType.REF, {'longValue': 1}),
+        (1, -99999999999, {'longValue': 1}),
+    ],
+)
+def test_get_filed_from_jdbc_type(value, jdbc_type, expected):
+    assert (
+        DummyJDBC(None)
+        .get_filed_from_jdbc_type(
+            value, jdbc_type.value if isinstance(jdbc_type, JDBCType) else jdbc_type
+        )
+        .dict(exclude_unset=True)
+        == expected
+    )
