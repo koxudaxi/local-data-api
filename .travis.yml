@@ -12,15 +12,10 @@ install:
 
 cache: pip
 
-jobs:
-  include:
-    - stage: unit test
-      script: ./scripts/test.sh
-    - stage: lint
-      script: ./scripts/lint.sh
-    - stage: integration test
-      script: ./scripts/integration-test.sh
-script: 
+script:
+- ./scripts/test.sh
+- ./scripts/lint.sh
+- ./scripts/integration-test.sh 
 - cp README.md docs/index.md && mkdocs build --verbose --clean --strict
 after_success:
 - codecov
