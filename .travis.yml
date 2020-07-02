@@ -20,8 +20,8 @@ jobs:
       script: ./scripts/lint.sh
     - stage: integration test
       script: ./scripts/integration-test.sh
-    - stage: docs
-      script: cp README.md docs/index.md && mkdocs build --verbose --clean --strict
+script: 
+- cp README.md docs/index.md && mkdocs build --verbose --clean --strict
 after_success:
 - codecov
 deploy:
