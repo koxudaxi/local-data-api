@@ -13,7 +13,7 @@ from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Fiel
 from local_data_api.resources.resource import JDBCType, Resource
 
 if TYPE_CHECKING:  # pragma: no cover
-    from local_data_api.resources.resource import ConnectionMaker, Connection
+    from local_data_api.resources.resource import Connection, ConnectionMaker
 
 # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html
 """
