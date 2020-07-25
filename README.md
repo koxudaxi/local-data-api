@@ -80,6 +80,11 @@ In [1]: import boto3; client = boto3.client('rds-data', endpoint_url='http://127
 In [2]: client.execute_statement(resourceArn='arn:aws:rds:us-east-1:123456789012:cluster:dummy', secretArn='arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy', sql='show databases', database='test')
 ```
 
+#### If you use PostgreSQL, then you should run this line to check databases. 
+```python
+In [2]: client.execute_statement(resourceArn='arn:aws:rds:us-east-1:123456789012:cluster:dummy', secretArn='arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy', sql='SELECT datname FROM pg_database', database='test')
+```
+
 4. local-data-api return the result from a MySQL Server.
 ```python
 Out[2]: {'ResponseMetadata': {'HTTPStatusCode': 200,
