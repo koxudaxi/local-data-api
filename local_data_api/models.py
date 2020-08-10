@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 from pydantic import Field as Field_
+from pydantic import validator
 
 TYPE_HINT_TO_CONVERTER: Dict[str, Callable[[Any], Any]] = {
     'DECIMAL': Decimal,
@@ -60,6 +61,12 @@ class ExecuteStatementRequests(BaseModel):
     parameters: Optional[List[SqlParameter]]
     schema_: Optional[str] = Field_(None, alias='schema')
     transactionId: Optional[str]
+
+    @validator('transactionId', pre=True)
+    def validate_transaction_id(cls, v: Any) -> Any:
+        if not v:
+            return None
+        return v
 
 
 class ColumnMetadata(BaseModel):
@@ -132,6 +139,12 @@ class BatchExecuteStatementRequests(BaseModel):
     parameterSets: Optional[List[List[SqlParameter]]]
     schema_: Optional[str] = Field_(None, alias='schema')
     transactionId: Optional[str]
+
+    @validator('transactionId', pre=True)
+    def validate_transaction_id(cls, v: Any) -> Any:
+        if not v:
+            return None
+        return v
 
 
 class UpdateResult(BaseModel):

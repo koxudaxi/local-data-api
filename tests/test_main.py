@@ -168,6 +168,30 @@ def test_execute_statement_with_transaction(
     }
 
 
+def test_execute_statement_with_empty_transaction_id(
+    mocked_mysql, mocked_connection, mocked_connection_pool, mocked_cursor
+):
+    mocked_cursor.description = 1, 1, 1, 1, 1, 1, 1
+    mocked_cursor.fetchall.side_effect = [((1, 'abc'),)]
+    mocked_connection_pool['2'] = mocked_connection
+
+    response = client.post(
+        "/Execute",
+        json={
+            'resourceArn': 'abc',
+            'secretArn': '1',
+            'sql': 'select * from users',
+            'transactionId': '',
+        },
+    )
+    assert response.status_code == 200
+    response_json = response.json()
+    assert response_json == {
+        'numberOfRecordsUpdated': 0,
+        'records': [[{'longValue': 1}, {'stringValue': 'abc'}]],
+    }
+
+
 def test_batch_execute_statement(mocked_mysql, mocked_cursor):
     mocked_cursor.description = ''
     mocked_cursor.rowcount = 1
@@ -226,6 +250,31 @@ def test_batch_execute_statement_with_transaction(
             'secretArn': '1',
             'sql': "insert into users (name) values (:name)",
             'transactionId': '2',
+            'parameterSets': [[{'name': 'name', 'value': {'stringValue': 'abc'}}]],
+        },
+    )
+
+    assert response.status_code == 200
+    response_json = response.json()
+    assert response_json == {'updateResults': [{'generatedFields': [{'longValue': 1}]}]}
+
+
+def test_batch_execute_statement_with_empty_transaction_id(
+    mocked_mysql, mocked_connection, mocked_connection_pool, mocked_cursor
+):
+    mocked_cursor.description = ''
+    mocked_cursor.rowcount = 1
+    mocked_cursor.lastrowid = 1
+
+    mocked_connection_pool['2'] = mocked_connection
+
+    response = client.post(
+        "/BatchExecute",
+        json={
+            'resourceArn': 'abc',
+            'secretArn': '1',
+            'sql': "insert into users (name) values (:name)",
+            'transactionId': '',
             'parameterSets': [[{'name': 'name', 'value': {'stringValue': 'abc'}}]],
         },
     )
