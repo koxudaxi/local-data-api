@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 import jaydebeapi
 from jpype import java
@@ -8,6 +8,19 @@ from sqlalchemy.engine import Dialect
 from local_data_api.models import Field
 from local_data_api.resources.jdbc import JDBC
 from local_data_api.resources.resource import register_resource_type
+
+PG_TYPES: Tuple[str, ...] = (
+    'UUID',
+    'PgArray',
+    'PGobject',
+    'PGbox',
+    'PGcircle',
+    'PGline',
+    'PGlseg',
+    'PGpath',
+    'PGpoint',
+    'PGpolygon',
+)
 
 
 @register_resource_type
@@ -26,11 +39,7 @@ class PostgreSQLJDBC(JDBC):
 
     def get_filed_from_jdbc_type(self, value: Any, jdbc_type: Optional[int]) -> Field:
         type_ = type(value)
-        if type_.__name__.endswith('UUID'):
-            return Field(stringValue=str(value))
-        elif type_.__name__.endswith('PGobject'):
-            return Field(stringValue=str(value))
-        elif type_.__name__.endswith('PgArray'):
-            return Field(stringValue=str(value))
-        else:
-            return super().get_filed_from_jdbc_type(value, jdbc_type)
+        for pg_type in PG_TYPES:
+            if type_.__name__.endswith(pg_type):
+                return Field(stringValue=str(value))
+        return super().get_filed_from_jdbc_type(value, jdbc_type)
