@@ -20,8 +20,12 @@ from local_data_api.exceptions import BadRequestException, InternalServerErrorEx
 from local_data_api.models import ColumnMetadata, ExecuteStatementResponse, Field
 from local_data_api.secret_manager import Secret, get_secret
 
-INVALID_PARAMETER_MESSAGE: str = r"Bind parameter '([^\']+)' without a renderable value not allowed here."
-UNDEFINED_PARAMETER_MESSAGE: str = r"This text\(\) construct doesn't define a bound parameter named '([^\']+)'"
+INVALID_PARAMETER_MESSAGE: str = (
+    r"Bind parameter '([^\']+)' without a renderable value not allowed here."
+)
+UNDEFINED_PARAMETER_MESSAGE: str = (
+    r"This text\(\) construct doesn't define a bound parameter named '([^\']+)'"
+)
 
 TRANSACTION_ID_CHARACTERS: str = string.ascii_letters + '/=+'
 TRANSACTION_ID_LENGTH: int = 184

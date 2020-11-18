@@ -235,7 +235,8 @@ def test_create_query_undefined_param(clear):
 
 def test_create_query_none_param(clear):
     query = DummyResource.create_query(
-        'insert into users values (:id, :name)', {'id': 1, 'name': None},
+        'insert into users values (:id, :name)',
+        {'id': 1, 'name': None},
     )
     assert query == "insert into users values (1, NULL)"
 
