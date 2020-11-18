@@ -307,7 +307,7 @@ def test_from_value(mocker) -> None:
         def __str__(self) -> str:
             return self._val
 
-    assert dummy.get_filed_from_jdbc_type(PGpoint("(50.074534,14.444137)"), None) == Field(
-        stringValue="(50.074534,14.444137)"
-    )
+    assert dummy.get_filed_from_jdbc_type(
+        PGpoint("(50.074534,14.444137)"), None
+    ) == Field(stringValue="(50.074534,14.444137)")
     helper_default_test_field(dummy)
