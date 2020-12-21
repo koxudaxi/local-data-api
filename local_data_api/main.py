@@ -129,6 +129,9 @@ def batch_execute_statement(
 
         update_results: List[UpdateResult] = []
 
+        if not resource.transaction_id:
+            resource.autocommit_off()
+
         if not request.parameterSets:
             response: BatchExecuteStatementResponse = BatchExecuteStatementResponse(
                 updateResults=update_results
