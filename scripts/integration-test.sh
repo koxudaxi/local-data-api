@@ -43,6 +43,7 @@ function test {
     --database 'test' \
     --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
     --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+    --include-result-metadata \
     --sql 'SELECT 1 AS value' \
     | jq -e '.records[0][0].longValue == 1'
 
@@ -54,6 +55,7 @@ function test {
         --database 'test' \
         --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
         --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+        --include-result-metadata \
         --sql 'SELECT 1 > 0 AS value' \
         | jq -e '.records[0][0].booleanValue == true'
     fi
@@ -67,6 +69,7 @@ function test {
         --database 'test' \
         --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
         --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+        --include-result-metadata \
         --sql 'SELECT 1 > 0 AS value' \
         | jq -e '.records[0][0].longValue == 1'
     fi
@@ -76,6 +79,7 @@ function test {
     --database 'test' \
     --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
     --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+    --include-result-metadata \
     --sql 'SELECT NOW() AS value' \
     | jq -e '.records[0][0].stringValue | length >= 19' # eg "2020-07-01 20:21:35.738998" or "2020-07-01 19:45:27"
 
