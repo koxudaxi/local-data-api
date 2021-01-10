@@ -37,6 +37,9 @@ class SqlParameter(BaseModel):
             if key == 'isNull' and value:
                 return None
 
+            if key == 'isNull':
+                continue
+
             if key == 'stringValue' and self.type_hint:
                 TYPE_HINT_TO_CONVERTER[self.type_hint](value)  # only validation
             return value
