@@ -94,6 +94,8 @@ class JDBC(Resource, ABC):
             elif type_ in BOOLEAN:
                 return Field(booleanValue=value)
             elif type_ in BLOB:
+                if isinstance(value, str):
+                    value = value.encode()
                 return Field(blobValue=b64encode(value))
 
         return self.get_field_from_value(value)
