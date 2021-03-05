@@ -58,6 +58,15 @@ function test {
         --include-result-metadata \
         --sql 'SELECT 1 > 0 AS value' \
         | jq -e '.records[0][0].booleanValue == true'
+
+        aws rds-data execute-statement \
+        --endpoint-url 'http://localhost:8080' \
+        --database 'test' \
+        --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
+        --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+        --include-result-metadata \
+        --sql $'SELECT \'hello\'::bytea as value' \
+        | jq -e '.records[0][0].blobValue == "aGVsbG8="'
     fi
 
     # select boolean (mysql)
@@ -72,6 +81,15 @@ function test {
         --include-result-metadata \
         --sql 'SELECT 1 > 0 AS value' \
         | jq -e '.records[0][0].longValue == 1'
+
+        aws rds-data execute-statement \
+        --endpoint-url 'http://localhost:8080' \
+        --database 'test' \
+        --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
+        --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+        --include-result-metadata \
+        --sql $'SELECT BINARY \'hello\' as value' \
+        | jq -e '.records[0][0].blobValue == "aGVsbG8="'
     fi
 
     aws rds-data execute-statement \
