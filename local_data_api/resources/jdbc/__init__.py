@@ -94,7 +94,7 @@ class JDBC(Resource, ABC):
             elif type_ in BOOLEAN:
                 return Field(booleanValue=value)
             elif type_ in BLOB:
-                if isinstance(value, str):
+                if isinstance(value, str):  # pragma: no cover
                     value = value.encode()
                 return Field(blobValue=b64encode(value))
 
