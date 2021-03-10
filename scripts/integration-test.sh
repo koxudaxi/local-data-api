@@ -100,8 +100,8 @@ function test {
     --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
     --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
     --include-result-metadata \
-    --sql $'SELECT CAST(\'2021-03-10 22:41:04.968123\' AS TIMESTAMP) AS value' \
-      | jq -e '.records[0][0].stringValue == "2021-03-10 22:41:04.968"'
+    --sql $'SELECT CAST(\'2021-03-10 22:41:04.968123+02\' AS TIMESTAMPTZ) AS value' \
+      | jq -e '.records[0][0].stringValue == "2021-03-10 20:41:04.968"'
     fi
 
     if [ "$db" = "mysql" ]
