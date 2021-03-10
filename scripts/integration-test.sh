@@ -92,14 +92,29 @@ function test {
         | jq -e '.records[0][0].blobValue == "aGVsbG8="'
     fi
 
+    if [ "$db" = "pg" ]
+    then
     aws rds-data execute-statement \
     --endpoint-url 'http://localhost:8080' \
     --database 'test' \
     --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
     --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
     --include-result-metadata \
-    --sql 'SELECT NOW() AS value' \
-    | jq -e '.records[0][0].stringValue | length >= 19' # eg "2020-07-01 20:21:35.738998" or "2020-07-01 19:45:27"
+    --sql $'SELECT CAST(\'2021-03-10 22:41:04.968123\' AS TIMESTAMP) AS value' \
+      | jq -e '.records[0][0].stringValue == "2021-03-10 22:41:04.968"'
+    fi
+
+    if [ "$db" = "mysql" ]
+    then
+    aws rds-data execute-statement \
+    --endpoint-url 'http://localhost:8080' \
+    --database 'test' \
+    --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
+    --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+    --include-result-metadata \
+    --sql $'SELECT CAST(\'2021-03-10 22:41:04.968123\' AS DATETIME) AS value' \
+      | jq -e '.records[0][0].stringValue == "2021-03-10 22:41:05"'
+    fi
 
     # TODO list, JSON, enum
 }
