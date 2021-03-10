@@ -33,6 +33,7 @@ DOUBLE = [JDBCType.FLOAT, JDBCType.REAL, JDBCType.DOUBLE]
 STRING = [JDBCType.DECIMAL, JDBCType.CLOB]
 BOOLEAN = [JDBCType.BOOLEAN, JDBCType.BIT]
 BLOB = [JDBCType.BLOB, JDBCType.BINARY, JDBCType.LONGVARBINARY, JDBCType.VARBINARY]
+TIMESTAMP = [JDBCType.TIMESTAMP, JDBCType.TIMESTAMP_WITH_TIMEZONE]
 
 
 def attach_thread_to_jvm() -> None:
@@ -93,6 +94,8 @@ class JDBC(Resource, ABC):
                 return Field(stringValue=value)
             elif type_ in BOOLEAN:
                 return Field(booleanValue=value)
+            elif type_ in TIMESTAMP:
+                return Field(stringValue=self._format_datetime(value))
             elif type_ in BLOB:
                 if isinstance(value, str):  # pragma: no cover
                     value = value.encode()

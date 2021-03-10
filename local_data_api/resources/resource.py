@@ -332,6 +332,10 @@ class Resource(ABC):
             for _ in range(TRANSACTION_ID_LENGTH)
         )
 
+    @classmethod
+    def _format_datetime(cls, value: Any) -> str:
+        return re.match(r'^[^.]+(\.\d{3}|$)', str(value)).group()  # type: ignore
+
     @abstractmethod
     def get_field_from_value(self, value: Any) -> Field:
         if isinstance(value, bool):
@@ -339,7 +343,7 @@ class Resource(ABC):
         elif isinstance(value, str):
             return Field(stringValue=value)
         elif type(value).__name__ == 'datetime':
-            return Field(stringValue=str(value))
+            return Field(stringValue=self._format_datetime(value))
         elif isinstance(value, int):
             return Field(longValue=value)
         elif isinstance(value, float):

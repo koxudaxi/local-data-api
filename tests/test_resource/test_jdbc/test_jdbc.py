@@ -170,6 +170,11 @@ def test_create_connection_maker_error(mocker):
         (b'bytes', JDBCType.BLOB, {'blobValue': b64encode(b'bytes').decode()}),
         (1, JDBCType.REF, {'longValue': 1}),
         (1, -99999999999, {'longValue': 1}),
+        (
+            '2021-03-10 22:41:04.968123',
+            JDBCType.TIMESTAMP,
+            {'stringValue': '2021-03-10 22:41:04.968'},
+        ),
     ],
 )
 def test_get_filed_from_jdbc_type(value, jdbc_type, expected):
