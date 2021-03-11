@@ -36,7 +36,7 @@ BLOB = [JDBCType.BLOB, JDBCType.BINARY, JDBCType.LONGVARBINARY, JDBCType.VARBINA
 TIMESTAMP = [JDBCType.TIMESTAMP, JDBCType.TIMESTAMP_WITH_TIMEZONE]
 
 
-def _fixed_to_datetime(rs: Any, col: Any) -> Optional[str]:
+def _fixed_to_datetime(rs: Any, col: Any) -> Optional[str]:  # pragma: no cover
     """
     jaydebeapi has a bug that can't be parsed datetime correctly.
     This workaround will be removed when the PR is merged.
