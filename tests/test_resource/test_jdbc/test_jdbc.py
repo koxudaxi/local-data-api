@@ -175,6 +175,11 @@ def test_create_connection_maker_error(mocker):
             JDBCType.TIMESTAMP,
             {'stringValue': '2021-03-10 22:41:04.968'},
         ),
+        (
+            None,
+            JDBCType.TIMESTAMP,
+            {'isNull': True},
+        ),
     ],
 )
 def test_get_filed_from_jdbc_type(value, jdbc_type, expected):
