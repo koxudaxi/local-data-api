@@ -105,7 +105,9 @@ class JDBC(Resource, ABC):
             except ValueError:
                 pass
         if type_:
-            if type_ in LONG:
+            if value is None:
+                return Field(isNull=True)
+            elif type_ in LONG:
                 return Field(longValue=value)
             elif type_ in DOUBLE:
                 return Field(doubleValue=value)

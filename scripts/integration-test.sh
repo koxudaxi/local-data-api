@@ -102,6 +102,15 @@ function test {
     --include-result-metadata \
     --sql $'SELECT CAST(\'2021-03-10 22:41:04.068123+02\' AS TIMESTAMPTZ) AS value' \
       | jq -e '.records[0][0].stringValue == "2021-03-10 20:41:04.068"'
+
+      aws rds-data execute-statement \
+    --endpoint-url 'http://localhost:8080' \
+    --database 'test' \
+    --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
+    --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+    --include-result-metadata \
+    --sql $'SELECT CAST(null AS TIMESTAMPTZ) AS value' \
+      | jq -e '.records[0][0].isNull == true'
     fi
 
     if [ "$db" = "mysql" ]
@@ -114,6 +123,16 @@ function test {
     --include-result-metadata \
     --sql $'SELECT CAST(\'2021-03-10 22:41:04.968123\' AS DATETIME) AS value' \
       | jq -e '.records[0][0].stringValue == "2021-03-10 22:41:05"'
+
+    aws rds-data execute-statement \
+    --endpoint-url 'http://localhost:8080' \
+    --database 'test' \
+    --resource-arn $RDS_DATA_API_CLIENT_RESOURCE_ARN \
+    --secret-arn $RDS_DATA_API_CLIENT_SECRETARN \
+    --include-result-metadata \
+    --sql $'SELECT CAST(null AS DATETIME) AS value' \
+      | jq -e '.records[0][0].isNull == true'
+
     fi
 
     # TODO list, JSON, enum
