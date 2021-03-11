@@ -1,0 +1,908 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Data API for local, you can write unittest for AWS Aurora Serverless's Data API">
+      
+      
+      
+      
+      <link rel="shortcut icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.5">
+    
+    
+      
+        <title>loca-data-api</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.77f3fd56.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.7fa14f5b.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#02a6f2">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+        
+<script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-142130505-1","auto"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){var e;this.value&&(e=document.location.pathname,ga("send","pageview",e+"?q="+this.value))}),"undefined"!=typeof location$&&location$.subscribe(function(e){ga("send","pageview",e.pathname)})})</script>
+<script async src="https://www.google-analytics.com/analytics.js"></script>
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="light-blue" data-md-color-accent="light-blue">
+      
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#local-data-api-local-data-api-for-aws-aurora-serverless-data-api" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="loca-data-api" class="md-header__button md-logo" aria-label="loca-data-api">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            loca-data-api
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              local-data-api
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="md-header__options">
+      
+    </div>
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/koxudaxi/local-data-api/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    koxudaxi/loca-data-api
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="loca-data-api" class="md-nav__button md-logo" aria-label="loca-data-api">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    loca-data-api
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/koxudaxi/local-data-api/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    koxudaxi/loca-data-api
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          local-data-api
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        local-data-api
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#whats-aws-aurora-serverlesss-data-api" class="md-nav__link">
+    What's AWS Aurora Serverless's Data API?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-does-local-data-api-work" class="md-nav__link">
+    How does local-data-api work?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-database-types" class="md-nav__link">
+    Support Database Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-use-this-image" class="md-nav__link">
+    How to use this image
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-compose" class="md-nav__link">
+    docker-compose
+  </a>
+  
+    <nav class="md-nav" aria-label="docker-compose">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mysql" class="md-nav__link">
+    MySQL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose-with-pythons-aws-sdk-clientboto3" class="md-nav__link">
+    docker-compose with Python's aws-sdk client(boto3)
+  </a>
+  
+    <nav class="md-nav" aria-label="docker-compose with Python's aws-sdk client(boto3)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#if-you-use-postgresql-then-you-should-run-this-line-to-check-databases" class="md-nav__link">
+    If you use PostgreSQL, then you should run this line to check databases.
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postgresql" class="md-nav__link">
+    PostgreSQL
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contribute" class="md-nav__link">
+    Contribute
+  </a>
+  
+    <nav class="md-nav" aria-label="Contribute">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-contribute" class="md-nav__link">
+    How to contribute
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-clone-your-fork-repository" class="md-nav__link">
+    1. Clone your fork repository
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-create-venv-with-python37-also-you-should-do-with-python36" class="md-nav__link">
+    2. Create venv with python3.7 (also you should do with python3.6)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-install-dependencies" class="md-nav__link">
+    3. Install dependencies
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-create-new-branch-and-rewrite-code" class="md-nav__link">
+    4. Create new branch and rewrite code.
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-run-unittest-you-should-pass-all-test-and-coverage-should-be-100" class="md-nav__link">
+    5. Run unittest (you should pass all test and coverage should be 100%)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-format-code" class="md-nav__link">
+    6. Format code
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-check-lint-mypy" class="md-nav__link">
+    7. Check lint (mypy)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-commit-and-push" class="md-nav__link">
+    8. Commit and Push...
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-projects" class="md-nav__link">
+    Related projects
+  </a>
+  
+    <nav class="md-nav" aria-label="Related projects">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#py-data-api" class="md-nav__link">
+    py-data-api
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-image" class="md-nav__link">
+    Docker Image
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-code" class="md-nav__link">
+    Source Code
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    Documentation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    License
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#whats-aws-aurora-serverlesss-data-api" class="md-nav__link">
+    What's AWS Aurora Serverless's Data API?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-does-local-data-api-work" class="md-nav__link">
+    How does local-data-api work?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-database-types" class="md-nav__link">
+    Support Database Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-use-this-image" class="md-nav__link">
+    How to use this image
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-compose" class="md-nav__link">
+    docker-compose
+  </a>
+  
+    <nav class="md-nav" aria-label="docker-compose">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mysql" class="md-nav__link">
+    MySQL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose-with-pythons-aws-sdk-clientboto3" class="md-nav__link">
+    docker-compose with Python's aws-sdk client(boto3)
+  </a>
+  
+    <nav class="md-nav" aria-label="docker-compose with Python's aws-sdk client(boto3)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#if-you-use-postgresql-then-you-should-run-this-line-to-check-databases" class="md-nav__link">
+    If you use PostgreSQL, then you should run this line to check databases.
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postgresql" class="md-nav__link">
+    PostgreSQL
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contribute" class="md-nav__link">
+    Contribute
+  </a>
+  
+    <nav class="md-nav" aria-label="Contribute">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-contribute" class="md-nav__link">
+    How to contribute
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-clone-your-fork-repository" class="md-nav__link">
+    1. Clone your fork repository
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-create-venv-with-python37-also-you-should-do-with-python36" class="md-nav__link">
+    2. Create venv with python3.7 (also you should do with python3.6)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-install-dependencies" class="md-nav__link">
+    3. Install dependencies
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-create-new-branch-and-rewrite-code" class="md-nav__link">
+    4. Create new branch and rewrite code.
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-run-unittest-you-should-pass-all-test-and-coverage-should-be-100" class="md-nav__link">
+    5. Run unittest (you should pass all test and coverage should be 100%)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-format-code" class="md-nav__link">
+    6. Format code
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-check-lint-mypy" class="md-nav__link">
+    7. Check lint (mypy)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-commit-and-push" class="md-nav__link">
+    8. Commit and Push...
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-projects" class="md-nav__link">
+    Related projects
+  </a>
+  
+    <nav class="md-nav" aria-label="Related projects">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#py-data-api" class="md-nav__link">
+    py-data-api
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-image" class="md-nav__link">
+    Docker Image
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-code" class="md-nav__link">
+    Source Code
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    Documentation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    License
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/koxudaxi/local-data-api/edit/master/docs/index.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="local-data-api-local-data-api-for-aws-aurora-serverless-data-api">local-data-api - Local Data API for AWS Aurora Serverless Data API</h1>
+<p><a href="https://travis-ci.org/koxudaxi/local-data-api"><img alt="Build Status" src="https://travis-ci.org/koxudaxi/local-data-api.svg?branch=master" /></a>
+<a href="https://hub.docker.com/r/koxudaxi/local-data-api"><img alt="" src="https://images.microbadger.com/badges/version/koxudaxi/local-data-api.svg" /></a>
+<a href="https://hub.docker.com/r/koxudaxi/local-data-api"><img alt="" src="https://badgen.net/docker/pulls/koxudaxi/local-data-api" /></a>
+<a href="https://codecov.io/gh/koxudaxi/local-data-api"><img alt="codecov" src="https://codecov.io/gh/koxudaxi/local-data-api/branch/master/graph/badge.svg" /></a>
+<img alt="license" src="https://img.shields.io/github/license/koxudaxi/local-data-api.svg" />
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a></p>
+<p>If you want to run tests on your local machine and CI then, local-data-api can run in your local machine with MySQL and PostgreSQL Servers.</p>
+<h2 id="whats-aws-aurora-serverlesss-data-api">What's AWS Aurora Serverless's Data API?</h2>
+<p>https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html</p>
+<h2 id="how-does-local-data-api-work">How does local-data-api work?</h2>
+<p>local-data-api is "proxy server" to real databases.</p>
+<p>The API converts RESTful request to SQL statements.</p>
+<h2 id="support-database-types">Support Database Types</h2>
+<ul>
+<li>MySQL</li>
+<li>PostgreSQL</li>
+</ul>
+<h2 id="how-to-use-this-image">How to use this image</h2>
+<p>You set your MYSQL Server configs as environments.</p>
+<div class="codehilite"><pre><span></span><code>docker run --rm -it --name my-data-api -p <span class="m">8080</span>:80  -e <span class="nv">MYSQL_HOST</span><span class="o">=</span>&lt;YOUR_MYSQL_HOST&gt; -e <span class="nv">MYSQL_PORT</span><span class="o">=</span>&lt;YOUR_MYSQL_PORT&gt; -e <span class="nv">MYSQL_USER</span><span class="o">=</span>&lt;YOUR_MYSQL_USER&gt; -e <span class="nv">MYSQL_PASSWORD</span><span class="o">=</span>&lt;YOUR_MYSQL_PASS&gt;  -e <span class="nv">RESOURCE_ARN</span><span class="o">=</span>arn:aws:rds:us-east-1:123456789012:cluster:dummy -e <span class="nv">SECRET_ARN</span><span class="o">=</span>arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy  koxudaxi/local-data-api
+</code></pre></div>
+
+<p>In this case, you give local-data-api URL to aws client (like aws-cli).</p>
+<div class="codehilite"><pre><span></span><code>$ aws --endpoint-url http://127.0.0.1:8080 rds-data execute-statement --resource-arn <span class="s2">&quot;arn:aws:rds:us-east-1:123456789012:cluster:dummy&quot;</span> --sql <span class="s2">&quot;show databases&quot;</span>  --secret-arn <span class="s2">&quot;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&quot;</span> --database <span class="s1">&#39;test&#39;</span>
+</code></pre></div>
+
+<h2 id="docker-compose">docker-compose</h2>
+<h3 id="mysql">MySQL</h3>
+<p>docker-compose-mysql.yml</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.1&#39;</span>
+
+<span class="nt">services</span><span class="p">:</span>
+  <span class="nt">local-data-api</span><span class="p">:</span>
+    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">koxudaxi/local-data-api</span>
+    <span class="nt">restart</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
+    <span class="nt">environment</span><span class="p">:</span>
+      <span class="nt">MYSQL_HOST</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">db</span>
+      <span class="nt">MYSQL_PORT</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3306</span>
+      <span class="nt">MYSQL_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+      <span class="nt">MYSQL_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
+      <span class="nt">RESOURCE_ARN</span><span class="p">:</span> <span class="s">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span>
+      <span class="nt">SECRET_ARN</span><span class="p">:</span> <span class="s">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span>
+    <span class="nt">ports</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;8080:80&quot;</span>
+  <span class="nt">db</span><span class="p">:</span>
+    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mysql:5.6</span>
+    <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">--default-authentication-plugin=mysql_native_password</span>
+    <span class="nt">restart</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
+    <span class="nt">environment</span><span class="p">:</span>
+      <span class="nt">MYSQL_ROOT_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
+      <span class="nt">MYSQL_DATABASE</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test</span>
+    <span class="nt">ports</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;3306:3306&quot;</span>
+</code></pre></div>
+
+<h3 id="docker-compose-with-pythons-aws-sdk-clientboto3">docker-compose with Python's aws-sdk client(boto3)</h3>
+<ol>
+<li>start local-data-api containers</li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$ docker-compose up -d
+</code></pre></div>
+
+<ol>
+<li>change a endpoint to local-data-api in your code. </li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$ ipython
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">boto3</span><span class="p">;</span> <span class="n">client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;rds-data&#39;</span><span class="p">,</span> <span class="n">endpoint_url</span><span class="o">=</span><span class="s1">&#39;http://127.0.0.1:8080&#39;</span><span class="p">,</span> <span class="n">aws_access_key_id</span><span class="o">=</span><span class="s1">&#39;aaa&#39;</span><span class="p">,</span>  <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="s1">&#39;bbb&#39;</span><span class="p">)</span> 
+</code></pre></div>
+
+<ol>
+<li>execute a sql statement</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">client</span><span class="o">.</span><span class="n">execute_statement</span><span class="p">(</span><span class="n">resourceArn</span><span class="o">=</span><span class="s1">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span><span class="p">,</span> <span class="n">secretArn</span><span class="o">=</span><span class="s1">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span><span class="p">,</span> <span class="n">sql</span><span class="o">=</span><span class="s1">&#39;show databases&#39;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="if-you-use-postgresql-then-you-should-run-this-line-to-check-databases">If you use PostgreSQL, then you should run this line to check databases.</h4>
+<div class="codehilite"><pre><span></span><code><span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">client</span><span class="o">.</span><span class="n">execute_statement</span><span class="p">(</span><span class="n">resourceArn</span><span class="o">=</span><span class="s1">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span><span class="p">,</span> <span class="n">secretArn</span><span class="o">=</span><span class="s1">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span><span class="p">,</span> <span class="n">sql</span><span class="o">=</span><span class="s1">&#39;SELECT datname FROM pg_database&#39;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+<ol>
+<li>local-data-api return the result from a MySQL Server.</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="n">Out</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="p">{</span><span class="s1">&#39;ResponseMetadata&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;HTTPStatusCode&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+ <span class="s1">&#39;HTTPHeaders&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s1">&#39;Sun, 09 Jun 2019 18:35:22 GMT&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;server&#39;</span><span class="p">:</span> <span class="s1">&#39;uvicorn&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;content-length&#39;</span><span class="p">:</span> <span class="s1">&#39;492&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">},</span>
+ <span class="s1">&#39;RetryAttempts&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+ <span class="s1">&#39;numberOfRecordsUpdated&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+ <span class="s1">&#39;records&#39;</span><span class="p">:</span> <span class="p">[[{</span><span class="s1">&#39;stringValue&#39;</span><span class="p">:</span> <span class="s1">&#39;information_schema&#39;</span><span class="p">}],</span>
+  <span class="p">[{</span><span class="s1">&#39;stringValue&#39;</span><span class="p">:</span> <span class="s1">&#39;mysql&#39;</span><span class="p">}],</span>
+  <span class="p">[{</span><span class="s1">&#39;stringValue&#39;</span><span class="p">:</span> <span class="s1">&#39;performance_schema&#39;</span><span class="p">}],</span>
+  <span class="p">[{</span><span class="s1">&#39;stringValue&#39;</span><span class="p">:</span> <span class="s1">&#39;sys&#39;</span><span class="p">}],</span>
+  <span class="p">[{</span><span class="s1">&#39;stringValue&#39;</span><span class="p">:</span> <span class="s1">&#39;test&#39;</span><span class="p">}]]}</span>
+</code></pre></div>
+
+<p>If a table has some records, then the local-data-api can run <code>select</code></p>
+<div class="codehilite"><pre><span></span><code><span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">client</span><span class="o">.</span><span class="n">execute_statement</span><span class="p">(</span><span class="n">resourceArn</span><span class="o">=</span><span class="s1">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span><span class="p">,</span> <span class="n">secretArn</span><span class="o">=</span><span class="s1">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span><span class="p">,</span> <span class="n">sql</span><span class="o">=</span><span class="s1">&#39;select * from users&#39;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">Out</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="p">{</span><span class="s1">&#39;ResponseMetadata&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;HTTPStatusCode&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+ <span class="s1">&#39;HTTPHeaders&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s1">&#39;Sun, 09 Jun 2019 18:35:22 GMT&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;server&#39;</span><span class="p">:</span> <span class="s1">&#39;uvicorn&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;content-length&#39;</span><span class="p">:</span> <span class="s1">&#39;492&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">},</span>
+ <span class="s1">&#39;RetryAttempts&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+ <span class="s1">&#39;numberOfRecordsUpdated&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+ <span class="s1">&#39;records&#39;</span><span class="p">:</span> <span class="p">[[{</span><span class="s1">&#39;longValue&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;stringValue&#39;</span><span class="p">:</span> <span class="s1">&#39;ichiro&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;longValue&#39;</span><span class="p">:</span> <span class="mi">17</span><span class="p">}],</span>
+  <span class="p">[{</span><span class="s1">&#39;longValue&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;stringValue&#39;</span><span class="p">:</span> <span class="s1">&#39;ken&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;longValue&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}],</span>
+  <span class="p">[{</span><span class="s1">&#39;longValue&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;stringValue&#39;</span><span class="p">:</span> <span class="s1">&#39;lisa&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;isNull&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}],}</span>
+</code></pre></div>
+
+<h3 id="postgresql">PostgreSQL</h3>
+<p>Now, local-data-api supports PostgreSQL</p>
+<p>docker-compose-postgres.yml</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.1&#39;</span>
+
+<span class="nt">services</span><span class="p">:</span>
+  <span class="nt">local-data-api</span><span class="p">:</span>
+    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">koxudaxi/local-data-api</span>
+    <span class="nt">restart</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
+    <span class="nt">environment</span><span class="p">:</span>
+      <span class="nt">ENGINE</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">PostgreSQLJDBC</span>
+      <span class="nt">POSTGRES_HOST</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">db</span>
+      <span class="nt">POSTGRES_PORT</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5432</span>
+      <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">postgres</span>
+      <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
+      <span class="nt">RESOURCE_ARN</span><span class="p">:</span> <span class="s">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span>
+      <span class="nt">SECRET_ARN</span><span class="p">:</span> <span class="s">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span>
+    <span class="nt">ports</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;8080:80&quot;</span>
+  <span class="nt">db</span><span class="p">:</span>
+    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">postgres:10.7-alpine</span>
+    <span class="nt">restart</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
+    <span class="nt">environment</span><span class="p">:</span>
+      <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
+      <span class="nt">POSTGRES_DB</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test</span>
+    <span class="nt">ports</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;5432:5432&quot;</span>
+</code></pre></div>
+
+<h2 id="contribute">Contribute</h2>
+<p>We are waiting for your contributions to <code>local-data-api</code>.</p>
+<h3 id="how-to-contribute">How to contribute</h3>
+<p>```shell script</p>
+<h2 id="1-clone-your-fork-repository">1. Clone your fork repository</h2>
+<p>$ git clone git@github.com:<your username>/local-data-api.git
+$ cd local-data-api</p>
+<h2 id="2-create-venv-with-python37-also-you-should-do-with-python36">2. Create <code>venv</code> with python3.7 (also you should do with python3.6)</h2>
+<p>$ python3.7 -m venv venv37
+$ source venv37/bin/activate  </p>
+<h2 id="3-install-dependencies">3. Install dependencies</h2>
+<p>$ python3 -m pip install ".[all]" </p>
+<h2 id="4-create-new-branch-and-rewrite-code">4. Create new branch and rewrite code.</h2>
+<p>$ git checkout -b new-branch</p>
+<h2 id="5-run-unittest-you-should-pass-all-test-and-coverage-should-be-100">5. Run unittest (you should pass all test and coverage should be 100%)</h2>
+<p>$ ./scripts/test.sh</p>
+<h2 id="6-format-code">6. Format code</h2>
+<p>$ ./scripts/format.sh</p>
+<h2 id="7-check-lint-mypy">7. Check lint (mypy)</h2>
+<p>$ ./scripts/lint.sh</p>
+<h2 id="8-commit-and-push">8. Commit and Push...</h2>
+<p>```</p>
+<h2 id="related-projects">Related projects</h2>
+<h3 id="py-data-api">py-data-api</h3>
+<p>DataAPI client for Python</p>
+<p>https://github.com/koxudaxi/py-data-api</p>
+<h2 id="docker-image">Docker Image</h2>
+<p><a href="https://hub.docker.com/r/koxudaxi/local-data-api">https://hub.docker.com/r/koxudaxi/local-data-api</a></p>
+<h2 id="source-code">Source Code</h2>
+<p><a href="https://github.com/koxudaxi/local-data-api">https://github.com/koxudaxi/local-data-api</a></p>
+<h2 id="documentation">Documentation</h2>
+<p><a href="https://koxudaxi.github.io/local-data-api">https://koxudaxi.github.io/local-data-api</a></p>
+<h2 id="license">License</h2>
+<p>local-data-api is released under the MIT License. http://www.opensource.org/licenses/mit-license</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.5cf3e710.min.js"></script>
+      
+    
+  </body>
+</html>
