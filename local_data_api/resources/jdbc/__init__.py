@@ -36,6 +36,25 @@ BLOB = [JDBCType.BLOB, JDBCType.BINARY, JDBCType.LONGVARBINARY, JDBCType.VARBINA
 TIMESTAMP = [JDBCType.TIMESTAMP, JDBCType.TIMESTAMP_WITH_TIMEZONE]
 
 
+def _fixed_to_datetime(rs: Any, col: Any) -> Optional[str]:  # pragma: no cover
+    """
+    jaydebeapi has a bug that can't be parsed datetime correctly.
+    This workaround will be removed when the PR is merged.
+    https://github.com/baztian/jaydebeapi/pull/177
+    """
+    java_val = rs.getTimestamp(col)
+    if not java_val:
+        return None
+    import datetime
+
+    d = datetime.datetime.strptime(str(java_val)[:19], "%Y-%m-%d %H:%M:%S")
+    d = d.replace(microsecond=int(str(java_val.getNanos()).zfill(9)[:6]))
+    return str(d)
+
+
+jaydebeapi._DEFAULT_CONVERTERS['TIMESTAMP'] = _fixed_to_datetime
+
+
 def attach_thread_to_jvm() -> None:
     "https://github.com/baztian/jaydebeapi/issues/14#issuecomment-261489331"
 

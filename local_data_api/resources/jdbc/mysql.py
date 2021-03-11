@@ -1,11 +1,10 @@
 from typing import Any, Optional
 
-import jaydebeapi
 from sqlalchemy.dialects import mysql
 from sqlalchemy.engine import Dialect
 
 from local_data_api.models import Field
-from local_data_api.resources.jdbc import JDBC
+from local_data_api.resources.jdbc import JDBC, jaydebeapi
 from local_data_api.resources.resource import register_resource_type
 
 
