@@ -36,7 +36,8 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:$logback_version"
     implementation "io.ktor:ktor-server-core:$ktor_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
+    implementation "io.ktor:ktor-serialization:$ktor_version"
     implementation "org.mariadb.jdbc:mariadb-java-client:2.7.2"
-    implementation "org.postgresql.postgresql:42.2.19"
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
 }

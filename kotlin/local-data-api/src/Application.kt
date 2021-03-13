@@ -2,9 +2,13 @@ package com.koxudaxi.local_data_api
 
 import io.ktor.application.*
 import io.ktor.features.*
+import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.routing.*
+import io.ktor.serialization.*
+import java.sql.ResultSet
+import java.sql.Statement
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -14,12 +18,13 @@ const val ROLLBACK_COMPLETE = "Rollback Complete"
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
-    install(ContentNegotiation)
+    install(ContentNegotiation) {
+        json(DefaultJson, ContentType.Any)
+    }
     install(StatusPages) {
         exception<DataAPIException> { cause ->
             call.respond(cause.statusCode, ErrorResponse(cause.message, cause.code))
         }
-
     }
     routing {
         val resourceManager = ResourceManager()
@@ -57,17 +62,32 @@ fun Application.module(testing: Boolean = false) {
                 request.transactionId,
                 request.database
             )
-            try {
+            val executeStatementRequests = try {
                 // TODO: Execute SQL
+                val statement = resource.connection.prepareStatement(request.sql, Statement.RETURN_GENERATED_KEYS)
+
+                request.parameters?.forEachIndexed { index, sqlParameter ->
+                    statement.setValue(index, sqlParameter.value)
+                }
+
+                statement.execute()
+                val resultSet = statement.resultSet
+                val executeStatementRequests = ExecuteStatementResponse(
+                    statement.updateCount,
+                    if (resultSet is ResultSet) statement.generatedFields else null,
+                    statement.records,
+                    if (request.includeResultMetadata) createColumnMetadata(resultSet) else null
+                )
                 if (resource.transactionId == null) {
                     resource.commit()
                 }
+                executeStatementRequests
             } finally {
                 if (resource.transactionId == null) {
                     resource.close()
                 }
             }
-            call.respond(ExecuteStatementResponse)
+            call.respond(executeStatementRequests)
         }
         post("/BatchExecute") {
             val request = call.receive<BatchExecuteStatementRequests>()

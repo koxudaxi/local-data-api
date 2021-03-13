@@ -5,12 +5,12 @@ import kotlinx.serialization.*
 
 @Serializable
 data class Field(
-    val blobValue: String?, //  # Type: Base64-encoded binary data object
-    val booleanValue: Boolean?,
-    val doubleValue: Double?,
-    val isNull: Boolean?,
-    val longValue: Long?,
-    val stringValue: String?
+    val blobValue: String? = null, //  # Type: Base64-encoded binary data object
+    val booleanValue: Boolean? = null,
+    val doubleValue: Double? = null,
+    val isNull: Boolean? = null,
+    val longValue: Long? = null,
+    val stringValue: String? = null,
 )
 
 @Serializable
@@ -34,16 +34,16 @@ data class ExecuteStatementRequests(
     val resourceArn: String,
     val secretArn: String,
     val sql: String,
-    val database: String?,
-    val continueAfterTimeout: Boolean?,
+    val database: String? = null,
+    val continueAfterTimeout: Boolean? = null,
     val includeResultMetadata: Boolean = false,
-    val parameters: List<SqlParameter>?,
-    val schema: String?,
-    val transactionId: String?
+    val parameters: List<SqlParameter>? = null,
+    val schema: String? = null,
+    val transactionId: String? = null
 )
 
 
-@Serializable 
+@Serializable
 data class ColumnMetadata(
     val arrayBaseColumnType: Int?,
     val isAutoIncrement: Boolean?,
@@ -61,7 +61,7 @@ data class ColumnMetadata(
     val typeName: String?,
 )
 
-@Serializable 
+@Serializable
 data class ExecuteStatementResponse(
     val numberOfRecordsUpdated: Int,
     val generatedFields: List<Field>?,
@@ -69,7 +69,7 @@ data class ExecuteStatementResponse(
     val columnMetadata: List<ColumnMetadata>?,
 )
 
-@Serializable 
+@Serializable
 data class BeginTransactionRequest(
     val resourceArn: String,
     val secretArn: String,
@@ -77,7 +77,7 @@ data class BeginTransactionRequest(
     val database: String?,
 )
 
-@Serializable 
+@Serializable
 data class BeginTransactionResponse(
     val transactionId: String,
 )
@@ -89,24 +89,24 @@ data class CommitTransactionRequest(
     val transactionId: String,
 )
 
-@Serializable 
+@Serializable
 data class CommitTransactionResponse(
     val transactionStatus: String //'Transaction Committed' or 'Rollback Complete'
 )
 
-@Serializable 
+@Serializable
 data class RollbackTransactionRequest(
     val resourceArn: String,
     val secretArn: String,
     val transactionId: String,
 )
 
-@Serializable 
+@Serializable
 data class RollbackTransactionResponse(
     val transactionStatus: String //'Transaction Committed' or 'Rollback Complete'
 )
 
-@Serializable 
+@Serializable
 data class BatchExecuteStatementRequests(
     val resourceArn: String,
     val secretArn: String,
@@ -119,12 +119,12 @@ data class BatchExecuteStatementRequests(
     val transactionId: String?,
 )
 
-@Serializable 
+@Serializable
 data class UpdateResult(
     val generatedFields: List<Field>
 )
 
-@Serializable 
+@Serializable
 data class BatchExecuteStatementResponse(
     val updateResults: List<UpdateResult>
 )
