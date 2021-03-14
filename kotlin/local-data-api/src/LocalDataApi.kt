@@ -1,11 +1,8 @@
 package com.koxudaxi.local_data_api
 
-
-import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Statement
 import java.sql.Types
-import java.util.*
 
 val LONG = listOf(Types.INTEGER, Types.TINYINT, Types.SMALLINT, Types.BIGINT)
 val DOUBLE = listOf(Types.FLOAT, Types.REAL, Types.DOUBLE)

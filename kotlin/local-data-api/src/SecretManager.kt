@@ -1,6 +1,5 @@
 package com.koxudaxi.local_data_api
 
-import java.security.MessageDigest
 import java.util.*
 
 class SecretManager {

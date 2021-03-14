@@ -41,12 +41,7 @@ class ResourceManager {
 
             connectionManager.createConnection(config.url, secret.userName, secret.password, database)
         } else {
-            connectionManager.getConnection(transactionId).let {
-//                if (database?.toLowerCase() != it.catalog?.toLowerCase()) {
-//                    throw  BadRequestException("Database name is not the same as when transaction was created")
-//                }
-                it
-            }
+            connectionManager.getConnection(transactionId)
         }
         return Resource(connection, transactionId)
     }
