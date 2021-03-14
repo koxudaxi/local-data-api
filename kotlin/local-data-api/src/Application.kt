@@ -8,6 +8,7 @@ import io.ktor.request.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
 import java.sql.ResultSet
+import java.sql.SQLException
 import java.sql.Statement
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -22,6 +23,12 @@ fun Application.module(testing: Boolean = false) {
         json(DefaultJson, ContentType.Any)
     }
     install(StatusPages) {
+        exception<SQLException> { cause ->
+            val badRequestException = BadRequestException.fromSQLException(cause)
+            call.respond(badRequestException.statusCode,
+                ErrorResponse(badRequestException.message, badRequestException.code)
+            )
+        }
         exception<DataAPIException> { cause ->
             call.respond(cause.statusCode, ErrorResponse(cause.message, cause.code))
         }
@@ -69,17 +76,25 @@ fun Application.module(testing: Boolean = false) {
                 val statement = resource.connection.prepareStatement(request.sql, Statement.RETURN_GENERATED_KEYS)
 
                 request.parameters?.forEachIndexed { index, sqlParameter ->
-                    statement.setValue(index, sqlParameter.value)
+                    statement.setValue(index, sqlParameter.value, sqlParameter.typeHint)
                 }
 
                 statement.execute()
                 val resultSet = statement.resultSet
-                val executeStatementRequests = ExecuteStatementResponse(
-                    if (statement.updateCount < 0) 0 else statement.updateCount,
-                    if (resultSet is ResultSet) statement.generatedFields else null,
-                    statement.records,
-                    if (request.includeResultMetadata) createColumnMetadata(resultSet) else null
-                )
+                val updatedCount = if (statement.updateCount < 0) 0 else statement.updateCount
+                val executeStatementRequests = if (resultSet is ResultSet) {
+                    ExecuteStatementResponse(
+                        updatedCount,
+                        null,
+                        statement.records,
+                        if (request.includeResultMetadata) createColumnMetadata(resultSet) else null
+                    )
+                } else {
+                    ExecuteStatementResponse(
+                        updatedCount,
+                        statement.generatedFields,
+                    )
+                }
                 if (resource.transactionId == null) {
                     resource.commit()
                 }

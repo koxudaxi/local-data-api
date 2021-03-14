@@ -17,7 +17,7 @@ data class Field(
 data class SqlParameter(
     val name: String,
     val value: Field,
-    val typeHint: String?
+    val typeHint: String? = null
 )
 
 @Serializable
@@ -64,9 +64,9 @@ data class ColumnMetadata(
 @Serializable
 data class ExecuteStatementResponse(
     val numberOfRecordsUpdated: Int,
-    val generatedFields: List<Field>?,
-    val records: List<List<Field>>?,
-    val columnMetadata: List<ColumnMetadata>?,
+    val generatedFields: List<Field>? = null,
+    val records: List<List<Field>>? = null,
+    val columnMetadata: List<ColumnMetadata>? = null,
 )
 
 @Serializable
