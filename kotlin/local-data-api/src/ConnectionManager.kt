@@ -3,12 +3,12 @@ package com.koxudaxi.local_data_api
 import java.sql.Connection
 import java.sql.DriverManager
 import java.util.*
-import kotlin.random.Random
+
 
 class ConnectionManager private constructor() {
     private val transactionIdCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/=+"
     private val transactionIdLength: Int = 184
-    fun createTransactionId(): String = transactionIdCharacters.random(Random(transactionIdLength)).toString()
+    fun createTransactionId(): String =IntRange(1, transactionIdLength).map { transactionIdCharacters.random() }.joinToString("")
 
     fun createConnection(
         url: String, user: String, password: String?, database: String?

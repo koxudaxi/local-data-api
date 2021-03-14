@@ -2,7 +2,7 @@ package com.koxudaxi.local_data_api
 
 import java.sql.Connection
 
-class Resource(config: Config, val connection: Connection, val transactionId: String?) {
+class Resource(val connection: Connection, val transactionId: String?) {
     private val connectionManager = ConnectionManager.INSTANCE
     fun begin(): String {
         val transactionId = connectionManager.createTransactionId()

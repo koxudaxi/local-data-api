@@ -10,6 +10,7 @@ import io.ktor.serialization.*
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
+import org.httprpc.sql.Parameters
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -71,18 +72,22 @@ fun Application.module(testing: Boolean = false) {
                 request.transactionId,
                 request.database
             )
-            val executeStatementRequests = try {
-
-                val statement = resource.connection.prepareStatement(request.sql, Statement.RETURN_GENERATED_KEYS)
-
-                request.parameters?.forEachIndexed { index, sqlParameter ->
-                    statement.setValue(index, sqlParameter.value, sqlParameter.typeHint)
+            val executeStatementResponse = try {
+                val statement = if (request.parameters == null) {
+                    resource.connection.prepareStatement(request.sql, Statement.RETURN_GENERATED_KEYS)
+                } else {
+                    val parameters = Parameters.parse(request.sql)
+                    val statement =
+                        resource.connection.prepareStatement(parameters.sql, Statement.RETURN_GENERATED_KEYS)
+                    parameters.apply(statement, request.parameters.map { Pair(it.name, it.castValue) }.toMap())
+                    statement
                 }
+
 
                 statement.execute()
                 val resultSet = statement.resultSet
                 val updatedCount = if (statement.updateCount < 0) 0 else statement.updateCount
-                val executeStatementRequests = if (resultSet is ResultSet) {
+                val executeStatementResponse = if (resultSet is ResultSet) {
                     ExecuteStatementResponse(
                         updatedCount,
                         null,
@@ -92,19 +97,19 @@ fun Application.module(testing: Boolean = false) {
                 } else {
                     ExecuteStatementResponse(
                         updatedCount,
-                        statement.generatedFields,
+                        statement.updateResults.last(),
                     )
                 }
                 if (resource.transactionId == null) {
                     resource.commit()
                 }
-                executeStatementRequests
+                executeStatementResponse
             } finally {
                 if (resource.transactionId == null) {
                     resource.close()
                 }
             }
-            call.respond(executeStatementRequests)
+            call.respond(executeStatementResponse)
         }
         post("/BatchExecute") {
             val request = call.receive<BatchExecuteStatementRequests>()
@@ -114,17 +119,37 @@ fun Application.module(testing: Boolean = false) {
                 request.transactionId,
                 request.database
             )
-            try {
-                // TODO: Execute SQL
+            val batchExecuteStatementResponse = try {
+                val statement = if (request.parameterSets == null) {
+                    resource.connection.prepareStatement(request.sql, Statement.RETURN_GENERATED_KEYS)
+                } else {
+                    val parameters = Parameters.parse(request.sql)
+                    val statement =
+                        resource.connection.prepareStatement(parameters.sql, Statement.RETURN_GENERATED_KEYS)
+
+                    request.parameterSets.forEach { parameterSet ->
+                        parameters.apply(statement, parameterSet.map { Pair(it.name, it.castValue) }.toMap())
+                        statement.addBatch()
+                        statement.clearParameters()
+                    }
+                    statement
+                }
+
+                statement.executeBatch()
+
+                val batchExecuteStatementResponse = BatchExecuteStatementResponse(
+                    statement.updateResults.map { UpdateResult(it) }.toList()
+                )
                 if (resource.transactionId == null) {
                     resource.commit()
                 }
+                batchExecuteStatementResponse
             } finally {
                 if (resource.transactionId == null) {
                     resource.close()
                 }
             }
-            call.respond(BatchExecuteStatementResponse)
+            call.respond(batchExecuteStatementResponse)
         }
     }
 }

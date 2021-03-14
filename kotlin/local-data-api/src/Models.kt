@@ -1,6 +1,9 @@
 package com.koxudaxi.local_data_api
 
 import kotlinx.serialization.*
+import java.sql.Statement
+import java.sql.Types
+import java.util.*
 
 
 @Serializable
@@ -17,16 +20,38 @@ data class Field(
 data class SqlParameter(
     val name: String,
     val value: Field,
-    val typeHint: String? = null
-)
+    val typeHint: String? = null,
+) {
+    val castValue: Any?
+        get() {
+            return when {
+                value.blobValue != null -> value.blobValue
+                value.booleanValue != null -> value.booleanValue
+                value.doubleValue != null -> value.doubleValue
+                value.longValue != null -> value.longValue
+                value.stringValue != null -> {
+                    when (typeHint) {
+                        "DATE" -> java.sql.Date.valueOf(value.stringValue)
+                        "DECIMAL" -> value.stringValue.toBigDecimal()
+                        "TIME" -> java.sql.Time.valueOf(value.stringValue)
+                        "TIMESTAMP" -> java.sql.Timestamp.valueOf(value.stringValue)
+                        "UUID" -> UUID.fromString(value.stringValue)
+                        //TODO: JSON
+                        else -> value.stringValue
+                    }
+                }
+                else -> null
+            }
+        }
+}
 
 @Serializable
 data class ExecuteSqlRequest(
     val awsSecretStoreArn: String,
     val dbClusterOrInstanceArn: String,
     val sqlStatements: String,
-    val database: String?,
-    val schema: String?
+    val database: String? = null,
+    val schema: String? = null,
 )
 
 @Serializable
@@ -39,7 +64,7 @@ data class ExecuteStatementRequests(
     val includeResultMetadata: Boolean = false,
     val parameters: List<SqlParameter>? = null,
     val schema: String? = null,
-    val transactionId: String? = null
+    val transactionId: String? = null,
 )
 
 
@@ -73,8 +98,8 @@ data class ExecuteStatementResponse(
 data class BeginTransactionRequest(
     val resourceArn: String,
     val secretArn: String,
-    val schema: String?,
-    val database: String?,
+    val schema: String? = null,
+    val database: String? = null,
 )
 
 @Serializable
@@ -91,7 +116,7 @@ data class CommitTransactionRequest(
 
 @Serializable
 data class CommitTransactionResponse(
-    val transactionStatus: String //'Transaction Committed' or 'Rollback Complete'
+    val transactionStatus: String, //'Transaction Committed' or 'Rollback Complete'
 )
 
 @Serializable
@@ -103,7 +128,7 @@ data class RollbackTransactionRequest(
 
 @Serializable
 data class RollbackTransactionResponse(
-    val transactionStatus: String //'Transaction Committed' or 'Rollback Complete'
+    val transactionStatus: String, //'Transaction Committed' or 'Rollback Complete'
 )
 
 @Serializable
@@ -111,27 +136,27 @@ data class BatchExecuteStatementRequests(
     val resourceArn: String,
     val secretArn: String,
     val sql: String,
-    val database: String?,
-    val continueAfterTimeout: Boolean?,
-    val includeResultMetadata: Boolean?,
-    val parameterSets: List<List<SqlParameter>>?,
-    val schema: String?,
-    val transactionId: String?,
+    val database: String? = null,
+    val continueAfterTimeout: Boolean? = null,
+    val includeResultMetadata: Boolean? = null,
+    val parameterSets: List<List<SqlParameter>>? = null,
+    val schema: String? = null,
+    val transactionId: String? = null,
 )
 
 @Serializable
 data class UpdateResult(
-    val generatedFields: List<Field>
+    val generatedFields: List<Field>,
 )
 
 @Serializable
 data class BatchExecuteStatementResponse(
-    val updateResults: List<UpdateResult>
+    val updateResults: List<UpdateResult>,
 )
 
 
 @Serializable
 data class ErrorResponse(
     val message: String?,
-    val code: String
+    val code: String,
 )

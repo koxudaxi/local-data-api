@@ -15,51 +15,31 @@ val BLOB = listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY
 val DATETIME = listOf(Types.TIMESTAMP, Types.TIMESTAMP_WITH_TIMEZONE)
 
 fun createField(resultSet: ResultSet, index: Int): Field {
+    if (resultSet.getObject(index) == null) {
+        return Field(isNull = true)
+    }
     return when (resultSet.metaData.getColumnType(index)) {
         in LONG -> Field(longValue = resultSet.getLong(index))
         in DOUBLE -> Field(doubleValue = resultSet.getDouble(index))
         in BOOLEAN -> Field(booleanValue = resultSet.getBoolean(index))
         in BLOB -> Field(blobValue = resultSet.getString(index))
-        in DATETIME -> Field(stringValue = resultSet.getString(index).let {
-            Regex("^[^.]+\\.\\d{3}|^[^.]+").find(it)?.value
-        })
-        else -> resultSet.getString(index)
-            ?.let { Field(stringValue = it) }
-            ?: Field(isNull = true)
-
-    }
-}
-
-fun PreparedStatement.setValue(index: Int, field: Field, typeHint: String?) {
-    when {
-        field.blobValue != null -> this.setString(index, field.blobValue)
-        field.booleanValue != null -> this.setBoolean(index, field.booleanValue)
-        field.doubleValue != null -> this.setDouble(index, field.doubleValue)
-        field.longValue != null -> this.setLong(index, field.longValue)
-        field.stringValue != null -> {
-            when (typeHint) {
-                "DATE" -> this.setDate(index, java.sql.Date.valueOf(field.stringValue))
-                "DECIMAL" -> this.setBigDecimal(index,  field.stringValue.toBigDecimal())
-                "TIME" -> this.setTime(index,  java.sql.Time.valueOf(field.stringValue))
-                "TIMESTAMP" -> this.setTimestamp(index,  java.sql.Timestamp.valueOf(field.stringValue))
-                "UUID" -> this.setObject(index, UUID.fromString(field.stringValue))
-                //TODO: JSON
-
-            else -> this.setString(index, field.stringValue)
-            }
+        in DATETIME -> Field(stringValue = Regex("^[^.]+\\.\\d{3}|^[^.]+").find(resultSet.getString(index))!!.value)
+        else -> {
+            Field(stringValue = resultSet.getString(index))
         }
-        else -> this.setNull(index, Types.NULL)
     }
 }
 
-val Statement.generatedFields: List<Field>?
+val Statement.updateResults: List<List<Field>>
     get() {
-        this.generatedKeys.let { resultSet ->
-            val fields = mutableListOf<Field>()
+        return this.generatedKeys.let { resultSet ->
+            val results = mutableListOf<List<Field>>()
             while (resultSet.next()) {
-                fields.add(createField(resultSet, 1))
+                IntRange(1, resultSet.metaData.columnCount).map { index ->
+                    createField(resultSet, index)
+                }.toList().run { results.add(this) }
             }
-            return fields.takeIf { it.isNotEmpty() }
+            results
         }
     }
 
