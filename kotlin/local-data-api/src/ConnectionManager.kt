@@ -11,9 +11,9 @@ class ConnectionManager private constructor() {
     fun createTransactionId(): String = transactionIdCharacters.random(Random(transactionIdLength)).toString()
 
     fun createConnection(
-        url: String, database: String?
+        url: String, user: String, password: String?, database: String?
     ): Connection {
-        return DriverManager.getConnection(database?.let { url + it } ?: url)
+        return DriverManager.getConnection(database?.let { url + it } ?: url, user, password)
             .apply {
                 this.autoCommit = false;
             }

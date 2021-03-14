@@ -27,7 +27,9 @@ fun Application.module(testing: Boolean = false) {
         }
     }
     routing {
-        val resourceManager = ResourceManager()
+
+        val resourceManager = ResourceManager.INSTANCE
+        setup()
 
         post("/ExecuteSql") {
             throw NotImplementedError()
@@ -63,7 +65,7 @@ fun Application.module(testing: Boolean = false) {
                 request.database
             )
             val executeStatementRequests = try {
-                // TODO: Execute SQL
+
                 val statement = resource.connection.prepareStatement(request.sql, Statement.RETURN_GENERATED_KEYS)
 
                 request.parameters?.forEachIndexed { index, sqlParameter ->
@@ -73,7 +75,7 @@ fun Application.module(testing: Boolean = false) {
                 statement.execute()
                 val resultSet = statement.resultSet
                 val executeStatementRequests = ExecuteStatementResponse(
-                    statement.updateCount,
+                    if (statement.updateCount < 0) 0 else statement.updateCount,
                     if (resultSet is ResultSet) statement.generatedFields else null,
                     statement.records,
                     if (request.includeResultMetadata) createColumnMetadata(resultSet) else null

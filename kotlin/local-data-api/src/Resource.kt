@@ -2,8 +2,7 @@ package com.koxudaxi.local_data_api
 
 import java.sql.Connection
 
-class Resource(private val config: Config, val connection: Connection, val transactionId: String?) {
-    val url =  "${config.jdbcName}://${config.host}:${config.port}/"
+class Resource(config: Config, val connection: Connection, val transactionId: String?) {
     private val connectionManager = ConnectionManager.INSTANCE
     fun begin(): String {
         val transactionId = connectionManager.createTransactionId()
@@ -21,7 +20,7 @@ class Resource(private val config: Config, val connection: Connection, val trans
 
     fun close() {
         connection.close()
-        if (transactionId is String && connectionManager.hasConnection(transactionId)){
+        if (transactionId is String && connectionManager.hasConnection(transactionId)) {
             connectionManager.deleteConnection(transactionId)
         }
     }
@@ -29,11 +28,9 @@ class Resource(private val config: Config, val connection: Connection, val trans
     data class Config(
         val jdbcName: String,
         val resourceArn: String,
-        val engineName: String,
         val host: String?,
         val port: Int?,
-        val userName: String?,
-        val password: String?,
-        val jdbcJARPath: String,
-    )
+    ) {
+        val url get() = "jdbc:${jdbcName}://${host}:${port}/"
+    }
 }

@@ -55,7 +55,7 @@ data class ColumnMetadata(
     val nullable: Int?,
     val precision: Int?,
     val scale: Int?,
-    val schema: String?,
+    val schemaName: String?,
     val tableName: String?,
     val type: Int?,
     val typeName: String?,

@@ -6,11 +6,20 @@ class ResourceManager {
     private val resourceConfigs: MutableMap<String, Resource.Config> = Collections.synchronizedMap(HashMap())
     private val connectionManager = ConnectionManager.INSTANCE
 
+    fun setResource(
+        jdbcName: String,
+        resourceArn: String,
+        host: String,
+        port: Int?,
+    ) {
+        resourceConfigs[resourceArn] = Resource.Config(jdbcName, resourceArn, host, port)
+    }
+
     fun getResource(
         resourceArn: String,
         secretArn: String,
         transactionId: String?,
-        database: String?
+        database: String?,
     ): Resource {
         val config = resourceConfigs[resourceArn]
             ?: if (connectionManager.hasConnection(transactionId)) {
@@ -20,20 +29,17 @@ class ResourceManager {
             }
 
         val secret = try {
-            SecretManager.getSecret(secretArn)
+            SecretManager.INSTANCE.getSecret(secretArn)
         } catch (e: BadRequestException) {
             if (connectionManager.hasConnection(transactionId)) {
                 throw InternalServerErrorException()
             }
             throw e
         }
-        // TODO: support multiple secret_arn for a resource
-        if (secret.userName != config.userName || secret.password != config.password) {
-            throw BadRequestException("Invalid secret_arn")
-        }
 
         val connection = if (transactionId == null) {
-            connectionManager.createConnection(resourceArn, database)
+
+            connectionManager.createConnection(config.url, secret.userName, secret.password, database)
         } else {
             connectionManager.getConnection(transactionId).let {
                 if (database?.toLowerCase() != it.catalog?.toLowerCase()) {
@@ -44,5 +50,10 @@ class ResourceManager {
         }
         return Resource(config, connection, transactionId)
     }
+
+    companion object {
+        val INSTANCE = ResourceManager()
+    }
+
 
 }
