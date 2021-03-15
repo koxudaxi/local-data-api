@@ -47,6 +47,7 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./kotlin/local-data-api/build/reports/jacoco/test/jacocoTestReport.xml
+        file: ./build/reports/jacoco/test/jacocoTestReport.xml
         flags: unittests
+        working-directory: ./kotlin/local-data-api/
         fail_ci_if_error: true
