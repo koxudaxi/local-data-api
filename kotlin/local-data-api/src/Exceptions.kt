@@ -1,4 +1,4 @@
-package com.koxudaxi.local_data_api
+package com.koxudaxi.localDataApi
 
 import io.ktor.http.*
 import java.sql.SQLException
@@ -20,9 +20,9 @@ class BadRequestException(override val message: String?) : DataAPIException(mess
     }
 }
 
-class ForbiddenException(override val message: String?) : DataAPIException(message) {
-    override val statusCode: HttpStatusCode = HttpStatusCode.Forbidden
-}
+//class ForbiddenException(override val message: String?) : DataAPIException(message) {
+//    override val statusCode: HttpStatusCode = HttpStatusCode.Forbidden
+//}
 
 class InternalServerErrorException(override val message: String = "InternalServerError") : DataAPIException(message) {
     override val statusCode: HttpStatusCode = HttpStatusCode.InternalServerError
@@ -33,6 +33,6 @@ class NotFoundException(override val message: String?) : DataAPIException(messag
     override val statusCode: HttpStatusCode = HttpStatusCode.NotFound
 }
 
-class ServiceUnavailableError(override val message: String?) : DataAPIException(message) {
-    override val statusCode: HttpStatusCode = HttpStatusCode.ServiceUnavailable
-}
+//class ServiceUnavailableError(override val message: String?) : DataAPIException(message) {
+//    override val statusCode: HttpStatusCode = HttpStatusCode.ServiceUnavailable
+//}

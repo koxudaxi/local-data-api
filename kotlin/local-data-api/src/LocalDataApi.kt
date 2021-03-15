@@ -1,4 +1,4 @@
-package com.koxudaxi.local_data_api
+package com.koxudaxi.localDataApi
 
 import java.sql.ResultSet
 import java.sql.Statement
@@ -41,7 +41,7 @@ val Statement.updateResults: List<List<Field>>
     }
 
 
-val Statement.records: List<List<Field>>?
+val Statement.records: List<List<Field>>
     get() {
         val records = mutableListOf<List<Field>>()
         while (resultSet.next()) {
@@ -53,7 +53,7 @@ val Statement.records: List<List<Field>>?
                 )
             }
         }
-        return records.takeIf { it.isNotEmpty() }?.toList()
+        return records.toList()
     }
 
 fun createColumnMetadata(resultSet: ResultSet): List<ColumnMetadata> {

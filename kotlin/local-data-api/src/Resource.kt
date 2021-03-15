@@ -1,9 +1,21 @@
-package com.koxudaxi.local_data_api
+package com.koxudaxi.localDataApi
 
-import java.sql.Connection
-
-class Resource(val connection: Connection, val transactionId: String?) {
+class Resource(
+    config: Config,
+    userName: String,
+    password: String?,
+    database: String?,
+    schema: String?,
+    val transactionId: String?,
+) {
     private val connectionManager = ConnectionManager.INSTANCE
+
+    val connection = if (transactionId == null) {
+        connectionManager.createConnection(config.url, userName, password, database, schema)
+    } else {
+        connectionManager.getConnection(transactionId)
+    }
+
     fun begin(): String {
         val transactionId = connectionManager.createTransactionId()
         connectionManager.setConnection(transactionId, connection)
@@ -31,6 +43,6 @@ class Resource(val connection: Connection, val transactionId: String?) {
         val host: String?,
         val port: Int?,
     ) {
-        val url get() = "jdbc:${jdbcName}://${host}:${port}/"
+        val url get() = if (host is String) "jdbc:${jdbcName}://${host}:${port}/" else "jdbc:${jdbcName}"
     }
 }

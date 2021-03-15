@@ -1,4 +1,4 @@
-package com.koxudaxi.local_data_api
+package com.koxudaxi.localDataApi
 
 import java.util.*
 

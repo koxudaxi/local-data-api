@@ -1,4 +1,4 @@
-package com.koxudaxi.local_data_api
+package com.koxudaxi.localDataApi
 
 import java.util.*
 
@@ -9,7 +9,7 @@ class ResourceManager {
     fun setResource(
         jdbcName: String,
         resourceArn: String,
-        host: String,
+        host: String?,
         port: Int?,
     ) {
         resourceConfigs[resourceArn] = Resource.Config(jdbcName, resourceArn, host, port)
@@ -17,9 +17,11 @@ class ResourceManager {
 
     fun getResource(
         resourceArn: String,
-        secretArn: String,
-        transactionId: String?,
-        database: String?,
+        userName: String,
+        password: String?,
+        transactionId: String? = null,
+        database: String? = null,
+        schema: String? = null,
     ): Resource {
         val config = resourceConfigs[resourceArn]
             ?: if (connectionManager.hasConnection(transactionId)) {
@@ -28,27 +30,10 @@ class ResourceManager {
                 throw BadRequestException("HttpEndPoint is not enabled for $resourceArn")
             }
 
-        val secret = try {
-            SecretManager.INSTANCE.getSecret(secretArn)
-        } catch (e: BadRequestException) {
-            if (connectionManager.hasConnection(transactionId)) {
-                throw InternalServerErrorException()
-            }
-            throw e
-        }
-
-        val connection = if (transactionId == null) {
-
-            connectionManager.createConnection(config.url, secret.userName, secret.password, database)
-        } else {
-            connectionManager.getConnection(transactionId)
-        }
-        return Resource(connection, transactionId)
+        return Resource(config, userName, password, database, schema, transactionId)
     }
 
     companion object {
         val INSTANCE = ResourceManager()
     }
-
-
 }

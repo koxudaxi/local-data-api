@@ -141,6 +141,11 @@ function test {
 # cleanup all
 down
 
+cwd="$PWD"
+cd ./kotlin/local-data-api/
+./gradlew shadowJar
+cd "$cwd"
+
 #
 # MySQL E2E
 #

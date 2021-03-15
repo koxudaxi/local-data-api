@@ -1,8 +1,6 @@
-package com.koxudaxi.local_data_api
+package com.koxudaxi.localDataApi
 
 import kotlinx.serialization.*
-import java.sql.Statement
-import java.sql.Types
 import java.util.*
 
 
@@ -45,17 +43,17 @@ data class SqlParameter(
         }
 }
 
-@Serializable
-data class ExecuteSqlRequest(
-    val awsSecretStoreArn: String,
-    val dbClusterOrInstanceArn: String,
-    val sqlStatements: String,
-    val database: String? = null,
-    val schema: String? = null,
-)
+//@Serializable
+//data class ExecuteSqlRequest(
+//    val awsSecretStoreArn: String,
+//    val dbClusterOrInstanceArn: String,
+//    val sqlStatements: String,
+//    val database: String? = null,
+//    val schema: String? = null,
+//)
 
 @Serializable
-data class ExecuteStatementRequests(
+data class ExecuteStatementRequest(
     val resourceArn: String,
     val secretArn: String,
     val sql: String,
@@ -132,7 +130,7 @@ data class RollbackTransactionResponse(
 )
 
 @Serializable
-data class BatchExecuteStatementRequests(
+data class BatchExecuteStatementRequest(
     val resourceArn: String,
     val secretArn: String,
     val sql: String,

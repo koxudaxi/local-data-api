@@ -1,21 +1,25 @@
-package com.koxudaxi.local_data_api
+package com.koxudaxi.localDataApi
 
 import java.sql.Connection
 import java.sql.DriverManager
 import java.util.*
 
 
-class ConnectionManager private constructor() {
+class ConnectionManager {
     private val transactionIdCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/=+"
     private val transactionIdLength: Int = 184
-    fun createTransactionId(): String =IntRange(1, transactionIdLength).map { transactionIdCharacters.random() }.joinToString("")
+    fun createTransactionId(): String =
+        IntRange(1, transactionIdLength).map { transactionIdCharacters.random() }.joinToString("")
 
     fun createConnection(
-        url: String, user: String, password: String?, database: String?
+        url: String, user: String, password: String?, database: String?, schema: String?,
     ): Connection {
         return DriverManager.getConnection(database?.let { url + it } ?: url, user, password)
             .apply {
-                this.autoCommit = false;
+                this.autoCommit = false
+                if (schema is String) {
+                    this.schema = schema
+                }
             }
     }
 
