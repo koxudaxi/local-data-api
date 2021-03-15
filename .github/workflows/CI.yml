@@ -38,7 +38,7 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
+        pip install ".[all]"
     - name: build document
       run: |
         cp README.md docs/index.md
