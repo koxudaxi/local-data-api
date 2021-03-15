@@ -1,5 +1,5 @@
 # local-data-api - Local Data API for AWS Aurora Serverless Data API
-[![Build Status](https://travis-ci.org/koxudaxi/local-data-api.svg?branch=master)](https://travis-ci.org/koxudaxi/local-data-api)
+[![CI](https://github.com/koxudaxi/local-data-api/actions/workflows/CI.yml/badge.svg)](https://github.com/koxudaxi/local-data-api/actions/workflows/CI.yml)
 [![](https://images.microbadger.com/badges/version/koxudaxi/local-data-api.svg)](https://hub.docker.com/r/koxudaxi/local-data-api)
 [![](https://badgen.net/docker/pulls/koxudaxi/local-data-api)](https://hub.docker.com/r/koxudaxi/local-data-api)
 [![codecov](https://codecov.io/gh/koxudaxi/local-data-api/branch/master/graph/badge.svg)](https://codecov.io/gh/koxudaxi/local-data-api)
@@ -156,33 +156,35 @@ services:
 We are waiting for your contributions to `local-data-api`.
 
 ### How to contribute
-```shell script
+```bash
 ## 1. Clone your fork repository
 $ git clone git@github.com:<your username>/local-data-api.git
 $ cd local-data-api
 
-## 2. Create `venv` with python3.7 (also you should do with python3.6)
-$ python3.7 -m venv venv37
-$ source venv37/bin/activate  
+## 2. Open the project with IDE/Editor
+The project path is `./kotlin/local-data-api`
 
-## 3. Install dependencies
-$ python3 -m pip install ".[all]" 
+## 3. Run on your local machine
+### Shell on Linux or MacOS 
+$ cd ./kotlin/local-data-api
+$ ./gradlew run
+
+### Command Prompt on Windows
+$ cd ./kotlin/local-data-api
+$ gradlew.bat run
 
 ## 4. Create new branch and rewrite code.
 $ git checkout -b new-branch
 
-## 5. Run unittest (you should pass all test and coverage should be 100%)
-$ ./scripts/test.sh
+## 5. Run unittest
+$ cd ./kotlin/local-data-api
+$ ./gradlew test jacocoTestReport
 
-## 6. Format code
-$ ./scripts/format.sh
+## 6. Run integration-test
+$ ./scripts/integration-test.sh
 
-## 7. Check lint (mypy)
-$ ./scripts/lint.sh
-
-## 8. Commit and Push...
+## 7. Commit and Push...
 ```
-
 
 ## Related projects
 ### py-data-api
