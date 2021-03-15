@@ -41,7 +41,9 @@ jacocoTestReport {
         html.enabled true
     }
 }
-
+shadowJar{
+    mergeServiceFiles()
+}
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "io.ktor:ktor-server-netty:$ktor_version"
@@ -49,8 +51,8 @@ dependencies {
     implementation "io.ktor:ktor-server-core:$ktor_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
     implementation "io.ktor:ktor-serialization:$ktor_version"
-    api "org.mariadb.jdbc:mariadb-java-client:2.7.2"
-    api group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
+    implementation "org.mariadb.jdbc:mariadb-java-client:2.7.2"
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
     implementation "org.httprpc:httprpc-client:8.1.2"
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
     testImplementation "com.h2database:h2:1.4.200"
