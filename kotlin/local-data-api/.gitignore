@@ -6,3 +6,4 @@
 *.ipr
 *.iws
 /test.mv.db
+jacocoHtml
