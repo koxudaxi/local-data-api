@@ -1,3 +1,3 @@
 fixes:
-  - "com/koxudaxi/localDataApi/::kotlin/local-data-api/src/"
+  - "::kotlin/local-data-api/"
 max_report_age: off
