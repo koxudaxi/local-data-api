@@ -50,3 +50,4 @@ jobs:
         file: ./kotlin/local-data-api/build/reports/jacoco/test/jacocoTestReport.xml
         flags: unittests
         fail_ci_if_error: true
+        verbose: true
