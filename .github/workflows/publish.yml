@@ -31,7 +31,7 @@ jobs:
         run: ./gradlew clean shadowJar test jacocoTestReport
         working-directory: ./kotlin/local-data-api/
       - name: Login to DockerHub
-        if: github.event_name == 'release' && github.event.action == 'released'
+        if: github.event_name == 'release' && github.event.action == 'published'
         uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -39,6 +39,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          push: ${{ github.event_name == 'release' && github.event.action == 'released' }}
+          push: ${{ github.event_name == 'release' && github.event.action == 'published' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           context: ./kotlin/local-data-api
