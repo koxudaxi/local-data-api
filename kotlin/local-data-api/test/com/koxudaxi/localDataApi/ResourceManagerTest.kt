@@ -22,12 +22,14 @@ class ResourceManagerTest {
     fun tearDown() {
         unmockkAll()
     }
+
     @Test
     fun testGetResourceNotfound() {
         assertFailsWith(BadRequestException::class) {
-            ResourceManager.INSTANCE.getResource("not found", "username", null)
+            ResourceManager.INSTANCE.getResource("not found", "username", null, database = "test")
         }
     }
+
     @Test
     fun testGetResourceNotfoundWithTransaction() {
         mockkObject(ConnectionManager)

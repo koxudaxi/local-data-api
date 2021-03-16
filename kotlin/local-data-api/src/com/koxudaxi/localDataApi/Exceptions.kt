@@ -3,12 +3,12 @@ package com.koxudaxi.localDataApi
 import io.ktor.http.*
 import java.sql.SQLException
 
-abstract class DataAPIException(override val message: String?) : Exception() {
+abstract class DataAPIException(override val message: String) : Exception() {
     abstract val statusCode: HttpStatusCode
     val code: String = this::class.java.name.substringAfterLast('.')
 }
 
-class BadRequestException(override val message: String?) : DataAPIException(message) {
+class BadRequestException(override val message: String) : DataAPIException(message) {
     override val statusCode: HttpStatusCode = HttpStatusCode.BadRequest
 
     companion object {
@@ -24,12 +24,12 @@ class BadRequestException(override val message: String?) : DataAPIException(mess
 //    override val statusCode: HttpStatusCode = HttpStatusCode.Forbidden
 //}
 
-class InternalServerErrorException(override val message: String = "InternalServerError") : DataAPIException(message) {
+class InternalServerErrorException : DataAPIException("InternalServerError") {
     override val statusCode: HttpStatusCode = HttpStatusCode.InternalServerError
 }
 
 
-class NotFoundException(override val message: String?) : DataAPIException(message) {
+class NotFoundException(override val message: String) : DataAPIException(message) {
     override val statusCode: HttpStatusCode = HttpStatusCode.NotFound
 }
 

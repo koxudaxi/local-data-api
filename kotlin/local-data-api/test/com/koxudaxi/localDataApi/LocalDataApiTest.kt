@@ -5,12 +5,23 @@ import io.mockk.*
 import io.mockk.mockk
 import org.junit.After
 import java.sql.Connection
+import java.sql.Types
 
 class LocalDataApiTest {
     @After
     fun tearDown() {
         unmockkAll()
     }
+
+    @Test
+    fun testTypes() {
+        assertEquals(listOf(Types.INTEGER, Types.TINYINT, Types.SMALLINT, Types.BIGINT), LONG)
+        assertEquals(listOf(Types.FLOAT, Types.REAL, Types.DOUBLE), DOUBLE)
+        assertEquals(listOf(Types.BOOLEAN, Types.BIT), BOOLEAN)
+        assertEquals(listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY), BLOB)
+        assertEquals(listOf(Types.TIMESTAMP, Types.TIMESTAMP_WITH_TIMEZONE), DATETIME)
+    }
+
     @Test
     fun testMySQL() {
         mockkStatic(System::class)
@@ -40,6 +51,7 @@ class LocalDataApiTest {
         every { System.getenv() } returns env
         setup()
     }
+
     @Test
     fun testMySQLDefault() {
         mockkStatic(System::class)
@@ -54,7 +66,12 @@ class LocalDataApiTest {
         val resource = mockk<Resource>(relaxed = true)
         mockkStatic(Resource::class)
         every {
-            Resource(Resource.Config("mysql", "arn:aws:rds:us-east-1:123456789012:cluster:dummy", "127.0.0.1", 3306), "root", "example", null, null, "xyz")
+            Resource(Resource.Config("mysql", "arn:aws:rds:us-east-1:123456789012:cluster:dummy", "127.0.0.1", 3306),
+                "root",
+                "example",
+                null,
+                null,
+                "xyz")
         } returns resource
 
         val env = mapOf(
@@ -93,6 +110,7 @@ class LocalDataApiTest {
         every { System.getenv() } returns env
         setup()
     }
+
     @Test
     fun testPostgresqlDefault() {
         mockkStatic(System::class)
@@ -107,7 +125,10 @@ class LocalDataApiTest {
         val resource = mockk<Resource>(relaxed = true)
         mockkStatic(Resource::class)
         every {
-            Resource(Resource.Config("postgresql", "arn:aws:rds:us-east-1:123456789012:cluster:dummy", "127.0.0.1", 5432), "postgres", "example", null, null, "xyz")
+            Resource(Resource.Config("postgresql",
+                "arn:aws:rds:us-east-1:123456789012:cluster:dummy",
+                "127.0.0.1",
+                5432), "postgres", "example", null, null, "xyz")
         } returns resource
 
         val env = mapOf(

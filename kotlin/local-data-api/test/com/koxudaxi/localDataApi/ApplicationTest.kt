@@ -29,10 +29,12 @@ class ApplicationTest {
             .createStatement()
             .execute("DROP ALL OBJECTS")
     }
+
     @After
     fun tearDown() {
         unmockkAll()
     }
+
     @Test
     fun testExecuteSql() {
         withTestApplication({ module(testing = true) }) {
@@ -128,6 +130,25 @@ class ApplicationTest {
     }
 
     @Test
+    fun testExecuteSelectDouble() {
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn,
+                    dummySecretArn,
+                    "select cast(1.0 as DOUBLE)")))
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":" +
+                            "[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":1.0,\"isNull\":null," +
+                            "\"longValue\":null,\"stringValue\":null}]],\"columnMetadata\":null}",
+                    response.content)
+            }
+        }
+    }
+
+    @Test
     fun testExecuteSelectVARCHAR() {
         withTestApplication({ module(testing = true) }) {
             handleRequest(HttpMethod.Post, "/Execute") {
@@ -198,6 +219,22 @@ class ApplicationTest {
                     "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"2021-03-10 22:41:04\"}]],\"columnMetadata\":null}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
+            }
+        }
+    }
+
+    @Test
+    fun testExecuteSelectNull() {
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "select null")))
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":true,\"longValue\":null,\"stringValue\":null}]],\"columnMetadata\":null}",
+                    response.content)
             }
         }
     }

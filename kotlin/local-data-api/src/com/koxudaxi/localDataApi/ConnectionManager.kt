@@ -14,7 +14,7 @@ class ConnectionManager {
     fun createConnection(
         url: String, user: String, password: String?, database: String?, schema: String?,
     ): Connection {
-        return DriverManager.getConnection(database?.let { url + it } ?: url, user, password)
+        return DriverManager.getConnection(url + (database ?: ""), user, password)
             .apply {
                 this.autoCommit = false
                 if (schema is String) {
