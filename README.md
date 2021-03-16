@@ -1,5 +1,5 @@
 # local-data-api - Local Data API for AWS Aurora Serverless Data API
-[![CI](https://github.com/koxudaxi/local-data-api/actions/workflows/CI.yml/badge.svg)](https://github.com/koxudaxi/local-data-api/actions/workflows/CI.yml)
+[![CI](https://github.com/koxudaxi/local-data-api/actions/workflows/ci.yml/badge.svg)](https://github.com/koxudaxi/local-data-api/actions/workflows/ci.yml)
 [![](https://images.microbadger.com/badges/version/koxudaxi/local-data-api.svg)](https://hub.docker.com/r/koxudaxi/local-data-api)
 [![](https://badgen.net/docker/pulls/koxudaxi/local-data-api)](https://hub.docker.com/r/koxudaxi/local-data-api)
 [![codecov](https://codecov.io/gh/koxudaxi/local-data-api/branch/master/graph/badge.svg)](https://codecov.io/gh/koxudaxi/local-data-api)
