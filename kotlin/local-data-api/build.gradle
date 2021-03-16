@@ -38,11 +38,16 @@ repositories {
     maven { url 'https://kotlin.bintray.com/ktor' }
 }
 
+test {
+    finalizedBy jacocoTestReport
+}
+
 jacocoTestReport {
     reports {
         xml.enabled true
         html.enabled true
     }
+    dependsOn test
 }
 shadowJar{
     mergeServiceFiles()
