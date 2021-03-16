@@ -36,6 +36,9 @@ repositories {
     mavenLocal()
     jcenter()
     maven { url 'https://kotlin.bintray.com/ktor' }
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
 }
 
 test {
@@ -43,7 +46,7 @@ test {
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "0.8.7-SNAPSHOT"
 }
 
 jacocoTestReport {
@@ -51,6 +54,23 @@ jacocoTestReport {
         xml.enabled true
         html.enabled true
         html.destination file("${projectDir}/jacocoHtml")
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(
+                    dir: it,
+                    excludes: [
+                            // ignore generated data class models.
+                            '**/localDataApi/*Request*',
+                            '**/localDataApi/*Response*',
+                            '**/localDataApi/ColumnMetadata.class',
+                            '**/localDataApi/UpdateResult.class',
+                            '**/localDataApi/SqlParameter.class',
+                            '**/localDataApi/DataAPIException.class',
+                            '**/localDataApi/ApplicationKt.class',
+                    ]
+            )
+        }))
     }
     dependsOn test
 }
@@ -70,5 +90,4 @@ dependencies {
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
     testImplementation "com.h2database:h2:1.4.200"
     testImplementation "io.mockk:mockk:1.10.6"
-
 }

@@ -6,7 +6,8 @@ import java.sql.Types
 
 val LONG = listOf(Types.INTEGER, Types.TINYINT, Types.SMALLINT, Types.BIGINT)
 val DOUBLE = listOf(Types.FLOAT, Types.REAL, Types.DOUBLE)
-val STRING = listOf(Types.DECIMAL, Types.CLOB)
+
+//val STRING = listOf(Types.DECIMAL, Types.CLOB)
 val BOOLEAN = listOf(Types.BOOLEAN, Types.BIT)
 val BLOB = listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY)
 val DATETIME = listOf(Types.TIMESTAMP, Types.TIMESTAMP_WITH_TIMEZONE)
@@ -86,32 +87,29 @@ fun setup() {
     val resourceArn = env["RESOURCE_ARN"] ?: "arn:aws:rds:us-east-1:123456789012:cluster:dummy"
     val secretArn = env["SECRET_ARN"] ?: "arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy"
 
-    when {
-        "mysql" in engine.toLowerCase() -> {
-            ResourceManager.INSTANCE.setResource(
-                "mysql",
-                resourceArn,
-                env["MYSQL_HOST"] ?: "127.0.0.1",
-                env["MYSQL_PORT"]?.toInt() ?: 3306,
-            )
-            SecretManager.INSTANCE.setSecret(
-                env["MYSQL_USER"] ?: "root",
-                env["MYSQL_PASSWORD"] ?: "example",
-                secretArn
-            )
-        }
-        else -> {
-            ResourceManager.INSTANCE.setResource(
-                "postgresql",
-                resourceArn,
-                env["POSTGRES_HOST"] ?: "127.0.0.1",
-                env["POSTGRES_PORT"]?.toInt() ?: 5432,
-            )
-            SecretManager.INSTANCE.setSecret(
-                env["POSTGRES_USER"] ?: "postgres",
-                env["POSTGRES_PASSWORD"] ?: "example",
-                secretArn
-            )
-        }
+    if ("mysql" in engine.toLowerCase()) {
+        ResourceManager.INSTANCE.setResource(
+            "mysql",
+            resourceArn,
+            env["MYSQL_HOST"] ?: "127.0.0.1",
+            env["MYSQL_PORT"]?.toInt() ?: 3306,
+        )
+        SecretManager.INSTANCE.setSecret(
+            env["MYSQL_USER"] ?: "root",
+            env["MYSQL_PASSWORD"] ?: "example",
+            secretArn
+        )
+    } else {
+        ResourceManager.INSTANCE.setResource(
+            "postgresql",
+            resourceArn,
+            env["POSTGRES_HOST"] ?: "127.0.0.1",
+            env["POSTGRES_PORT"]?.toInt() ?: 5432,
+        )
+        SecretManager.INSTANCE.setSecret(
+            env["POSTGRES_USER"] ?: "postgres",
+            env["POSTGRES_PASSWORD"] ?: "example",
+            secretArn
+        )
     }
 }

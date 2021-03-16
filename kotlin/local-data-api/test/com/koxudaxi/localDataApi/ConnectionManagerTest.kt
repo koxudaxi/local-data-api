@@ -28,6 +28,7 @@ class ConnectionManagerTest {
     fun tearDown() {
         unmockkAll()
     }
+
     @Test
     fun testCreateConnection() {
         val jdbcName = "h2:./test;MODE=MySQL;INIT=CREATE SCHEMA IF NOT EXISTS TEST"
@@ -56,6 +57,15 @@ class ConnectionManagerTest {
 
     @Test
     fun testGetConnection() {
+        val connectionManager = spyk<ConnectionManager>()
+        val connection = mockk<Connection>(relaxed = true)
+        mockkStatic(DriverManager::class)
+        every { DriverManager.getConnection("jdbc:mysql://127.0.0.1/", "username", "password") } returns connection
+        connectionManager.createConnection("jdbc:mysql://127.0.0.1/", "username", "password", null, null)
+    }
+
+    @Test
+    fun testGetConnectionWithDatabase() {
         val connectionManager = spyk<ConnectionManager>()
         val connection = mockk<Connection>(relaxed = true)
         mockkStatic(DriverManager::class)
