@@ -23,7 +23,7 @@ data class SqlParameter(
     val castValue: Any?
         get() {
             return when {
-                value.blobValue != null -> value.blobValue
+                value.blobValue != null -> Base64.getDecoder().decode(value.blobValue)
                 value.booleanValue != null -> value.booleanValue
                 value.doubleValue != null -> value.doubleValue
                 value.longValue != null -> value.longValue

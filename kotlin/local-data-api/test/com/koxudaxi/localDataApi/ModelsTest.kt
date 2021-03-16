@@ -6,11 +6,14 @@ import kotlin.test.*
 class ModelsTest {
     @Test
     fun testSqlParameter() {
-        assertEquals("123", SqlParameter("value", Field(blobValue = "123")).value.blobValue)
+        assertEquals("aGVsbG8=", SqlParameter("value", Field(blobValue = "aGVsbG8=")).value.blobValue)
         assertEquals("DECIMAL", SqlParameter("value", Field(stringValue = "123"), typeHint = "DECIMAL").typeHint)
         assertEquals(null, SqlParameter("value", Field(stringValue = "123")).typeHint)
         assertEquals(null, SqlParameter("value", Field(stringValue = "123"), typeHint = null).typeHint)
-        assertEquals("123", SqlParameter("value", Field(blobValue = "123")).castValue)
+        // hello as bytes
+        assertEquals(
+            byteArrayOf(104, 101, 108, 108, 111).toList(),
+            (SqlParameter("value",Field(blobValue = "aGVsbG8=")).castValue as ByteArray).toList())
         assertEquals("dog", SqlParameter("value", Field(stringValue = "dog")).castValue)
         assertEquals((123).toDouble(), SqlParameter("value", Field(doubleValue = (123).toDouble())).castValue)
         assertEquals((123).toLong(), SqlParameter("value", Field(longValue = (123).toLong())).castValue)
