@@ -49,5 +49,4 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./kotlin/local-data-api/build/reports/jacoco/test/jacocoTestReport.xml
         flags: unittests
-        root_dir: ./kotlin/local-data-api/
         fail_ci_if_error: true
