@@ -170,10 +170,10 @@ class ApplicationTest {
             handleRequest(HttpMethod.Post, "/Execute") {
                 addHeader(HttpHeaders.ContentType, "*/*")
                 setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
-                    "select cast(1234 as BINARY)")))
+                    "select cast('hello' as BINARY)")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":\"000004d2\",\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":null}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":\"aGVsbG8=\",\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":null}]],\"columnMetadata\":null}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }

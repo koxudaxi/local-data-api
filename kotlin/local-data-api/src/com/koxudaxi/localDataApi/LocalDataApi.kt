@@ -3,6 +3,7 @@ package com.koxudaxi.localDataApi
 import java.sql.ResultSet
 import java.sql.Statement
 import java.sql.Types
+import java.util.*
 
 val LONG = listOf(Types.INTEGER, Types.TINYINT, Types.SMALLINT, Types.BIGINT)
 val DOUBLE = listOf(Types.FLOAT, Types.REAL, Types.DOUBLE)
@@ -20,7 +21,7 @@ fun createField(resultSet: ResultSet, index: Int): Field {
         in LONG -> Field(longValue = resultSet.getLong(index))
         in DOUBLE -> Field(doubleValue = resultSet.getDouble(index))
         in BOOLEAN -> Field(booleanValue = resultSet.getBoolean(index))
-        in BLOB -> Field(blobValue = resultSet.getString(index))
+        in BLOB -> Field(blobValue = Base64.getEncoder().encodeToString(resultSet.getBytes(index)))
         in DATETIME -> Field(stringValue = Regex("^[^.]+\\.\\d{3}|^[^.]+").find(resultSet.getString(index))!!.value)
         else -> {
             Field(stringValue = resultSet.getString(index))
