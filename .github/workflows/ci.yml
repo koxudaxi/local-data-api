@@ -27,7 +27,7 @@ jobs:
       with:
         java-version: 11
     - name: test 
-      run: ./gradlew shadowJar test jacocoTestReport
+      run: ./gradlew clean shadowJar test jacocoTestReport
       working-directory: ./kotlin/local-data-api/
     - name: integration test
       run: |
