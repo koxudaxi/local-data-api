@@ -27,7 +27,7 @@ jobs:
       with:
         java-version: 11
     - name: test 
-      run: ./gradlew shadowJar test jacocoTestReport
+      run: ./gradlew clean shadowJar test jacocoTestReport
       working-directory: ./kotlin/local-data-api/
     - name: integration test
       run: |
@@ -38,7 +38,7 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        pip install ".[all]"
+        pip install -r requirements-docs.txt
     - name: build document
       run: |
         cp README.md docs/index.md
@@ -49,5 +49,5 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./kotlin/local-data-api/build/reports/jacoco/test/jacocoTestReport.xml
         flags: unittests
-        root_dir: ./kotlin/local-data-api/
         fail_ci_if_error: true
+        verbose: true

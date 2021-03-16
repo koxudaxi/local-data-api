@@ -2,6 +2,9 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+              url "https://plugins.gradle.org/m2/"
+            }
     }
     
     dependencies {
@@ -35,11 +38,21 @@ repositories {
     maven { url 'https://kotlin.bintray.com/ktor' }
 }
 
+test {
+    finalizedBy jacocoTestReport
+}
+
+jacoco {
+    toolVersion = "0.8.6"
+}
+
 jacocoTestReport {
     reports {
         xml.enabled true
         html.enabled true
+        html.destination file("${projectDir}/jacocoHtml")
     }
+    dependsOn test
 }
 shadowJar{
     mergeServiceFiles()

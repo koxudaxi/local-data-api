@@ -28,7 +28,7 @@ jobs:
         with:
           java-version: 11
       - name: build and test 
-        run: ./gradlew shadowJar test jacocoTestReport
+        run: ./gradlew clean shadowJar test jacocoTestReport
         working-directory: ./kotlin/local-data-api/
       - name: Login to DockerHub
         if: github.event_name  == 'push tag'
