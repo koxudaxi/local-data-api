@@ -23,7 +23,7 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
     - name: Install dependencies
       run: |
-         pip install ".[all]"
+        pip install -r requirements-docs.txt
     - run: | 
          cp README.md docs/index.md
          mkdocs build --verbose --clean --strict
