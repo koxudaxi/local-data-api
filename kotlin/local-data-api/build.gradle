@@ -3,13 +3,10 @@ buildscript {
         mavenCentral()
         jcenter()
         maven {
-              url "https://plugins.gradle.org/m2/"
-            }
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url "https://plugins.gradle.org/m2/"
         }
     }
-    
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
@@ -27,6 +24,12 @@ group 'com.koxudaxi.local-data-api'
 version '0.6.0'
 mainClassName = "io.ktor.server.netty.EngineMain"
 
+
+configurations.all {
+    resolutionStrategy {
+        cacheChangingModulesFor 0, 'seconds'
+    }
+}
 
 sourceSets {
     main.kotlin.srcDirs = main.java.srcDirs = ['src']
@@ -77,7 +80,7 @@ jacocoTestReport {
     }
     dependsOn test
 }
-shadowJar{
+shadowJar {
     mergeServiceFiles()
 }
 dependencies {
