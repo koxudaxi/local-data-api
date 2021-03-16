@@ -31,7 +31,7 @@ I have re-written local-data-api in Kotlin. The design is the same as the old ve
 Also, I wrote unittest and made coverage 100%. We welcome your feedback and error reports.
 
 
-Related issue: `https://github.com/koxudaxi/local-data-api/issues/70`
+Related issue: [#70](https://github.com/koxudaxi/local-data-api/issues/70)
 
 
 ## How to use this image
