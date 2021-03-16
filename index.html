@@ -664,7 +664,7 @@
 <p>But, We need a JDBC driver that needs Java to reproduce real Data API behavior.</p>
 <p>I have re-written local-data-api in Kotlin. The design is the same as the old version.</p>
 <p>Also, I wrote unittest and made coverage 100%. We welcome your feedback and error reports.</p>
-<p>Related issue: <code>https://github.com/koxudaxi/local-data-api/issues/70</code></p>
+<p>Related issue: <a href="https://github.com/koxudaxi/local-data-api/issues/70">#70</a></p>
 <h2 id="how-to-use-this-image">How to use this image</h2>
 <p>You set your MYSQL Server configs as environments.</p>
 <div class="codehilite"><pre><span></span><code>docker run --rm -it --name my-data-api -p <span class="m">8080</span>:80  -e <span class="nv">MYSQL_HOST</span><span class="o">=</span>&lt;YOUR_MYSQL_HOST&gt; -e <span class="nv">MYSQL_PORT</span><span class="o">=</span>&lt;YOUR_MYSQL_PORT&gt; -e <span class="nv">MYSQL_USER</span><span class="o">=</span>&lt;YOUR_MYSQL_USER&gt; -e <span class="nv">MYSQL_PASSWORD</span><span class="o">=</span>&lt;YOUR_MYSQL_PASS&gt;  -e <span class="nv">RESOURCE_ARN</span><span class="o">=</span>arn:aws:rds:us-east-1:123456789012:cluster:dummy -e <span class="nv">SECRET_ARN</span><span class="o">=</span>arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy  koxudaxi/local-data-api
