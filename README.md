@@ -19,6 +19,20 @@ The API converts RESTful request to SQL statements.
 - MySQL
 - PostgreSQL
 
+## Version 0.6.0
+### local-data-api has been re-written in Kotlin
+#### Motivation
+This project was written in Python at the start.
+
+But, We need a JDBC driver that needs Java to reproduce real Data API behavior.
+
+I have re-written local-data-api in Kotlin. The design is the same as the old version.
+
+Also, I wrote unittest and made coverage 100%. We welcome your feedback and error reports.
+
+
+Related issue: `https://github.com/koxudaxi/local-data-api/issues/70`
+
 
 ## How to use this image
 You set your MYSQL Server configs as environments.
