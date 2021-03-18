@@ -3,6 +3,7 @@ package com.koxudaxi.localDataApi
 import java.sql.Connection
 import java.sql.DriverManager
 import java.util.*
+import java.util.Properties
 
 
 class ConnectionManager {
@@ -12,9 +13,22 @@ class ConnectionManager {
         IntRange(1, transactionIdLength).map { transactionIdCharacters.random() }.joinToString("")
 
     fun createConnection(
-        url: String, user: String, password: String?, database: String?, schema: String?,
+        url: String,
+        user: String,
+        password: String?,
+        database: String?,
+        schema: String?,
+        jdbcOptions: Map<String, String>,
     ): Connection {
-        return DriverManager.getConnection(url + (database ?: ""), user, password)
+        val props = Properties()
+        props.setProperty("user", user)
+        if (password is String) {
+            props.setProperty("password", password)
+        }
+        jdbcOptions.entries.forEach {
+            props.setProperty(it.key, it.value)
+        }
+        return DriverManager.getConnection(url + (database ?: ""), props)
             .apply {
                 this.autoCommit = false
                 if (schema is String) {

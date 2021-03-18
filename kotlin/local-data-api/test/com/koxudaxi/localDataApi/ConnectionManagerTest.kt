@@ -17,9 +17,9 @@ class ConnectionManagerTest {
     @Before
     fun setUp() {
         val jdbcName = "h2:./test;MODE=MySQL"
-        ResourceManager.INSTANCE.setResource(jdbcName, dummyResourceArn, null, null)
+        ResourceManager.INSTANCE.setResource(jdbcName, dummyResourceArn, null, null, emptyMap())
         SecretManager.INSTANCE.setSecret(username, password, dummySecretArn)
-        ConnectionManager.INSTANCE.createConnection("jdbc:${jdbcName}", username, password, null, null)
+        ConnectionManager.INSTANCE.createConnection("jdbc:${jdbcName}", username, password, null, null, emptyMap())
             .createStatement()
             .execute("DROP ALL OBJECTS")
     }
@@ -33,7 +33,7 @@ class ConnectionManagerTest {
     fun testCreateConnection() {
         val jdbcName = "h2:./test;MODE=MySQL;INIT=CREATE SCHEMA IF NOT EXISTS TEST"
         val connectionManager =
-            ConnectionManager.INSTANCE.createConnection("jdbc:${jdbcName}", username, password, null, "TEST")
+            ConnectionManager.INSTANCE.createConnection("jdbc:${jdbcName}", username, password, null, "TEST", mapOf("timeout" to "10"))
         assertEquals("TEST", connectionManager.schema)
         assertEquals(false, connectionManager.autoCommit)
     }
@@ -60,8 +60,8 @@ class ConnectionManagerTest {
         val connectionManager = spyk<ConnectionManager>()
         val connection = mockk<Connection>(relaxed = true)
         mockkStatic(DriverManager::class)
-        every { DriverManager.getConnection("jdbc:mysql://127.0.0.1/", "username", "password") } returns connection
-        connectionManager.createConnection("jdbc:mysql://127.0.0.1/", "username", "password", null, null)
+        every { DriverManager.getConnection("jdbc:mysql://127.0.0.1/", any()) } returns connection
+        connectionManager.createConnection("jdbc:mysql://127.0.0.1/", "username", null, null, null, emptyMap())
     }
 
     @Test
@@ -69,8 +69,8 @@ class ConnectionManagerTest {
         val connectionManager = spyk<ConnectionManager>()
         val connection = mockk<Connection>(relaxed = true)
         mockkStatic(DriverManager::class)
-        every { DriverManager.getConnection("jdbc:mysql://127.0.0.1/test", "username", "password") } returns connection
-        connectionManager.createConnection("jdbc:mysql://127.0.0.1/", "username", "password", "test", "testSchema")
+        every { DriverManager.getConnection("jdbc:mysql://127.0.0.1/test", any()) } returns connection
+        connectionManager.createConnection("jdbc:mysql://127.0.0.1/", "username", "password", "test", "testSchema", emptyMap())
     }
 }
 

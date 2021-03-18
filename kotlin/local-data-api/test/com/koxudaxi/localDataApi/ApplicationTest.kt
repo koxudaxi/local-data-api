@@ -23,9 +23,9 @@ class ApplicationTest {
     @Before
     fun setUp() {
         val jdbcName = "h2:./test;MODE=MySQL"
-        ResourceManager.INSTANCE.setResource(jdbcName, dummyResourceArn, null, null)
+        ResourceManager.INSTANCE.setResource(jdbcName, dummyResourceArn, null, null, emptyMap())
         SecretManager.INSTANCE.setSecret(username, password, dummySecretArn)
-        ConnectionManager.INSTANCE.createConnection("jdbc:${jdbcName}", username, password, null, null)
+        ConnectionManager.INSTANCE.createConnection("jdbc:${jdbcName}", username, password, null, null, emptyMap())
             .createStatement()
             .execute("DROP ALL OBJECTS")
     }

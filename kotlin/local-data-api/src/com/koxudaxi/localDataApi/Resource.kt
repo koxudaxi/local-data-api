@@ -11,7 +11,7 @@ class Resource(
     private val connectionManager = ConnectionManager.INSTANCE
 
     val connection = if (transactionId == null) {
-        connectionManager.createConnection(config.url, userName, password, database, schema)
+        connectionManager.createConnection(config.url, userName, password, database, schema, config.jdbcOptions)
     } else {
         connectionManager.getConnection(transactionId)
     }
@@ -42,6 +42,7 @@ class Resource(
         val resourceArn: String,
         val host: String?,
         val port: Int?,
+        val jdbcOptions: Map<String, String>
     ) {
         val url get() = if (host is String) "jdbc:${jdbcName}://${host}:${port}/" else "jdbc:${jdbcName}"
     }

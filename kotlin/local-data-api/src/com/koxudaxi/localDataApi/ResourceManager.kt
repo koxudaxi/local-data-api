@@ -11,8 +11,9 @@ class ResourceManager {
         resourceArn: String,
         host: String?,
         port: Int?,
+        jdbcOptions: Map<String,String>
     ) {
-        resourceConfigs[resourceArn] = Resource.Config(jdbcName, resourceArn, host, port)
+        resourceConfigs[resourceArn] = Resource.Config(jdbcName, resourceArn, host, port, jdbcOptions)
     }
 
     fun getResource(
