@@ -23,6 +23,18 @@ class LocalDataApiTest {
     }
 
     @Test
+    fun testIsReturnGeneratedKeysType() {
+        assertEquals( false, isReturnGeneratedKeysType("selEct 1"))
+        assertEquals( false, isReturnGeneratedKeysType(" selEct 1"))
+        assertEquals( true, isReturnGeneratedKeysType(" insert 1"))
+        assertEquals( true, isReturnGeneratedKeysType(" Update 1"))
+        assertEquals( true, isReturnGeneratedKeysType(" DELETE 1"))
+        assertEquals( false, isReturnGeneratedKeysType(" CREATE 1"))
+        assertEquals( false, isReturnGeneratedKeysType(" ;"))
+        assertEquals( false, isReturnGeneratedKeysType(""))
+    }
+
+    @Test
     fun testMySQL() {
         mockkStatic(System::class)
         mockkObject(ResourceManager)

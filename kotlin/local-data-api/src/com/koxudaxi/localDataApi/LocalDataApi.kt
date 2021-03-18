@@ -1,8 +1,6 @@
 package com.koxudaxi.localDataApi
 
-import java.sql.ResultSet
-import java.sql.Statement
-import java.sql.Types
+import java.sql.*
 import java.util.*
 
 val LONG = listOf(Types.INTEGER, Types.TINYINT, Types.SMALLINT, Types.BIGINT)
@@ -57,6 +55,19 @@ val Statement.records: List<List<Field>>
         }
         return records.toList()
     }
+
+fun isReturnGeneratedKeysType(sql: String): Boolean {
+    val match = Regex("^[^a-zA-Z]*([a-zA-Z]+)").find(sql) ?: return false
+    return match.destructured.component1().toUpperCase() in listOf("INSERT", "UPDATE", "DELETE")
+}
+
+fun Connection.prepareStatementWithReturnGeneratedKeys(sql: String): PreparedStatement {
+    return if (isReturnGeneratedKeysType(sql)) {
+        this.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+    } else {
+        this.prepareStatement(sql)
+    }
+}
 
 fun createColumnMetadata(resultSet: ResultSet): List<ColumnMetadata> {
     return resultSet.metaData.let {
