@@ -14,7 +14,7 @@ class ResourceManagerTest {
     @Before
     fun setUp() {
         val jdbcName = "h2:./test;MODE=MySQL"
-        ResourceManager.INSTANCE.setResource(jdbcName, dummyResourceArn, null, null)
+        ResourceManager.INSTANCE.setResource(jdbcName, dummyResourceArn, null, null, emptyMap())
         SecretManager.INSTANCE.setSecret(username, password, dummySecretArn)
     }
 

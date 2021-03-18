@@ -105,6 +105,7 @@ fun setup() {
             resourceArn,
             env["MYSQL_HOST"] ?: "127.0.0.1",
             env["MYSQL_PORT"]?.toInt() ?: 3306,
+            emptyMap()
         )
         SecretManager.INSTANCE.setSecret(
             env["MYSQL_USER"] ?: "root",
@@ -117,6 +118,7 @@ fun setup() {
             resourceArn,
             env["POSTGRES_HOST"] ?: "127.0.0.1",
             env["POSTGRES_PORT"]?.toInt() ?: 5432,
+            mapOf("stringtype" to "unspecified")
         )
         SecretManager.INSTANCE.setSecret(
             env["POSTGRES_USER"] ?: "postgres",

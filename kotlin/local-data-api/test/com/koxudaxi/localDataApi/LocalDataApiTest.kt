@@ -48,7 +48,7 @@ class LocalDataApiTest {
         val resource = mockk<Resource>(relaxed = true)
         mockkStatic(Resource::class)
         every {
-            Resource(Resource.Config("mysql", "abc", "localhost", 1234), "user", "pass", null, null, "xyz")
+            Resource(Resource.Config("mysql", "abc", "localhost", 1234, emptyMap()), "user", "pass", null, null, "xyz")
         } returns resource
 
         val env = mapOf(
@@ -78,7 +78,7 @@ class LocalDataApiTest {
         val resource = mockk<Resource>(relaxed = true)
         mockkStatic(Resource::class)
         every {
-            Resource(Resource.Config("mysql", "arn:aws:rds:us-east-1:123456789012:cluster:dummy", "127.0.0.1", 3306),
+            Resource(Resource.Config("mysql", "arn:aws:rds:us-east-1:123456789012:cluster:dummy", "127.0.0.1", 3306, emptyMap()),
                 "root",
                 "example",
                 null,
@@ -107,7 +107,7 @@ class LocalDataApiTest {
         val resource = mockk<Resource>(relaxed = true)
         mockkStatic(Resource::class)
         every {
-            Resource(Resource.Config("postgresql", "abc", "localhost", 1234), "user", "pass", null, null, "xyz")
+            Resource(Resource.Config("postgresql", "abc", "localhost", 1234, mapOf("stringtype" to "unspecified")), "user", "pass", null, null, "xyz")
         } returns resource
 
         val env = mapOf(
@@ -140,7 +140,7 @@ class LocalDataApiTest {
             Resource(Resource.Config("postgresql",
                 "arn:aws:rds:us-east-1:123456789012:cluster:dummy",
                 "127.0.0.1",
-                5432), "postgres", "example", null, null, "xyz")
+                5432, mapOf("stringtype" to "unspecified")), "postgres", "example", null, null, "xyz")
         } returns resource
 
         val env = mapOf(
