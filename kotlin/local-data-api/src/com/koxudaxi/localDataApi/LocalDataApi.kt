@@ -27,6 +27,17 @@ fun createField(resultSet: ResultSet, index: Int): Field {
     }
 }
 
+fun isPostgreSQL(connection: Connection): Boolean = "PostgreSQL" in connection.metaData.databaseProductName
+
+fun getGeneratedKeys(connection: Connection): List<Field> {
+    if (isPostgreSQL(connection)) return emptyList()
+    val resultSet = connection.createStatement().executeQuery("SELECT LAST_INSERT_ID()")
+    resultSet.next()
+    return IntRange(1, resultSet.metaData.columnCount).mapNotNull { index ->
+        resultSet.getInt(index)
+    }.filter { it > 0 }.map { Field(longValue = it.toLong()) }.toList()
+}
+
 val Statement.updateResults: List<List<Field>>
     get() {
         return this.generatedKeys.let { resultSet ->
@@ -55,19 +66,6 @@ val Statement.records: List<List<Field>>
         }
         return records.toList()
     }
-
-fun isReturnGeneratedKeysType(sql: String): Boolean {
-    val match = Regex("^[^a-zA-Z]*([a-zA-Z]+)").find(sql) ?: return false
-    return match.destructured.component1().toUpperCase() in listOf("INSERT", "UPDATE", "DELETE")
-}
-
-fun Connection.prepareStatementWithReturnGeneratedKeys(sql: String): PreparedStatement {
-    return if (isReturnGeneratedKeysType(sql)) {
-        this.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-    } else {
-        this.prepareStatement(sql)
-    }
-}
 
 fun createColumnMetadata(resultSet: ResultSet): List<ColumnMetadata> {
     return resultSet.metaData.let {

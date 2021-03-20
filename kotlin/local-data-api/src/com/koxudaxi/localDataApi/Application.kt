@@ -94,11 +94,11 @@ fun Application.module(testing: Boolean = false) {
             )
             val executeStatementResponse = try {
                 val statement = if (request.parameters == null) {
-                    resource.connection.prepareStatementWithReturnGeneratedKeys(request.sql)
+                    resource.connection.prepareStatement(request.sql)
                 } else {
                     val parameters = Parameters.parse(request.sql)
                     val statement =
-                        resource.connection.prepareStatementWithReturnGeneratedKeys(parameters.sql)
+                        resource.connection.prepareStatement(parameters.sql)
                     parameters.apply(statement, request.parameters.map { Pair(it.name, it.castValue) }.toMap())
                     statement
                 }
@@ -117,7 +117,7 @@ fun Application.module(testing: Boolean = false) {
                 } else {
                     ExecuteStatementResponse(
                         updatedCount,
-                        statement.updateResults.lastOrNull() ?: emptyList(),
+                        getGeneratedKeys(statement.connection),
                     )
                 }
                 if (resource.transactionId == null) {
@@ -151,7 +151,7 @@ fun Application.module(testing: Boolean = false) {
             val batchExecuteStatementResponse = try {
                 val parameters = Parameters.parse(request.sql)
                 val statement =
-                    resource.connection.prepareStatementWithReturnGeneratedKeys(parameters.sql)
+                    resource.connection.prepareStatement(parameters.sql, Statement.RETURN_GENERATED_KEYS)
 
                 request.parameterSets.forEach { parameterSet ->
                     parameters.apply(statement, parameterSet.map { Pair(it.name, it.castValue) }.toMap())

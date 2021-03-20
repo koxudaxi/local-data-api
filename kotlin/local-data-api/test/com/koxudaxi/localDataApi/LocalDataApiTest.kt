@@ -23,18 +23,6 @@ class LocalDataApiTest {
     }
 
     @Test
-    fun testIsReturnGeneratedKeysType() {
-        assertEquals( false, isReturnGeneratedKeysType("selEct 1"))
-        assertEquals( false, isReturnGeneratedKeysType(" selEct 1"))
-        assertEquals( true, isReturnGeneratedKeysType(" insert 1"))
-        assertEquals( true, isReturnGeneratedKeysType(" Update 1"))
-        assertEquals( true, isReturnGeneratedKeysType(" DELETE 1"))
-        assertEquals( false, isReturnGeneratedKeysType(" CREATE 1"))
-        assertEquals( false, isReturnGeneratedKeysType(" ;"))
-        assertEquals( false, isReturnGeneratedKeysType(""))
-    }
-
-    @Test
     fun testMySQL() {
         mockkStatic(System::class)
         mockkObject(ResourceManager)
@@ -78,7 +66,11 @@ class LocalDataApiTest {
         val resource = mockk<Resource>(relaxed = true)
         mockkStatic(Resource::class)
         every {
-            Resource(Resource.Config("mysql", "arn:aws:rds:us-east-1:123456789012:cluster:dummy", "127.0.0.1", 3306, emptyMap()),
+            Resource(Resource.Config("mysql",
+                "arn:aws:rds:us-east-1:123456789012:cluster:dummy",
+                "127.0.0.1",
+                3306,
+                emptyMap()),
                 "root",
                 "example",
                 null,
@@ -107,7 +99,12 @@ class LocalDataApiTest {
         val resource = mockk<Resource>(relaxed = true)
         mockkStatic(Resource::class)
         every {
-            Resource(Resource.Config("postgresql", "abc", "localhost", 1234, mapOf("stringtype" to "unspecified")), "user", "pass", null, null, "xyz")
+            Resource(Resource.Config("postgresql", "abc", "localhost", 1234, mapOf("stringtype" to "unspecified")),
+                "user",
+                "pass",
+                null,
+                null,
+                "xyz")
         } returns resource
 
         val env = mapOf(
