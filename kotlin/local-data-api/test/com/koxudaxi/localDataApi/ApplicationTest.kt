@@ -301,6 +301,72 @@ class ApplicationTest {
     }
 
     @Test
+    fun testExecuteInsertParametersPostgresql() {
+        ResourceManager.INSTANCE.setResource("h2:./test;MODE=PostgreSQL", dummyResourceArn, null, null, emptyMap())
+
+        mockkStatic("com.koxudaxi.localDataApi.LocalDataApiKt")
+        every { isPostgreSQL(any()) } returns true
+
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "CREATE TABLE TEST(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(10), age INT)"
+                )))
+            }.apply {
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    response.content)
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "select * from TEST")))
+            }.apply {
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[],\"columnMetadata\":null}",
+                    response.content)
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "INSERT INTO TEST (name, age) VALUES ('cat', 1)")))
+            }.apply {
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    response.content)
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "INSERT INTO test (name, age) VALUES (:name, :age)", parameters = listOf(
+                        SqlParameter("name", Field(stringValue = "dog")),
+                        SqlParameter("age", Field(longValue = 3)),
+                    ))))
+            }.apply {
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    response.content)
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "select * from TEST", includeResultMetadata = true)))
+            }.apply {
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"cat\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"dog\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":3,\"stringValue\":null}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    response.content)
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+        }
+    }
+
+    @Test
     fun testExecuteInsertParametersWithTransaction() {
         withTestApplication({ module(testing = true) }) {
 
