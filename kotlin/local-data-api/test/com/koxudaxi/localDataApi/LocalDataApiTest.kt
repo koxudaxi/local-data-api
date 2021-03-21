@@ -5,6 +5,7 @@ import io.mockk.*
 import io.mockk.mockk
 import org.junit.After
 import java.sql.Connection
+import java.sql.ResultSet
 import java.sql.Types
 
 class LocalDataApiTest {
@@ -19,7 +20,18 @@ class LocalDataApiTest {
         assertEquals(listOf(Types.FLOAT, Types.REAL, Types.DOUBLE), DOUBLE)
         assertEquals(listOf(Types.BOOLEAN, Types.BIT), BOOLEAN)
         assertEquals(listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY), BLOB)
-        assertEquals(listOf(Types.TIMESTAMP, Types.TIMESTAMP_WITH_TIMEZONE), DATETIME)
+        assertEquals(listOf(Types.TIMESTAMP), DATETIME)
+        assertEquals(listOf(Types.TIMESTAMP_WITH_TIMEZONE), DATETIME_TZ)
+    }
+
+    @Test
+    fun testCreateField() {
+        // For PostgreSQL
+        val mock = mockk<ResultSet>(relaxed = true)
+        every {mock.metaData.getColumnType(1) } returns Types.TIMESTAMP
+        every {mock.metaData.getColumnTypeName(1) } returns "timestamptz"
+        every {mock.getString(1) } returns "2021-03-10 22:41:04.123456+02"
+        assertEquals(createField(mock, 1).stringValue, "2021-03-10 22:41:04.123456")
     }
 
     @Test

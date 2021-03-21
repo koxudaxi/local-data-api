@@ -9,21 +9,23 @@ val DOUBLE = listOf(Types.FLOAT, Types.REAL, Types.DOUBLE)
 //val STRING = listOf(Types.DECIMAL, Types.CLOB)
 val BOOLEAN = listOf(Types.BOOLEAN, Types.BIT)
 val BLOB = listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY)
-val DATETIME = listOf(Types.TIMESTAMP, Types.TIMESTAMP_WITH_TIMEZONE)
+val DATETIME = listOf(Types.TIMESTAMP)
+val DATETIME_TZ = listOf(Types.TIMESTAMP_WITH_TIMEZONE)
 
 fun createField(resultSet: ResultSet, index: Int): Field {
     if (resultSet.getObject(index) == null) {
         return Field(isNull = true)
     }
-    return when (resultSet.metaData.getColumnType(index)) {
-        in LONG -> Field(longValue = resultSet.getLong(index))
-        in DOUBLE -> Field(doubleValue = resultSet.getDouble(index))
-        in BOOLEAN -> Field(booleanValue = resultSet.getBoolean(index))
-        in BLOB -> Field(blobValue = Base64.getEncoder().encodeToString(resultSet.getBytes(index)))
-        in DATETIME -> Field(stringValue = Regex("^[^.]+\\.\\d{3}|^[^.]+").find(resultSet.getString(index))!!.value)
-        else -> {
-            Field(stringValue = resultSet.getString(index))
-        }
+    val value = resultSet.metaData.getColumnType(index)
+    return when {
+        value in LONG -> Field(longValue = resultSet.getLong(index))
+        value in DOUBLE -> Field(doubleValue = resultSet.getDouble(index))
+        value in BOOLEAN -> Field(booleanValue = resultSet.getBoolean(index))
+        value in BLOB -> Field(blobValue = Base64.getEncoder().encodeToString(resultSet.getBytes(index)))
+        value in DATETIME_TZ || (value in DATETIME && resultSet.metaData.getColumnTypeName(index) == "timestamptz")
+        -> Field(stringValue = Regex("^.+ [^.]+\\.\\d{6}|^.+ [^.+\\-]+").find(resultSet.getString(index))!!.value)
+        value in DATETIME -> Field(stringValue = Regex("^[^.]+\\.\\d{3}|^[^.]+").find(resultSet.getString(index))!!.value)
+        else -> Field(stringValue = resultSet.getString(index))
     }
 }
 
