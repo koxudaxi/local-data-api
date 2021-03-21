@@ -224,6 +224,35 @@ class ApplicationTest {
     }
 
     @Test
+    fun testExecuteSelectTIMESTAMP_WITH_TZ() {
+        ResourceManager.INSTANCE.setResource("h2:./test;MODE=PostgreSQL", dummyResourceArn, null, null, emptyMap())
+
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "SELECT CAST('2021-03-10 22:41:04.968123' AS TIMESTAMP(6) WITH TIME ZONE) as value")))
+            }.apply {
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"2021-03-10 22:41:04.968123\"}]],\"columnMetadata\":null}",
+                    response.content)
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "SELECT CAST('2021-03-10 22:41:04' AS TIMESTAMP(6) WITH TIME ZONE) AS value")))
+            }.apply {
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"2021-03-10 22:41:04\"}]],\"columnMetadata\":null}",
+                    response.content)
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+        }
+    }
+
+    @Test
     fun testExecuteSelectNull() {
         withTestApplication({ module(testing = true) }) {
             handleRequest(HttpMethod.Post, "/Execute") {
