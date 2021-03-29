@@ -56,9 +56,11 @@ fun createField(resultSet: ResultSet, index: Int): Field {
         value in BLOB -> Field(blobValue = Base64.getEncoder().encodeToString(resultSet.getBytes(index)))
         value in DATETIME_TZ || (value in DATETIME && resultSet.metaData.getColumnTypeName(index) == "timestamptz")
         -> Field(stringValue = convertOffsetDatetimeToUTC(resultSet.getString(index)))
+        value in DATETIME -> Field(stringValue = Regex("^[^.]+\\.\\d{1,6}|^[^.]+").find(resultSet.getString(
+            index))!!.value)
         value in TIME_TZ || (value in TIME && resultSet.metaData.getColumnTypeName(index) == "timetz")
         -> Field(stringValue = convertOffsetTimeToUTC(resultSet.getString(index)))
-        value in DATETIME || value in TIME -> Field(stringValue = Regex("^[^.]+\\.\\d{1,6}|^[^.]+").find(resultSet.getString(
+        value in TIME -> Field(stringValue = Regex("^[^.]+\\.\\d{1,3}|^[^.]+").find(resultSet.getString(
             index))!!.value)
         else -> Field(stringValue = resultSet.getString(index))
     }
