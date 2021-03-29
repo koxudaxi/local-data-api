@@ -25,13 +25,36 @@ class LocalDataApiTest {
     }
 
     @Test
+    fun testConvertOffsetDatetimeToUTC() {
+        assertEquals("2021-03-10 20:41:04.123456", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.123456+02"))
+        assertEquals("2021-03-10 22:41:04.123456", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.123456+00"))
+        assertEquals("2021-03-10 20:41:04.12345", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.123450+02"))
+        assertEquals("2021-03-10 20:41:04.1234", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.123400+02"))
+        assertEquals("2021-03-10 20:41:04.123", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.123000+02"))
+        assertEquals("2021-03-10 20:41:04.12", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.120000+02"))
+        assertEquals("2021-03-10 20:41:04.1", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.100000+02"))
+        assertEquals("2021-03-10 20:41:04", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.000000+02"))
+        assertEquals("2021-03-10 20:41:04.12345", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.12345+02"))
+        assertEquals("2021-03-10 20:41:04.1234", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.1234+02"))
+        assertEquals("2021-03-10 20:41:04.123", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.123+02"))
+        assertEquals("2021-03-10 20:41:04.12", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.12+02"))
+        assertEquals("2021-03-10 20:41:04.1", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.1+02"))
+        assertEquals("2021-03-10 20:41:04", convertOffsetDatetimeToUTC("2021-03-10 22:41:04+02"))
+        assertEquals("2021-03-10 20:41:04.00005", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.000050+02"))
+        assertEquals("2021-03-10 20:41:04.0004", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.000400+02"))
+        assertEquals("2021-03-10 20:41:04.003", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.003000+02"))
+        assertEquals("2021-03-10 20:41:04.02", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.020000+02"))
+        assertEquals("2021-03-10 20:41:04", convertOffsetDatetimeToUTC("2021-03-10 22:41:04.000000+02"))
+    }
+
+    @Test
     fun testCreateField() {
         // For PostgreSQL
         val mock = mockk<ResultSet>(relaxed = true)
         every {mock.metaData.getColumnType(1) } returns Types.TIMESTAMP
         every {mock.metaData.getColumnTypeName(1) } returns "timestamptz"
         every {mock.getString(1) } returns "2021-03-10 22:41:04.123456+02"
-        assertEquals(createField(mock, 1).stringValue, "2021-03-10 22:41:04.123456")
+        assertEquals(createField(mock, 1).stringValue, "2021-03-10 20:41:04.123456")
     }
 
     @Test
