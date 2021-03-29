@@ -2,6 +2,7 @@ package com.koxudaxi.localDataApi
 
 import java.sql.*
 import java.time.OffsetDateTime
+import java.time.OffsetTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -14,6 +15,14 @@ val BOOLEAN = listOf(Types.BOOLEAN, Types.BIT)
 val BLOB = listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY)
 val DATETIME = listOf(Types.TIMESTAMP)
 val DATETIME_TZ = listOf(Types.TIMESTAMP_WITH_TIMEZONE)
+val TIME = listOf(Types.TIME)
+val TIME_TZ = listOf(Types.TIME_WITH_TIMEZONE)
+
+fun stripNanoSecs(time: String): String {
+    val splitTime = time.split(".")
+    return splitTime[0] + ".${splitTime[1]}".dropLastWhile { char -> char == '0' || char == '.' }
+}
+
 
 fun convertOffsetDatetimeToUTC(input: String): String {
     val splitFormatUtc = OffsetDateTime.parse(input,
@@ -21,9 +30,19 @@ fun convertOffsetDatetimeToUTC(input: String): String {
     )
         .atZoneSameInstant(ZoneOffset.UTC)
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
-        .split(".")
-    return splitFormatUtc[0] + ".${splitFormatUtc[1]}".dropLastWhile { char -> char == '0' || char == '.' }
+
+    return stripNanoSecs(splitFormatUtc)
 }
+
+fun convertOffsetTimeToUTC(input: String): String {
+    val splitFormatUtc = OffsetTime.parse(input,
+        DateTimeFormatter.ofPattern("HH:mm:ss[.SSSSSS][.SSSSS][.SSSS][.SSS][.SS][.S]x")
+    )
+        .withOffsetSameInstant(ZoneOffset.UTC)
+        .format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"))
+    return stripNanoSecs(splitFormatUtc)
+}
+
 
 fun createField(resultSet: ResultSet, index: Int): Field {
     if (resultSet.getObject(index) == null) {
@@ -37,7 +56,10 @@ fun createField(resultSet: ResultSet, index: Int): Field {
         value in BLOB -> Field(blobValue = Base64.getEncoder().encodeToString(resultSet.getBytes(index)))
         value in DATETIME_TZ || (value in DATETIME && resultSet.metaData.getColumnTypeName(index) == "timestamptz")
         -> Field(stringValue = convertOffsetDatetimeToUTC(resultSet.getString(index)))
-        value in DATETIME -> Field(stringValue = Regex("^[^.]+\\.\\d{3}|^[^.]+").find(resultSet.getString(index))!!.value)
+        value in TIME_TZ || (value in TIME && resultSet.metaData.getColumnTypeName(index) == "timetz")
+        -> Field(stringValue = convertOffsetTimeToUTC(resultSet.getString(index)))
+        value in DATETIME || value in TIME -> Field(stringValue = Regex("^[^.]+\\.\\d{1,6}|^[^.]+").find(resultSet.getString(
+            index))!!.value)
         else -> Field(stringValue = resultSet.getString(index))
     }
 }
