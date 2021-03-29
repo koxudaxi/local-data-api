@@ -1,6 +1,9 @@
 package com.koxudaxi.localDataApi
 
 import java.sql.*
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 val LONG = listOf(Types.INTEGER, Types.TINYINT, Types.SMALLINT, Types.BIGINT)
@@ -11,6 +14,18 @@ val BOOLEAN = listOf(Types.BOOLEAN, Types.BIT)
 val BLOB = listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY)
 val DATETIME = listOf(Types.TIMESTAMP)
 val DATETIME_TZ = listOf(Types.TIMESTAMP_WITH_TIMEZONE)
+
+val OFFSET_DATETIME_FORMAT: DateTimeFormatter = DateTimeFormatter
+    .ofPattern("yyyy-MM-dd HH:mm:ss[.SSSSSS][.SSSSS][.SSSS][.SSS][.SS][.S]x")
+val DATETIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")
+
+fun convertOffsetDatetimeToUTC(input: String): String {
+    val splitFormatUtc = OffsetDateTime.parse(input, OFFSET_DATETIME_FORMAT)
+        .atZoneSameInstant(ZoneOffset.UTC)
+        .format(DATETIME_FORMAT)
+        .split(".")
+    return splitFormatUtc[0] + ".${splitFormatUtc[1]}".dropLastWhile { char -> char == '0' || char == '.' }
+}
 
 fun createField(resultSet: ResultSet, index: Int): Field {
     if (resultSet.getObject(index) == null) {
@@ -23,7 +38,7 @@ fun createField(resultSet: ResultSet, index: Int): Field {
         value in BOOLEAN -> Field(booleanValue = resultSet.getBoolean(index))
         value in BLOB -> Field(blobValue = Base64.getEncoder().encodeToString(resultSet.getBytes(index)))
         value in DATETIME_TZ || (value in DATETIME && resultSet.metaData.getColumnTypeName(index) == "timestamptz")
-        -> Field(stringValue = Regex("^.+ [^.]+\\.\\d{6}|^.+ [^.+\\-]+").find(resultSet.getString(index))!!.value)
+        -> Field(stringValue = convertOffsetDatetimeToUTC(resultSet.getString(index)))
         value in DATETIME -> Field(stringValue = Regex("^[^.]+\\.\\d{3}|^[^.]+").find(resultSet.getString(index))!!.value)
         else -> Field(stringValue = resultSet.getString(index))
     }
