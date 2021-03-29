@@ -15,14 +15,12 @@ val BLOB = listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY
 val DATETIME = listOf(Types.TIMESTAMP)
 val DATETIME_TZ = listOf(Types.TIMESTAMP_WITH_TIMEZONE)
 
-val OFFSET_DATETIME_FORMAT: DateTimeFormatter = DateTimeFormatter
-    .ofPattern("yyyy-MM-dd HH:mm:ss[.SSSSSS][.SSSSS][.SSSS][.SSS][.SS][.S]x")
-val DATETIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")
-
 fun convertOffsetDatetimeToUTC(input: String): String {
-    val splitFormatUtc = OffsetDateTime.parse(input, OFFSET_DATETIME_FORMAT)
+    val splitFormatUtc = OffsetDateTime.parse(input,
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSSSSS][.SSSSS][.SSSS][.SSS][.SS][.S]x")
+    )
         .atZoneSameInstant(ZoneOffset.UTC)
-        .format(DATETIME_FORMAT)
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
         .split(".")
     return splitFormatUtc[0] + ".${splitFormatUtc[1]}".dropLastWhile { char -> char == '0' || char == '.' }
 }
