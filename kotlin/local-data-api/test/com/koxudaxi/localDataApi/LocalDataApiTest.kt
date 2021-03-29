@@ -22,6 +22,8 @@ class LocalDataApiTest {
         assertEquals(listOf(Types.BLOB, Types.BINARY, Types.LONGVARBINARY, Types.VARBINARY), BLOB)
         assertEquals(listOf(Types.TIMESTAMP), DATETIME)
         assertEquals(listOf(Types.TIMESTAMP_WITH_TIMEZONE), DATETIME_TZ)
+        assertEquals(listOf(Types.TIME), TIME)
+        assertEquals(listOf(Types.TIME_WITH_TIMEZONE), TIME_TZ)
     }
 
     @Test
@@ -48,13 +50,43 @@ class LocalDataApiTest {
     }
 
     @Test
+    fun testConvertOffsetTimeToUTC() {
+        assertEquals("20:41:04.123", convertOffsetTimeToUTC("22:41:04.123456+02"))
+        assertEquals("22:41:04.123", convertOffsetTimeToUTC("22:41:04.123456+00"))
+        assertEquals("20:41:04.123", convertOffsetTimeToUTC("22:41:04.123450+02"))
+        assertEquals("20:41:04.123", convertOffsetTimeToUTC("22:41:04.123400+02"))
+        assertEquals("20:41:04.123", convertOffsetTimeToUTC("22:41:04.123000+02"))
+        assertEquals("20:41:04.12", convertOffsetTimeToUTC("22:41:04.120000+02"))
+        assertEquals("20:41:04.1", convertOffsetTimeToUTC("22:41:04.100000+02"))
+        assertEquals("20:41:04", convertOffsetTimeToUTC("22:41:04.000000+02"))
+        assertEquals("20:41:04.123", convertOffsetTimeToUTC("22:41:04.12345+02"))
+        assertEquals("20:41:04.123", convertOffsetTimeToUTC("22:41:04.1234+02"))
+        assertEquals("20:41:04.123", convertOffsetTimeToUTC("22:41:04.123+02"))
+        assertEquals("20:41:04.12", convertOffsetTimeToUTC("22:41:04.12+02"))
+        assertEquals("20:41:04.1", convertOffsetTimeToUTC("22:41:04.1+02"))
+        assertEquals("20:41:04", convertOffsetTimeToUTC("22:41:04+02"))
+        assertEquals("20:41:04", convertOffsetTimeToUTC("22:41:04.000050+02"))
+        assertEquals("20:41:04", convertOffsetTimeToUTC("22:41:04.000400+02"))
+        assertEquals("20:41:04.003", convertOffsetTimeToUTC("22:41:04.003000+02"))
+        assertEquals("20:41:04.02", convertOffsetTimeToUTC("22:41:04.020000+02"))
+        assertEquals("20:41:04", convertOffsetTimeToUTC("22:41:04.000000+02"))
+    }
+
+    @Test
     fun testCreateField() {
         // For PostgreSQL
-        val mock = mockk<ResultSet>(relaxed = true)
-        every {mock.metaData.getColumnType(1) } returns Types.TIMESTAMP
-        every {mock.metaData.getColumnTypeName(1) } returns "timestamptz"
-        every {mock.getString(1) } returns "2021-03-10 22:41:04.123456+02"
-        assertEquals(createField(mock, 1).stringValue, "2021-03-10 20:41:04.123456")
+        val timestamptzMock = mockk<ResultSet>(relaxed = true)
+        every {timestamptzMock.metaData.getColumnType(1) } returns Types.TIMESTAMP
+        every {timestamptzMock.metaData.getColumnTypeName(1) } returns "timestamptz"
+        every {timestamptzMock.getString(1) } returns "2021-03-10 22:41:04.123456+02"
+        assertEquals(createField(timestamptzMock, 1).stringValue, "2021-03-10 20:41:04.123456")
+
+        val timetzMock = mockk<ResultSet>(relaxed = true)
+        every {timetzMock.metaData.getColumnType(1) } returns Types.TIME
+        every {timetzMock.metaData.getColumnTypeName(1) } returns "timetz"
+        every {timetzMock.getString(1) } returns "22:41:04.123+02"
+        assertEquals(createField(timetzMock, 1).stringValue, "20:41:04.123")
+
     }
 
     @Test
