@@ -19,6 +19,7 @@ val TIME = listOf(Types.TIME)
 val TIME_TZ = listOf(Types.TIME_WITH_TIMEZONE)
 
 fun stripNanoSecs(time: String): String {
+    if ('.' !in time) return time
     val splitTime = time.split(".")
     return splitTime[0] + ".${splitTime[1]}".dropLastWhile { char -> char == '0' || char == '.' }
 }
@@ -44,6 +45,14 @@ fun convertOffsetTimeToUTC(input: String): String {
 }
 
 
+fun formatDatetime(input: String): String {
+    return stripNanoSecs(Regex("^[^.]+\\.\\d{1,6}|^[^.]+").find(input)!!.value)
+}
+
+fun formatTime(input: String): String {
+    return stripNanoSecs(Regex("^[^.]+\\.\\d{1,3}|^[^.]+").find(input)!!.value)
+}
+
 fun createField(resultSet: ResultSet, index: Int): Field {
     if (resultSet.getObject(index) == null) {
         return Field(isNull = true)
@@ -56,12 +65,10 @@ fun createField(resultSet: ResultSet, index: Int): Field {
         value in BLOB -> Field(blobValue = Base64.getEncoder().encodeToString(resultSet.getBytes(index)))
         value in DATETIME_TZ || (value in DATETIME && resultSet.metaData.getColumnTypeName(index) == "timestamptz")
         -> Field(stringValue = convertOffsetDatetimeToUTC(resultSet.getString(index)))
-        value in DATETIME -> Field(stringValue = Regex("^[^.]+\\.\\d{1,6}|^[^.]+").find(resultSet.getString(
-            index))!!.value)
+        value in DATETIME -> Field(stringValue = formatDatetime(resultSet.getString(index)))
         value in TIME_TZ || (value in TIME && resultSet.metaData.getColumnTypeName(index) == "timetz")
         -> Field(stringValue = convertOffsetTimeToUTC(resultSet.getString(index)))
-        value in TIME -> Field(stringValue = Regex("^[^.]+\\.\\d{1,3}|^[^.]+").find(resultSet.getString(
-            index))!!.value)
+        value in TIME -> Field(stringValue = formatTime(resultSet.getString(index)))
         else -> Field(stringValue = resultSet.getString(index))
     }
 }
