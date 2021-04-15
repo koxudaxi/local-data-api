@@ -1,7 +1,6 @@
 FROM openjdk:11.0.10-jre-slim-buster
 
 RUN mkdir /app
-RUN chown -R $APPLICATION_USER /app
 
 COPY ./build/libs/local-data-api-*-all.jar /app/local-data-api.jar
 WORKDIR /app
