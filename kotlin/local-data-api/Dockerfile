@@ -1,12 +1,6 @@
 FROM openjdk:11.0.10-jre-slim-buster
 
-ENV APPLICATION_USER ktor
-RUN adduser --disabled-password --gecos '' $APPLICATION_USER
-
 RUN mkdir /app
-RUN chown -R $APPLICATION_USER /app
-
-USER $APPLICATION_USER
 
 COPY ./build/libs/local-data-api-*-all.jar /app/local-data-api.jar
 WORKDIR /app
