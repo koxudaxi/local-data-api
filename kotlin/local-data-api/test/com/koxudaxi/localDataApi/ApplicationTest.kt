@@ -578,7 +578,7 @@ class ApplicationTest {
     @Test
     fun testExecuteSelectWithUnknownKey() {
         @Serializable
-        data class ExecuteStatementRequestWithUnkownKey(
+        data class ExecuteStatementRequestWithUnknownKey(
             val resourceArn: String,
             val secretArn: String,
             val sql: String,
@@ -593,7 +593,7 @@ class ApplicationTest {
         withTestApplication({ module(testing = true) }) {
             handleRequest(HttpMethod.Post, "/Execute") {
                 addHeader(HttpHeaders.ContentType, "*/*")
-                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn,
+                setBody(Json.encodeToString(ExecuteStatementRequestWithUnknownKey(dummyResourceArn,
                     dummySecretArn,
                     "select 1",
                     resultSetOptions = "abc")))
