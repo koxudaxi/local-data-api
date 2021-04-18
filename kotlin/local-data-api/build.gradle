@@ -74,6 +74,7 @@ jacocoTestReport {
                             '**/localDataApi/SqlParameter.class',
                             '**/localDataApi/DataAPIException.class',
                             '**/localDataApi/ApplicationKt.class',
+                            '**/localDataApi/Field.class',
                     ]
             )
         }))
