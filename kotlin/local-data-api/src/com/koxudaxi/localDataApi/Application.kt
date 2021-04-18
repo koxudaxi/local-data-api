@@ -7,6 +7,7 @@ import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
+import kotlinx.serialization.json.Json
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
@@ -25,7 +26,7 @@ val secretManager = SecretManager.INSTANCE
 fun Application.module(testing: Boolean = false) {
     setup()
     install(ContentNegotiation) {
-        json(DefaultJson, ContentType.Any)
+        json(Json { ignoreUnknownKeys = true }, ContentType.Any)
     }
     install(StatusPages) {
         exception<SQLException> { cause ->
