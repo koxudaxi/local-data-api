@@ -121,9 +121,9 @@ class ApplicationTest {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":" +
-                            "[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null," +
-                            "\"longValue\":1,\"stringValue\":null}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":" +
+                            "[[{" +
+                            "\"longValue\":1}]]}",
                     response.content)
             }
         }
@@ -140,9 +140,9 @@ class ApplicationTest {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":" +
-                            "[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":1.0,\"isNull\":null," +
-                            "\"longValue\":null,\"stringValue\":null}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":" +
+                            "[[{\"doubleValue\":1.0" +
+                            "}]]}",
                     response.content)
             }
         }
@@ -158,7 +158,7 @@ class ApplicationTest {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"hello\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"hello\"}]]}",
                     response.content)
             }
         }
@@ -173,7 +173,7 @@ class ApplicationTest {
                     "select cast('hello' as BINARY)")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":\"aGVsbG8=\",\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":null}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"blobValue\":\"aGVsbG8=\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -189,7 +189,7 @@ class ApplicationTest {
                     "select 1 > 0 as value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":true,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":null}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"booleanValue\":true}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -206,7 +206,7 @@ class ApplicationTest {
                     "SELECT CAST('22:41:04.968123' AS TIME) AS value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"22:41:05\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"22:41:05\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -216,7 +216,7 @@ class ApplicationTest {
                     "SELECT CAST('22:41:04' AS TIME) AS value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"22:41:04\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"22:41:04\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -232,7 +232,7 @@ class ApplicationTest {
                     "SELECT CAST('2021-03-10 22:41:04.968123' AS TIMESTAMP) AS value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"2021-03-10 22:41:04.968123\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"2021-03-10 22:41:04.968123\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -244,7 +244,7 @@ class ApplicationTest {
                     "SELECT CAST('2021-03-10 22:41:04' AS TIMESTAMP) AS value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"2021-03-10 22:41:04\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"2021-03-10 22:41:04\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -262,7 +262,7 @@ class ApplicationTest {
                     "SELECT CAST('22:41:04.968123+02' AS TIME(6) WITH TIME ZONE) as value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"20:41:04.968\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"20:41:04.968\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -273,7 +273,7 @@ class ApplicationTest {
                     "SELECT CAST('22:41:04+02' AS TIME(6) WITH TIME ZONE) AS value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"20:41:04\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"20:41:04\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -291,7 +291,7 @@ class ApplicationTest {
                     "SELECT CAST('2021-03-10 22:41:04.968123+02' AS TIMESTAMP(6) WITH TIME ZONE) as value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"2021-03-10 20:41:04.968123\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"2021-03-10 20:41:04.968123\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -302,7 +302,7 @@ class ApplicationTest {
                     "SELECT CAST('2021-03-10 22:41:04+02' AS TIMESTAMP(6) WITH TIME ZONE) AS value")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"2021-03-10 20:41:04\"}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"stringValue\":\"2021-03-10 20:41:04\"}]]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -319,7 +319,7 @@ class ApplicationTest {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":true,\"longValue\":null,\"stringValue\":null}]],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"isNull\":true}]]}",
                     response.content)
             }
         }
@@ -335,7 +335,7 @@ class ApplicationTest {
                 )))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -345,7 +345,7 @@ class ApplicationTest {
                     "select * from TEST")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -355,7 +355,7 @@ class ApplicationTest {
                     "INSERT INTO TEST (name, age) VALUES ('cat', 1)")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[{\"longValue\":1}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -369,7 +369,7 @@ class ApplicationTest {
                     ))))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null}],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[{\"longValue\":2}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -379,7 +379,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"cat\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"dog\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":3,\"stringValue\":null}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"longValue\":1},{\"stringValue\":\"cat\"},{\"longValue\":1}],[{\"longValue\":2},{\"stringValue\":\"dog\"},{\"longValue\":3}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -401,7 +401,7 @@ class ApplicationTest {
                 )))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -411,7 +411,7 @@ class ApplicationTest {
                     "select * from TEST")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -421,7 +421,7 @@ class ApplicationTest {
                     "INSERT INTO TEST (name, age) VALUES ('cat', 1)")))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -435,7 +435,7 @@ class ApplicationTest {
                     ))))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -445,7 +445,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"cat\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"dog\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":3,\"stringValue\":null}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"longValue\":1},{\"stringValue\":\"cat\"},{\"longValue\":1}],[{\"longValue\":2},{\"stringValue\":\"dog\"},{\"longValue\":3}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -477,7 +477,7 @@ class ApplicationTest {
                 )))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -487,7 +487,7 @@ class ApplicationTest {
                     "select * from TEST", transactionId = transactionId)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[],\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -497,7 +497,7 @@ class ApplicationTest {
                     "INSERT INTO TEST (name, age) VALUES ('cat', 1)", transactionId = transactionId)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[{\"longValue\":1}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -511,7 +511,7 @@ class ApplicationTest {
                     ), transactionId = transactionId)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null}],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":1,\"generatedFields\":[{\"longValue\":2}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -521,7 +521,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -531,7 +531,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true, transactionId = transactionId)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"cat\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"dog\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":3,\"stringValue\":null}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"longValue\":1},{\"stringValue\":\"cat\"},{\"longValue\":1}],[{\"longValue\":2},{\"stringValue\":\"dog\"},{\"longValue\":3}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -552,7 +552,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"cat\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"dog\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":3,\"stringValue\":null}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"longValue\":1},{\"stringValue\":\"cat\"},{\"longValue\":1}],[{\"longValue\":2},{\"stringValue\":\"dog\"},{\"longValue\":3}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -576,6 +576,39 @@ class ApplicationTest {
     }
 
     @Test
+    fun testExecuteSelectWithUnknownKey() {
+        @Serializable
+        data class ExecuteStatementRequestWithUnknownKey(
+            val resourceArn: String,
+            val secretArn: String,
+            val sql: String,
+            val database: String? = null,
+            val continueAfterTimeout: Boolean? = null,
+            val includeResultMetadata: Boolean = false,
+            val parameters: List<SqlParameter>? = null,
+            val schema: String? = null,
+            val transactionId: String? = null,
+            val resultSetOptions: String,
+        )
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequestWithUnknownKey(dummyResourceArn,
+                    dummySecretArn,
+                    "select 1",
+                    resultSetOptions = "abc")))
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"records\":" +
+                            "[[{" +
+                            "\"longValue\":1}]]}",
+                    response.content)
+            }
+        }
+    }
+
+    @Test
     fun testExecuteBatch() {
         withTestApplication({ module(testing = true) }) {
             handleRequest(HttpMethod.Post, "/Execute") {
@@ -585,7 +618,7 @@ class ApplicationTest {
                 )))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -615,7 +648,7 @@ class ApplicationTest {
                     ))))
             }.apply {
                 assertEquals(
-                    "{\"updateResults\":[{\"generatedFields\":[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}]},{\"generatedFields\":[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null}]}]}",
+                    "{\"updateResults\":[{\"generatedFields\":[{\"longValue\":1}]},{\"generatedFields\":[{\"longValue\":2}]}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -625,7 +658,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"cat\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"dog\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":3,\"stringValue\":null}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"longValue\":1},{\"stringValue\":\"cat\"},{\"longValue\":1}],[{\"longValue\":2},{\"stringValue\":\"dog\"},{\"longValue\":3}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -656,7 +689,7 @@ class ApplicationTest {
                 )))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[],\"records\":null,\"columnMetadata\":null}",
+                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":[]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -688,7 +721,7 @@ class ApplicationTest {
                     transactionId = transactionId)))
             }.apply {
                 assertEquals(
-                    "{\"updateResults\":[{\"generatedFields\":[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}]},{\"generatedFields\":[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null}]}]}",
+                    "{\"updateResults\":[{\"generatedFields\":[{\"longValue\":1}]},{\"generatedFields\":[{\"longValue\":2}]}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -698,7 +731,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -708,7 +741,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true, transactionId = transactionId)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"cat\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"dog\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":3,\"stringValue\":null}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"longValue\":1},{\"stringValue\":\"cat\"},{\"longValue\":1}],[{\"longValue\":2},{\"stringValue\":\"dog\"},{\"longValue\":3}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
@@ -729,7 +762,7 @@ class ApplicationTest {
                     "select * from TEST", includeResultMetadata = true)))
             }.apply {
                 assertEquals(
-                    "{\"numberOfRecordsUpdated\":0,\"generatedFields\":null,\"records\":[[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"cat\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":1,\"stringValue\":null}],[{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":2,\"stringValue\":null},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":null,\"stringValue\":\"dog\"},{\"blobValue\":null,\"booleanValue\":null,\"doubleValue\":null,\"isNull\":null,\"longValue\":3,\"stringValue\":null}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"longValue\":1},{\"stringValue\":\"cat\"},{\"longValue\":1}],[{\"longValue\":2},{\"stringValue\":\"dog\"},{\"longValue\":3}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
