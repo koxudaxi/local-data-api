@@ -5,6 +5,36 @@ import java.util.*
 
 
 @Serializable
+data class ArrayValue(
+    val arrayValues: List<ArrayValue>? = null,
+    val booleanValues: List<Boolean>? = null,
+    val doubleValues: List<Double>? = null,
+    val longValues: List<Long>? = null,
+    val stringValue: List<String>? = null,
+) {
+    companion object {
+        fun fromList(list: List<*>): ArrayValue? {
+            return when (list.firstOrNull()) {
+                is String -> ArrayValue(stringValue = list.filterIsInstance<String>())
+                is Boolean -> ArrayValue(booleanValues = list.filterIsInstance<Boolean>())
+                is Double -> ArrayValue(doubleValues = list.filterIsInstance<Double>())
+                is Long -> ArrayValue(longValues = list.filterIsInstance<Long>())
+                is ArrayValue -> ArrayValue(arrayValues = list.filterIsInstance<ArrayValue>())
+                else -> null
+            }
+        }
+    }
+}
+
+data class Blob(val encodedValue: String) {
+    companion object {
+        fun fromBytes(value: ByteArray): Blob {
+            return Blob(encodedValue = Base64.getEncoder().encodeToString(value))
+        }
+    }
+}
+
+@Serializable
 data class Field(
     val blobValue: String? = null, //  # Type: Base64-encoded binary data object
     val booleanValue: Boolean? = null,
@@ -12,7 +42,22 @@ data class Field(
     val isNull: Boolean? = null,
     val longValue: Long? = null,
     val stringValue: String? = null,
-)
+    val arrayValue: ArrayValue? = null,
+) {
+    companion object {
+        fun fromValue(value: Any?): Field {
+            return when (value) {
+                is Blob -> Field(blobValue = value.encodedValue)
+                is Boolean -> Field(booleanValue = value)
+                is Double -> Field(doubleValue = value)
+                is Long -> Field(longValue = value)
+                is String -> Field(stringValue = value)
+                is List<*> -> Field(arrayValue = ArrayValue.fromList(value))
+                else -> Field(isNull = true)
+            }
+        }
+    }
+}
 
 @Serializable
 data class SqlParameter(
@@ -38,6 +83,7 @@ data class SqlParameter(
                         else -> value.stringValue
                     }
                 }
+                value.arrayValue != null -> throw BadRequestException("Array parameters are not supported.")
                 else -> null
             }
         }
