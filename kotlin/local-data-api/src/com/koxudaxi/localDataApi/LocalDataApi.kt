@@ -66,20 +66,24 @@ fun getFieldValue(resultSet: ResultSet, index: Int): Any? {
         value in LONG -> resultSet.getLong(index)
         value in DOUBLE -> resultSet.getDouble(index)
         value in BOOLEAN -> resultSet.getBoolean(index)
-        value in BLOB ->  Blob.fromBytes(resultSet.getBytes(index))
+        value in BLOB -> Blob.fromBytes(resultSet.getBytes(index))
         value in DATETIME_TZ || (value in DATETIME && resultSet.metaData.getColumnTypeName(index) == "timestamptz")
-        ->  convertOffsetDatetimeToUTC(resultSet.getString(index))
+        -> convertOffsetDatetimeToUTC(resultSet.getString(index))
         value in DATETIME -> formatDatetime(resultSet.getString(index))
         value in TIME_TZ || (value in TIME && resultSet.metaData.getColumnTypeName(index) == "timetz")
-        ->  convertOffsetTimeToUTC(resultSet.getString(index))
-        value in TIME ->  formatTime(resultSet.getString(index))
-        value == ARRAY ->resultSet.getArray(index).resultSet.let {
-            it.next()
-            IntRange(1, it.metaData.columnCount).map { index -> getFieldValue(it, index) }.toList()
+        -> convertOffsetTimeToUTC(resultSet.getString(index))
+        value in TIME -> formatTime(resultSet.getString(index))
+        value == ARRAY -> resultSet.getArray(index).resultSet.let { arrayResultSet ->
+            val fields = mutableMapOf<Int, Any?>()
+            while (arrayResultSet.next()) {
+                fields[arrayResultSet.getInt(1)] = getFieldValue(arrayResultSet, 2)
+            }
+            fields.toSortedMap().values.toList()
         }
         else -> resultSet.getString(index)
     }
 }
+
 fun isPostgreSQL(connection: Connection): Boolean = "PostgreSQL" in connection.metaData.databaseProductName
 
 fun getGeneratedKeys(connection: Connection): List<Field> {

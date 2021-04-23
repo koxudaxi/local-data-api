@@ -13,7 +13,7 @@ class ModelsTest {
         // hello as bytes
         assertEquals(
             byteArrayOf(104, 101, 108, 108, 111).toList(),
-            (SqlParameter("value",Field(blobValue = "aGVsbG8=")).castValue as ByteArray).toList())
+            (SqlParameter("value", Field(blobValue = "aGVsbG8=")).castValue as ByteArray).toList())
         assertEquals("dog", SqlParameter("value", Field(stringValue = "dog")).castValue)
         assertEquals((123).toDouble(), SqlParameter("value", Field(doubleValue = (123).toDouble())).castValue)
         assertEquals((123).toLong(), SqlParameter("value", Field(longValue = (123).toLong())).castValue)
@@ -33,6 +33,18 @@ class ModelsTest {
         assertEquals("dog", SqlParameter("value", Field(stringValue = "dog"), typeHint = "unknown").castValue)
         assertEquals(null, SqlParameter("value", Field(isNull = true)).castValue)
         assertEquals(true, SqlParameter("value", Field(isNull = true)).value.isNull)
+    }
+
+    @Test
+    fun testArrayValueFromList() {
+        assertEquals(listOf("a", "b"), ArrayValue.fromList(listOf("a", "b")).stringValues)
+        assertEquals(listOf(true, false), ArrayValue.fromList(listOf(true, false)).booleanValues)
+        assertEquals(listOf(1.toDouble(), 2.toDouble()),
+            ArrayValue.fromList(listOf(1.toDouble(), 2.toDouble())).doubleValues)
+        assertEquals(listOf(1.toLong(), 2.toLong()), ArrayValue.fromList(listOf(1.toLong(), 2.toLong())).longValues)
+        val array = ArrayValue.fromList(listOf(listOf("a", "b"), listOf("c", "d"))).arrayValues!!
+        assertEquals(listOf("a", "b"), array[0].stringValues)
+        assertEquals(listOf("c", "d"), array[1].stringValues)
     }
 }
 

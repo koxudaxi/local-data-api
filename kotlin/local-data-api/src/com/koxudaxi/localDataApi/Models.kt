@@ -10,17 +10,16 @@ data class ArrayValue(
     val booleanValues: List<Boolean>? = null,
     val doubleValues: List<Double>? = null,
     val longValues: List<Long>? = null,
-    val stringValue: List<String>? = null,
+    val stringValues: List<String>? = null,
 ) {
     companion object {
-        fun fromList(list: List<*>): ArrayValue? {
+        fun fromList(list: List<*>): ArrayValue {
             return when (list.firstOrNull()) {
-                is String -> ArrayValue(stringValue = list.filterIsInstance<String>())
+                is String -> ArrayValue(stringValues = list.filterIsInstance<String>())
                 is Boolean -> ArrayValue(booleanValues = list.filterIsInstance<Boolean>())
                 is Double -> ArrayValue(doubleValues = list.filterIsInstance<Double>())
                 is Long -> ArrayValue(longValues = list.filterIsInstance<Long>())
-                is ArrayValue -> ArrayValue(arrayValues = list.filterIsInstance<ArrayValue>())
-                else -> null
+                else -> ArrayValue(arrayValues = list.filterIsInstance<List<*>>().map { fromList(it) })
             }
         }
     }

@@ -326,6 +326,27 @@ class ApplicationTest {
     }
 
     @Test
+    fun testExecuteSelectArray() {
+        ResourceManager.INSTANCE.setResource("h2:./test;MODE=PostgreSQL", dummyResourceArn, null, null, emptyMap())
+
+        mockkStatic("com.koxudaxi.localDataApi.LocalDataApiKt")
+        every { isPostgreSQL(any()) } returns true
+
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "select ARRAY['a', 'b', 'c']")))
+            }.apply {
+                assertEquals(
+                    "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"arrayValue\":{\"stringValues\":[\"a\",\"b\",\"c\"]}}]]}",
+                    response.content)
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+        }
+    }
+
+    @Test
     fun testExecuteInsertParameters() {
         withTestApplication({ module(testing = true) }) {
             handleRequest(HttpMethod.Post, "/Execute") {
@@ -555,6 +576,24 @@ class ApplicationTest {
                     "{\"numberOfRecordsUpdated\":0,\"records\":[[{\"longValue\":1},{\"stringValue\":\"cat\"},{\"longValue\":1}],[{\"longValue\":2},{\"stringValue\":\"dog\"},{\"longValue\":3}]],\"columnMetadata\":[{\"arrayBaseColumnType\":0,\"isAutoIncrement\":true,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"ID\",\"name\":\"ID\",\"nullable\":0,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"NAME\",\"name\":\"NAME\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":12,\"typeName\":\"VARCHAR\"},{\"arrayBaseColumnType\":0,\"isAutoIncrement\":false,\"isCaseSensitive\":true,\"isCurrency\":false,\"isSigned\":true,\"label\":\"AGE\",\"name\":\"AGE\",\"nullable\":1,\"precision\":10,\"scale\":0,\"schemaName\":\"PUBLIC\",\"tableName\":\"TEST\",\"type\":4,\"typeName\":\"INTEGER\"}]}",
                     response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
+            }
+        }
+    }
+
+    @Test
+    fun testExecuteArrayParameters() {
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Post, "/Execute") {
+                addHeader(HttpHeaders.ContentType, "*/*")
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn,
+                    "select :param", parameters = listOf(
+                        SqlParameter("param", Field(arrayValue = ArrayValue(longValues = listOf(1, 2, 3)))),
+                    ))))
+            }.apply {
+                assertEquals(
+                    "{\"message\":\"Array parameters are not supported.\",\"code\":\"BadRequestException\"}",
+                    response.content)
+                assertEquals(HttpStatusCode.BadRequest, response.status())
             }
         }
     }
