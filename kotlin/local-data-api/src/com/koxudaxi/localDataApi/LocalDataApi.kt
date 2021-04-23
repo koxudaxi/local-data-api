@@ -1,11 +1,11 @@
 package com.koxudaxi.localDataApi
 
 import java.sql.*
+import java.sql.Types.ARRAY
 import java.time.OffsetDateTime
 import java.time.OffsetTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 val LONG = listOf(Types.INTEGER, Types.TINYINT, Types.SMALLINT, Types.BIGINT)
 val DOUBLE = listOf(Types.FLOAT, Types.REAL, Types.DOUBLE)
@@ -54,22 +54,33 @@ fun formatTime(input: String): String {
 }
 
 fun createField(resultSet: ResultSet, index: Int): Field {
+    return getFieldValue(resultSet, index).let { Field.fromValue(it) }
+}
+
+fun getFieldValue(resultSet: ResultSet, index: Int): Any? {
     if (resultSet.getObject(index) == null) {
-        return Field(isNull = true)
+        return null
     }
     val value = resultSet.metaData.getColumnType(index)
     return when {
-        value in LONG -> Field(longValue = resultSet.getLong(index))
-        value in DOUBLE -> Field(doubleValue = resultSet.getDouble(index))
-        value in BOOLEAN -> Field(booleanValue = resultSet.getBoolean(index))
-        value in BLOB -> Field(blobValue = Base64.getEncoder().encodeToString(resultSet.getBytes(index)))
+        value in LONG -> resultSet.getLong(index)
+        value in DOUBLE -> resultSet.getDouble(index)
+        value in BOOLEAN -> resultSet.getBoolean(index)
+        value in BLOB -> Blob.fromBytes(resultSet.getBytes(index))
         value in DATETIME_TZ || (value in DATETIME && resultSet.metaData.getColumnTypeName(index) == "timestamptz")
-        -> Field(stringValue = convertOffsetDatetimeToUTC(resultSet.getString(index)))
-        value in DATETIME -> Field(stringValue = formatDatetime(resultSet.getString(index)))
+        -> convertOffsetDatetimeToUTC(resultSet.getString(index))
+        value in DATETIME -> formatDatetime(resultSet.getString(index))
         value in TIME_TZ || (value in TIME && resultSet.metaData.getColumnTypeName(index) == "timetz")
-        -> Field(stringValue = convertOffsetTimeToUTC(resultSet.getString(index)))
-        value in TIME -> Field(stringValue = formatTime(resultSet.getString(index)))
-        else -> Field(stringValue = resultSet.getString(index))
+        -> convertOffsetTimeToUTC(resultSet.getString(index))
+        value in TIME -> formatTime(resultSet.getString(index))
+        value == ARRAY -> resultSet.getArray(index).resultSet.let { arrayResultSet ->
+            val fields = mutableMapOf<Int, Any?>()
+            while (arrayResultSet.next()) {
+                fields[arrayResultSet.getInt(1)] = getFieldValue(arrayResultSet, 2)
+            }
+            fields.toSortedMap().values.toList()
+        }
+        else -> resultSet.getString(index)
     }
 }
 
