@@ -257,6 +257,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-to-insert-array-data-into-postgresql" class="md-nav__link">
+    How to insert array data into PostgreSQL
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-060" class="md-nav__link">
     Version 0.6.0
   </a>
@@ -465,6 +472,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-to-insert-array-data-into-postgresql" class="md-nav__link">
+    How to insert array data into PostgreSQL
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-060" class="md-nav__link">
     Version 0.6.0
   </a>
@@ -653,6 +667,15 @@
 <li>MySQL</li>
 <li>PostgreSQL</li>
 </ul>
+<h2 id="how-to-insert-array-data-into-postgresql">How to insert array data into PostgreSQL</h2>
+<p>DataAPI have not support inserting array data with <code>SqlParameter</code> yet.
+But, @ormu5 give us this workaround to insert array data.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">insert</span> <span class="k">into</span> <span class="n">cfg</span><span class="p">.</span><span class="n">attributes</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="k">type</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span>
+<span class="k">values</span><span class="p">(:</span><span class="n">id</span><span class="p">,</span> <span class="p">:</span><span class="k">type</span><span class="p">,</span> <span class="k">cast</span><span class="p">(:</span><span class="n">attributes</span> <span class="k">as</span> <span class="nb">text</span><span class="p">[]));</span>
+</code></pre></div>
+
+<p>where the value for attributes parameter is a string properly formatted as Postgres array, e.g., <code>'{"Volume","Material"}'</code>.</p>
+<p>Thanks to @ormu5.</p>
 <h2 id="version-060">Version 0.6.0</h2>
 <h3 id="local-data-api-has-been-re-written-in-kotlin">local-data-api has been re-written in Kotlin</h3>
 <h4 id="motivation">Motivation</h4>
