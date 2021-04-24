@@ -10,7 +10,7 @@ class Resource(
 ) {
     private val connectionManager = ConnectionManager.INSTANCE
 
-    val connection = if (transactionId == null) {
+    val connection = if (transactionId == null || transactionId.isBlank()) {
         connectionManager.createConnection(config.url, userName, password, database, schema, config.jdbcOptions)
     } else {
         connectionManager.getConnection(transactionId)
