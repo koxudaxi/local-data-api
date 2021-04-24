@@ -117,7 +117,7 @@ class ApplicationTest {
         withTestApplication({ module(testing = true) }) {
             handleRequest(HttpMethod.Post, "/Execute") {
                 addHeader(HttpHeaders.ContentType, "*/*")
-                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn, "select 1")))
+                setBody(Json.encodeToString(ExecuteStatementRequest(dummyResourceArn, dummySecretArn, "select 1", transactionId = "")))
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(
