@@ -19,6 +19,19 @@ The API converts RESTful request to SQL statements.
 - MySQL
 - PostgreSQL
 
+## How to insert array data into PostgreSQL
+DataAPI have not support inserting array data with `SqlParameter` yet.
+But, @ormu5 give us this workaround to insert array data.
+```sql
+insert into cfg.attributes(id, type, attributes)
+values(:id, :type, cast(:attributes as text[]));
+```
+where the value for attributes parameter is a string properly formatted as Postgres array, e.g., `'{"Volume","Material"}'`.
+
+Thanks to @ormu5.
+
+
+
 ## Version 0.6.0
 ### local-data-api has been re-written in Kotlin
 #### Motivation
