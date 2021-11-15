@@ -27,18 +27,23 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: build and test 
+      - name: build and test
         run: ./gradlew clean shadowJar test jacocoTestReport
         working-directory: ./kotlin/local-data-api/
       - name: Login to DockerHub
         if: github.event_name == 'release' && github.event.action == 'published'
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name == 'release' && github.event.action == 'published' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           context: ./kotlin/local-data-api
+          platforms: linux/amd64,linux/arm64
