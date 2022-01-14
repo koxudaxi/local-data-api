@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://koxudaxi.github.io/local-data-api/">
       
       <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.0.5">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.6">
     
     
       
@@ -21,10 +21,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.a617204b.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.cd566b2a.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.9204c3b2.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.e6a45f82.min.css">
         
           
           
@@ -679,8 +679,8 @@
 <h2 id="how-to-insert-array-data-into-postgresql">How to insert array data into PostgreSQL</h2>
 <p>DataAPI have not support inserting array data with <code>SqlParameter</code> yet.
 But, @ormu5 give us this workaround to insert array data.</p>
-<div class="codehilite"><pre><span></span><code><span class="k">insert</span> <span class="k">into</span> <span class="n">cfg</span><span class="p">.</span><span class="n">attributes</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="k">type</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span>
-<span class="k">values</span><span class="p">(:</span><span class="n">id</span><span class="p">,</span> <span class="p">:</span><span class="k">type</span><span class="p">,</span> <span class="k">cast</span><span class="p">(:</span><span class="n">attributes</span> <span class="k">as</span> <span class="nb">text</span><span class="p">[]));</span>
+<div class="codehilite"><pre><span></span><code><span class="k">insert</span><span class="w"> </span><span class="k">into</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">attributes</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">type</span><span class="p">,</span><span class="w"> </span><span class="n">attributes</span><span class="p">)</span><span class="w"></span>
+<span class="k">values</span><span class="p">(:</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="p">:</span><span class="k">type</span><span class="p">,</span><span class="w"> </span><span class="k">cast</span><span class="p">(:</span><span class="n">attributes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nb">text</span><span class="p">[]));</span><span class="w"></span>
 </code></pre></div>
 
 <p>where the value for attributes parameter is a string properly formatted as Postgres array, e.g., <code>'{"Volume","Material"}'</code>.</p>
@@ -705,30 +705,30 @@ But, @ormu5 give us this workaround to insert array data.</p>
 <h2 id="docker-compose">docker-compose</h2>
 <h3 id="mysql">MySQL</h3>
 <p>docker-compose-mysql.yml</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.1&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.1&#39;</span><span class="w"></span>
 
-<span class="nt">services</span><span class="p">:</span>
-  <span class="nt">local-data-api</span><span class="p">:</span>
-    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">koxudaxi/local-data-api</span>
-    <span class="nt">restart</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
-    <span class="nt">environment</span><span class="p">:</span>
-      <span class="nt">MYSQL_HOST</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">db</span>
-      <span class="nt">MYSQL_PORT</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3306</span>
-      <span class="nt">MYSQL_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
-      <span class="nt">MYSQL_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
-      <span class="nt">RESOURCE_ARN</span><span class="p">:</span> <span class="s">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span>
-      <span class="nt">SECRET_ARN</span><span class="p">:</span> <span class="s">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span>
-    <span class="nt">ports</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="s">&quot;8080:80&quot;</span>
-  <span class="nt">db</span><span class="p">:</span>
-    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mysql:5.6</span>
-    <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">--default-authentication-plugin=mysql_native_password</span>
-    <span class="nt">restart</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
-    <span class="nt">environment</span><span class="p">:</span>
-      <span class="nt">MYSQL_ROOT_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
-      <span class="nt">MYSQL_DATABASE</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test</span>
-    <span class="nt">ports</span><span class="p">:</span>
-        <span class="p p-Indicator">-</span> <span class="s">&quot;3306:3306&quot;</span>
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">local-data-api</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">koxudaxi/local-data-api</span><span class="w"></span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">MYSQL_HOST</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">db</span><span class="w"></span>
+<span class="w">      </span><span class="nt">MYSQL_PORT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span><span class="w"></span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span><span class="w"></span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w"></span>
+<span class="w">      </span><span class="nt">RESOURCE_ARN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">SECRET_ARN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:80&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql:5.6</span><span class="w"></span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--default-authentication-plugin=mysql_native_password</span><span class="w"></span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">MYSQL_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w"></span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;3306:3306&quot;</span><span class="w"></span>
 </code></pre></div>
 
 <h3 id="docker-compose-with-pythons-aws-sdk-clientboto3">docker-compose with Python's aws-sdk client(boto3)</h3>
@@ -793,30 +793,30 @@ But, @ormu5 give us this workaround to insert array data.</p>
 <h3 id="postgresql">PostgreSQL</h3>
 <p>Now, local-data-api supports PostgreSQL</p>
 <p>docker-compose-postgres.yml</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.1&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.1&#39;</span><span class="w"></span>
 
-<span class="nt">services</span><span class="p">:</span>
-  <span class="nt">local-data-api</span><span class="p">:</span>
-    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">koxudaxi/local-data-api</span>
-    <span class="nt">restart</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
-    <span class="nt">environment</span><span class="p">:</span>
-      <span class="nt">ENGINE</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">PostgreSQLJDBC</span>
-      <span class="nt">POSTGRES_HOST</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">db</span>
-      <span class="nt">POSTGRES_PORT</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5432</span>
-      <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">postgres</span>
-      <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
-      <span class="nt">RESOURCE_ARN</span><span class="p">:</span> <span class="s">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span>
-      <span class="nt">SECRET_ARN</span><span class="p">:</span> <span class="s">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span>
-    <span class="nt">ports</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="s">&quot;8080:80&quot;</span>
-  <span class="nt">db</span><span class="p">:</span>
-    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">postgres:10.7-alpine</span>
-    <span class="nt">restart</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
-    <span class="nt">environment</span><span class="p">:</span>
-      <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
-      <span class="nt">POSTGRES_DB</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test</span>
-    <span class="nt">ports</span><span class="p">:</span>
-        <span class="p p-Indicator">-</span> <span class="s">&quot;5432:5432&quot;</span>
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">local-data-api</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">koxudaxi/local-data-api</span><span class="w"></span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ENGINE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PostgreSQLJDBC</span><span class="w"></span>
+<span class="w">      </span><span class="nt">POSTGRES_HOST</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">db</span><span class="w"></span>
+<span class="w">      </span><span class="nt">POSTGRES_PORT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span><span class="w"></span>
+<span class="w">      </span><span class="nt">POSTGRES_USER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres</span><span class="w"></span>
+<span class="w">      </span><span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w"></span>
+<span class="w">      </span><span class="nt">RESOURCE_ARN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;arn:aws:rds:us-east-1:123456789012:cluster:dummy&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">SECRET_ARN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;arn:aws:secretsmanager:us-east-1:123456789012:secret:dummy&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:80&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres:10.7-alpine</span><span class="w"></span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w"></span>
+<span class="w">      </span><span class="nt">POSTGRES_DB</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;5432:5432&quot;</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="contribute">Contribute</h2>
@@ -893,10 +893,10 @@ $ ./scripts/integration-test.sh
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.cefbb252.min.js"}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.22074ed6.min.js"}</script>
     
     
-      <script src="assets/javascripts/bundle.a5f8ea78.min.js"></script>
+      <script src="assets/javascripts/bundle.1514a9a0.min.js"></script>
       
     
   </body>
